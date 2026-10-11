@@ -73,6 +73,7 @@ const Quiz = {
 
   pick(item, o) {
     const ok = o.hasAttribute('data-ok');
+    if (!item.sent) { item.sent = true; emit('quiz-answer', item, [item.opts.indexOf(o)]); }   // 처음 고른 것만(다시 고르는 것은 배우는 과정)
     o.classList.add(ok ? 'is-right' : 'is-wrong');
     item.fb.textContent = o.dataset.why || (ok ? '맞다.' : '다시 생각해 보자.');
     item.fb.className = `ch-fb ${ok ? 'is-ok' : 'is-bad'}`;
@@ -110,6 +111,7 @@ const Quiz = {
       this.why(o, pick !== ok);
       if (pick === ok) right += 1;
     }
+    emit('quiz-answer', item, item.opts.map((o, i) => (o.classList.contains('is-pick') ? i : -1)).filter((i) => i >= 0));
     const all = right === item.opts.length;
     item.fb.textContent = all ? (item.box.dataset.why || '맞다. 모두 바르게 골랐다.')
       : `${item.opts.length}개 가운데 ${right}개를 맞게 판단했다. 점선은 골라야 하는데 고르지 않은 것이다.`;
@@ -123,5 +125,36 @@ const Quiz = {
     item.solved = true;
     const next = item.slide && qsa('.step', item.slide).find((s) => item.box.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING && !item.box.contains(s));
     if (next) setTimeout(() => Nav.revealTo(next), 600);
+  },
+};
+
+// 단답 쓰기: 학생이 짧게 적어 「보내기」. 실시간 수업이면 교사 「학생 보기」에 이름 없이 모인다.
+// 작성 모양: <div class="short"><p>물음</p></div>  (data-ph="입력칸 안내 글"은 고를 때만)
+const SHORT_MAX = 200;
+const Short = {
+  list: [],
+
+  init() {
+    this.list = [];
+    for (const box of qsa('.short', Stage.deck)) {
+      const ask = box.querySelector('p, h3, h4');
+      const input = h('textarea', {
+        class: 'ch-short-in', rows: '2', maxlength: String(SHORT_MAX), autocomplete: 'off', spellcheck: 'false',
+        placeholder: box.dataset.ph || '여기에 적어요', 'aria-label': `${(ask && ask.textContent.trim()) || '물음'} 답`,
+      });
+      const fb = h('p', { class: 'ch-fb', 'aria-live': 'polite' });
+      const item = { box, input, fb, slide: box.closest('section.slide') };
+      const send = h('button', { type: 'button', class: 'ch-check-btn ch-short-send', text: '보내기', onclick: (e) => { this.send(item); e.currentTarget.blur(); } });
+      box.append(h('div', { class: 'ch-short-row' }, input, send), fb);
+      this.list.push(item);
+    }
+  },
+
+  send(item) {
+    const t = LiveCore.tidy(item.input.value);
+    if (!t) { item.fb.textContent = '먼저 적어 주세요.'; item.fb.className = 'ch-fb is-bad'; item.input.focus(); return; }
+    item.fb.textContent = Live.role === 'student' ? '보냈어요. 고쳐서 다시 보내도 돼요.' : '적었어요.';
+    item.fb.className = 'ch-fb is-ok';
+    emit('short-answer', item, t);
   },
 };

@@ -231,7 +231,7 @@ const Audit = {
       }
     }
     // 활동 = 입력에 따라 화면이 달라지는 부품. 글만 차례로 여는 .reveal·.switch는 그림·도식·계산이 함께 있을 때만 센다.
-    const ACT = '.map-reveal, .ch-yearline, .sort, .quiz, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
+    const ACT = '.map-reveal, .ch-yearline, .sort, .quiz, .short, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
     const visual = (st) => st.el.matches('[data-name]') || !!st.el.closest('.calc')
       || !!st.el.querySelector('.veil, img, svg, figure, canvas');
     const activityPages = Stage.slides.map((s, i) => (s.querySelector(ACT)

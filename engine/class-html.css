@@ -1,4 +1,4 @@
-/*! class-html engine v1.2.1 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.3.0 | MIT | https://github.com/N-lifescience/exploragram */
 /* ---- 00-tokens.css ---- */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
@@ -514,12 +514,18 @@ body .slide.chapter::before { display: none; }
 :where(.slide) .ch-opt-why { flex-basis: 100%; margin: 2px 0 0 56px; font-size: 20px; font-weight: 500; line-height: 1.4; color: var(--ch-mute); }
 :where(.slide) .ch-check-btn { min-height: 56px; padding: 0 30px; border-color: var(--accent); background: var(--accent); color: #fff; font-size: 24px; }
 
+/* 단답 쓰기 */
+.ch-short-row { display: flex; align-items: stretch; gap: 12px; margin: 6px 0 10px; }
+:where(.slide) .ch-short-in { flex: 1; min-width: 0; min-height: 64px; box-sizing: border-box; padding: 12px 18px; border: 2px solid #C3C9D1; border-radius: 16px; background: var(--ch-card); color: var(--ch-ink); font: 600 26px/1.4 var(--ch-font); resize: vertical; word-break: keep-all; overflow-wrap: anywhere; }
+:where(.slide) .ch-short-in:focus { outline: none; border-color: var(--accent); }
+:where(.slide) .ch-short-row .ch-short-send { align-self: flex-end; }
+
 @media print {
   .slide .quiz .opt { border-color: #C3C9D1 !important; background: #fff !important; }
   .slide .quiz .opt .ch-opt-n { background: #EEF0F3 !important; color: inherit !important; }
   .slide .quiz .opt[data-ok] { border-color: var(--ch-ok) !important; background: #EAF7EF !important; }
   .slide .quiz .opt[data-ok] .ch-opt-n { background: var(--ch-ok) !important; color: #fff !important; }
-  .slide .quiz .ch-fb, :where(.slide) .quiz .ch-check-btn { display: none !important; }
+  .slide .quiz .ch-fb, :where(.slide) .quiz .ch-check-btn, .slide .short :is(.ch-fb, .ch-short-send) { display: none !important; }
 }
 
 /* ---- 78-order.css ---- */
@@ -787,6 +793,22 @@ html:not(.ch-editing) .ch-ed-ui { display: none !important; }
 .ch-live-ui .ch-live-bin:disabled { height: 6px; opacity: 1; background: #2E323A; }
 .ch-live-ui .ch-live-bin[aria-pressed="true"] { background: var(--ch-hl); }
 .ch-live-empty { margin: 0; color: var(--ch-ui-mute); }
+.ch-live-dist:has(.ch-live-quiz, .ch-live-short) { width: min(960px, calc(100vw - 32px)); }
+.ch-live-dist { max-height: calc(100vh - var(--ch-reserve-bottom, 0px) - 48px); overflow-y: auto; }
+/* 퀴즈: 보기마다 가로 막대. 정답 보기는 초록 */
+.ch-live-opts { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.ch-live-opts li { font-size: 18px; display: grid; grid-template-columns: 34px minmax(0, 1fr) minmax(80px, 34%) 44px; align-items: center; gap: 8px; }
+.ch-live-opts b { text-align: center; color: var(--ch-ui-mute); }
+.ch-live-opt-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-live-opts i { height: 18px; border-radius: 4px; background: linear-gradient(90deg, #6B8DE8 calc(var(--w, 0) * 100%), #2E323A 0); }
+.ch-live-opts em { font-style: normal; text-align: right; color: var(--ch-ui-mute); }
+.ch-live-opts .is-ok b { color: #4ADE80; }
+.ch-live-opts .is-ok i { background: linear-gradient(90deg, #22A06B calc(var(--w, 0) * 100%), #2E323A 0); }
+/* 단답: 이름 없는 카드 */
+.ch-live-cards { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; max-height: 320px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.ch-live-cards li { display: flex; align-items: flex-start; gap: 4px; max-width: 100%; padding: 8px 4px 8px 14px; border-radius: 10px; background: var(--ch-ui-2); font-size: 22px; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
+.ch-live-ui .ch-live-cards .ch-live-x { min-height: 28px; padding: 0 8px; border: 0; background: none; color: var(--ch-ui-mute); }
+.ch-live-short .ch-live-empty { grid-column: 1 / -1; }
 
 /* 학생: 입장 화면, 위 띠 */
 .ch-live-join { position: fixed; z-index: 9500; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(22, 24, 29, .78); }

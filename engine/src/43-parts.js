@@ -10,6 +10,7 @@ const Parts = {
     Yearline.init();
     Sort.init();
     Quiz.init();
+    Short.init();
     Order.init();
     Calc.init();
     Plot.init();

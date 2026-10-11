@@ -4,7 +4,7 @@
 > **AI에게**: 이 파일 하나가 Exploragram(옛 이름 class-html) 지침 전체다. 선생님이 수업 PPT를 주면 이 지침대로 수업용 HTML을 만든다.
 > **반드시**: `<head>`에 아래 엔진 css·js 두 줄을 넣는다(지금 환경에서 안 열려도 그대로 둔다). 넘기기·툴바를 직접 짜지 않고, PPT 장을 통째로 그림으로 넣지 않는다(1절 기준 8·9).
 > 본문의 `references/…`는 이 파일의 해당 절을, `scripts/…`는 저장소 https://github.com/N-lifescience/exploragram 의 `skills/class-html/scripts/`를 가리킨다.
-> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css`·`.js` (v1.2.1)
+> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css`·`.js` (v1.3.0)
 > 레퍼런스 완성본(`references/examples/`): https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/elem-shadow.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/eth-exploragram.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/mid-linear.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/sci-diffusion.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/soc-supply-demand.html
 
 ## 차례
@@ -530,6 +530,20 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 - 번호(동그라미 배지 안의 1, 2…)는 엔진이 붙인다(`data-num="off"`로 끔). `data-cols`로 열 수.
 - 높이: 보기 한 줄 64px, 사이 12px, 아래 알림 줄 약 60px. 보기 5개면 약 380px다.
 - 처음 맞히면 문제 뒤 첫 `.step`을 연다. 인쇄는 정답 표시.
+- 실시간 수업에서는 학생이 처음 고른 보기(여러 개 고르기는 「확인」 때 고른 보기)가 교사 「학생 보기」에 보기별 인원으로 모인다. 정답 보기에는 ✓가 붙는다.
+
+#### 6-1. 단답 쓰기 `.short`
+
+```html
+<div class="short" data-ph="내 생각을 한 문장으로 적어요">
+  <p class="ask">바람이 없는데도 냄새가 퍼지는 이유는 무엇일까?</p>
+</div>
+```
+
+- 엔진이 입력칸과 「보내기」를 붙인다. 200자까지 받는다. `data-ph`는 입력칸 안 안내 글이다.
+- 실시간 수업에서는 학생이 보낸 답이 교사 「학생 보기」에 이름 없이 카드로 모인다. 교사는 카드의 ×로 칠판에서 숨길 수 있다.
+- 실시간이 아닐 때는 「보내기」를 눌러도 아무 데도 가지 않는다. 생각 열기·예측·한 줄 정리처럼 답이 여럿일 수 있는 물음에 쓴다. 정답이 하나인 물음은 `.quiz`나 `.blank`를 쓴다.
+- 높이: 입력칸 약 100px + 알림 줄 약 40px.
 
 ### 7. 순서 배열 `ol.order`
 

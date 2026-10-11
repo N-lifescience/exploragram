@@ -26,6 +26,19 @@
   <input type="range" id="t" min="0" max="10" value="5" aria-label="시간">
   <output id="t-out">5</output>
 </section>
+<section class="slide" id="quiz">
+  <h2>퀴즈</h2>
+  <div class="quiz">
+    <p>물이 끓는 온도는?</p>
+    <button class="opt" data-ok data-why="맞아요">100 ℃</button>
+    <button class="opt" data-why="아니에요">50 ℃</button>
+    <button class="opt" data-why="아니에요">0 ℃</button>
+  </div>
+</section>
+<section class="slide" id="short">
+  <h2>단답</h2>
+  <div class="short"><p>오늘 배운 것 한 가지</p></div>
+</section>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const t = document.getElementById('t');

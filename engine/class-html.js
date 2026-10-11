@@ -1,7 +1,7 @@
-/*! class-html engine v1.2.1 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.3.0 | MIT | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '1.2.1';
+const VERSION = '1.3.0';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
 // 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 ClassHTML.
@@ -2340,7 +2340,7 @@ const Audit = {
       }
     }
     // 활동 = 입력에 따라 화면이 달라지는 부품. 글만 차례로 여는 .reveal·.switch는 그림·도식·계산이 함께 있을 때만 센다.
-    const ACT = '.map-reveal, .ch-yearline, .sort, .quiz, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
+    const ACT = '.map-reveal, .ch-yearline, .sort, .quiz, .short, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
     const visual = (st) => st.el.matches('[data-name]') || !!st.el.closest('.calc')
       || !!st.el.querySelector('.veil, img, svg, figure, canvas');
     const activityPages = Stage.slides.map((s, i) => (s.querySelector(ACT)
@@ -2411,6 +2411,7 @@ const Parts = {
     Yearline.init();
     Sort.init();
     Quiz.init();
+    Short.init();
     Order.init();
     Calc.init();
     Plot.init();
@@ -3405,6 +3406,7 @@ const Quiz = {
 
   pick(item, o) {
     const ok = o.hasAttribute('data-ok');
+    if (!item.sent) { item.sent = true; emit('quiz-answer', item, [item.opts.indexOf(o)]); }   // 처음 고른 것만(다시 고르는 것은 배우는 과정)
     o.classList.add(ok ? 'is-right' : 'is-wrong');
     item.fb.textContent = o.dataset.why || (ok ? '맞다.' : '다시 생각해 보자.');
     item.fb.className = `ch-fb ${ok ? 'is-ok' : 'is-bad'}`;
@@ -3442,6 +3444,7 @@ const Quiz = {
       this.why(o, pick !== ok);
       if (pick === ok) right += 1;
     }
+    emit('quiz-answer', item, item.opts.map((o, i) => (o.classList.contains('is-pick') ? i : -1)).filter((i) => i >= 0));
     const all = right === item.opts.length;
     item.fb.textContent = all ? (item.box.dataset.why || '맞다. 모두 바르게 골랐다.')
       : `${item.opts.length}개 가운데 ${right}개를 맞게 판단했다. 점선은 골라야 하는데 고르지 않은 것이다.`;
@@ -3455,6 +3458,37 @@ const Quiz = {
     item.solved = true;
     const next = item.slide && qsa('.step', item.slide).find((s) => item.box.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING && !item.box.contains(s));
     if (next) setTimeout(() => Nav.revealTo(next), 600);
+  },
+};
+
+// 단답 쓰기: 학생이 짧게 적어 「보내기」. 실시간 수업이면 교사 「학생 보기」에 이름 없이 모인다.
+// 작성 모양: <div class="short"><p>물음</p></div>  (data-ph="입력칸 안내 글"은 고를 때만)
+const SHORT_MAX = 200;
+const Short = {
+  list: [],
+
+  init() {
+    this.list = [];
+    for (const box of qsa('.short', Stage.deck)) {
+      const ask = box.querySelector('p, h3, h4');
+      const input = h('textarea', {
+        class: 'ch-short-in', rows: '2', maxlength: String(SHORT_MAX), autocomplete: 'off', spellcheck: 'false',
+        placeholder: box.dataset.ph || '여기에 적어요', 'aria-label': `${(ask && ask.textContent.trim()) || '물음'} 답`,
+      });
+      const fb = h('p', { class: 'ch-fb', 'aria-live': 'polite' });
+      const item = { box, input, fb, slide: box.closest('section.slide') };
+      const send = h('button', { type: 'button', class: 'ch-check-btn ch-short-send', text: '보내기', onclick: (e) => { this.send(item); e.currentTarget.blur(); } });
+      box.append(h('div', { class: 'ch-short-row' }, input, send), fb);
+      this.list.push(item);
+    }
+  },
+
+  send(item) {
+    const t = LiveCore.tidy(item.input.value);
+    if (!t) { item.fb.textContent = '먼저 적어 주세요.'; item.fb.className = 'ch-fb is-bad'; item.input.focus(); return; }
+    item.fb.textContent = Live.role === 'student' ? '보냈어요. 고쳐서 다시 보내도 돼요.' : '적었어요.';
+    item.fb.className = 'ch-fb is-ok';
+    emit('short-answer', item, t);
   },
 };
 
@@ -5726,7 +5760,8 @@ const Editor = {
 };
 
 /* ---- 68-live.js ---- */
-// 실시간 수업: 학생 기기(웨일북 등)가 교사 화면을 따라가고, 학생이 만진 익스플로라그램 슬라이더 값이 교사 화면에 분포로 모인다.
+// 실시간 수업: 학생 기기(웨일북 등)가 교사 화면을 따라가고, 학생이 만진 익스플로라그램 슬라이더 값·고른 퀴즈 보기·적은 단답이
+// 교사 「학생 보기」에 이름 없이 모인다.
 // 저장 안 함·식별 안 함: 이름·번호·DB 없이 탭 메모리에만 두고, 닫으면 사라진다. 실시간을 켜지 않으면 아무것도 하지 않는다.
 // 채널 둘: 교사 → 학생 'ch-live-<코드>'(학생이 구독), 학생 → 교사 'ch-live-<코드>-in'(교사만 구독, 학생은 구독 없이 보낸다).
 // 그래서 학생 메시지는 다른 학생에게 퍼지지 않는다. 전송은 Supabase Realtime(broadcast) 또는 같은 PC 탭끼리(BroadcastChannel).
@@ -5797,6 +5832,15 @@ const LiveCore = {
       const ok = sid(p.sid) && int(p.slide, 0, n - 1) && typeof p.key === 'string' && p.key.length > 0 && p.key.length <= 60 && Number.isFinite(p.v);
       return ok ? { sid: p.sid, slide: p.slide, key: p.key, v: p.v } : null;
     }
+    const where = sid(p.sid) && int(p.slide, 0, n - 1) && typeof p.key === 'string' && /^[\w-]{1,60}$/.test(p.key);
+    if (event === 'pick') {
+      const ok = where && Array.isArray(p.c) && p.c.length <= 50 && p.c.every((x) => int(x, 0, 49));
+      return ok ? { sid: p.sid, slide: p.slide, key: p.key, c: [...new Set(p.c)].sort((a, b) => a - b) } : null;
+    }
+    if (event === 'text') {
+      const t = where && typeof p.t === 'string' ? LiveCore.tidy(p.t.slice(0, 1000)) : '';
+      return t ? { sid: p.sid, slide: p.slide, key: p.key, t } : null;
+    }
     if (event === 'state') {
       if (!sid(p.tid) || !int(p.slide, 0, 999) || !int(p.shown, 0, 999) || !Array.isArray(p.reach) || p.reach.length > 1000) return null;
       const steps = (a) => (Array.isArray(a) && a.length <= 50 && a.every((x) => int(x, -1, 999)) ? a.slice() : []);
@@ -5813,6 +5857,9 @@ const LiveCore = {
     }
     return null;
   },
+
+  // 단답 글: 줄바꿈·제어 문자는 띄어쓰기로, 앞뒤 빈칸은 지우고 SHORT_MAX자까지
+  tidy(t) { return String(t || '').replace(/[\u0000-\u001f\u007f\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200); },
 
   code() { return String(100000 + Math.floor(Math.random() * 900000)); },
 
@@ -5852,7 +5899,7 @@ const SupaLink = {
     const client = this.client;
     const ch = client.channel(topic, { config: { broadcast: { self: false } } });
     if (listen) {
-      for (const ev of ['state', 'val', 'hi', 'end']) ch.on('broadcast', { event: ev }, (m) => onMsg(ev, m && m.payload));
+      for (const ev of ['state', 'val', 'pick', 'text', 'hi', 'end']) ch.on('broadcast', { event: ev }, (m) => onMsg(ev, m && m.payload));
       try {
         await new Promise((resolve, reject) => {
           const timer = setTimeout(() => reject(new Error('TIMED_OUT')), 10000);
@@ -5885,6 +5932,9 @@ const Live = {
   // 교사
   reach: [],
   vals: new Map(),     // '장|키' → Map(sid → 값)
+  picks: new Map(),    // '장|키' → Map(sid → [고른 보기 번호])
+  texts: new Map(),    // '장|키' → Map(sid → { t, at })
+  hidden: new Set(),   // 교사가 숨긴 단답 '장|키|sid'
   seen: new Map(),     // sid → 마지막 소식 시각
   peek: null,          // 칠판에 띄운 학생 값 { input, before }
   panel: null,
@@ -5945,6 +5995,18 @@ const Live = {
   keyOf(el, i) { return el.id || el.getAttribute('name') || `r${this.ranges(i).indexOf(el)}`; },
   // ponytail: 한 장에 같은 name이 둘이면(계산 상자 둘) 앞의 것으로만 모인다. 따로 모으려면 id를 붙인다.
   rangeOf(i, key) { return this.ranges(i).find((el) => this.keyOf(el, i) === key) || null; },
+  // 장 안의 퀴즈·단답: 키는 id, 없으면 장 안 순서(q0, s0…)
+  quizzes(i) { return Quiz.list.filter((q) => q.slide === Stage.slides[i]); },
+  shorts(i) { return Short.list.filter((q) => q.slide === Stage.slides[i]); },
+  partKey(item, i, kind) { return item.box.id || `${kind}${(kind === 'q' ? this.quizzes(i) : this.shorts(i)).indexOf(item)}`; },
+  // 학생 보기에 쓸 물음: 상자 안 첫 글, 없으면 바로 앞 문단, 그것도 없으면 장 제목
+  askOf(box) {
+    const prev = box.previousElementSibling;
+    const el = box.querySelector('p:not(.ch-fb), h3, h4') || (prev && prev.matches('p, h3, h4') ? prev : null);
+    const slide = box.closest('section.slide');
+    return ((el && (el.innerText || el.textContent)) || (slide && slide.dataset.title) || '').replace(/\s+/g, ' ').trim();   // innerText: <br> 자리를 띄어 쓴다
+  },
+  partOf(i, key, kind) { return (kind === 'q' ? this.quizzes(i) : this.shorts(i)).find((it) => this.partKey(it, i, kind) === key) || null; },
 
   // ---- 교사 ----
   async startTeacher() {
@@ -6064,6 +6126,22 @@ const Live = {
         if (p.slide === Nav.state.slide) this.renderDist();
       }
     }
+    if (event === 'pick' || event === 'text') {
+      const kind = event === 'pick' ? 'q' : 's';
+      const item = this.partOf(p.slide, p.key, kind);
+      if (item) {
+        const key = `${p.slide}|${p.key}`;
+        const store = kind === 'q' ? this.picks : this.texts;
+        if (!store.has(key)) store.set(key, new Map());
+        if (kind === 'q') store.get(key).set(p.sid, p.c.filter((c) => c < item.opts.length));
+        else {
+          const old = store.get(key).get(p.sid);
+          if (!old || old.t !== p.t) this.hidden.delete(`${key}|${p.sid}`);   // 고쳐 보낸 답은 다시 보인다
+          store.get(key).set(p.sid, { t: p.t, at: old ? old.at : Date.now() });
+        }
+        if (p.slide === Nav.state.slide) this.renderDist();
+      }
+    }
     this.renderCount();
   },
 
@@ -6073,7 +6151,7 @@ const Live = {
     for (const [sid, t] of this.seen) {
       if (now - t <= LIVE_FORGET_MS) continue;
       this.seen.delete(sid);
-      for (const m of this.vals.values()) m.delete(sid);
+      for (const store of [this.vals, this.picks, this.texts]) for (const m of store.values()) m.delete(sid);
     }
     return this.seen.size;
   },
@@ -6217,13 +6295,50 @@ const Live = {
         h('div', { class: 'ch-live-bins' }, bars),
         h('span', { class: 'ch-live-n', text: `${vals.length}명` }));
     });
+    rows.push(...this.quizzes(i).map((item) => this.quizRow(item, i)), ...this.shorts(i).map((item) => this.shortRow(item, i)));
+    const slider = this.ranges(i).length > 0;
     const head = h('div', { class: 'ch-live-dhead' },
-      h('b', { text: '학생 값' }),
-      h('span', { text: this.peek ? '학생 값을 칠판에 띄우는 중' : '막대를 누르면 그 값을 칠판 익스플로라그램에 띄워요' }),
+      h('b', { text: '학생 응답' }),
+      h('span', { text: this.peek ? '학생 값을 칠판에 띄우는 중' : slider ? '막대를 누르면 그 값을 칠판 익스플로라그램에 띄워요' : '이름 없이 모아요' }),
       this.peek ? h('button', { type: 'button', class: 'ch-live-back', text: '내 값으로', onclick: () => this.unpeek() }) : null,
       h('button', { type: 'button', class: 'ch-live-x', text: '×', 'aria-label': '학생 보기 닫기', onclick: () => this.toggleDist(false) }));
-    const empty = h('p', { class: 'ch-live-empty', text: '이 장에는 학생이 움직이는 슬라이더가 없어요' });
+    const empty = h('p', { class: 'ch-live-empty', text: '이 장에는 학생이 답하는 활동(슬라이더·퀴즈·단답)이 없어요' });
     this.dist.replaceChildren(head, ...(rows.length ? rows : [empty]));
+  },
+
+  // 퀴즈: 보기마다 고른 학생 수(여러 개 고르기는 한 학생이 여러 보기에 들어간다). 정답 보기에 ✓.
+  quizRow(item, i) {
+    const key = this.partKey(item, i, 'q');
+    const all = [...(this.picks.get(`${i}|${key}`) || new Map()).values()];
+    const n = item.opts.map((_, k) => all.filter((c) => c.includes(k)).length);
+    const top = Math.max(1, ...n);
+    return h('div', { class: 'ch-live-row ch-live-quiz', 'data-key': key },
+      h('span', { class: 'ch-live-name', text: this.askOf(item.box) || '퀴즈' }),
+      h('span', { class: 'ch-live-n', text: `${all.length}명` }),
+      h('ol', { class: 'ch-live-opts' }, item.opts.map((o, k) => {
+        const t = o.querySelector('.ch-opt-t');
+        const ok = o.hasAttribute('data-ok');
+        return h('li', { class: ok ? 'is-ok' : null, style: `--w:${(n[k] / top).toFixed(3)}` },
+          h('b', { text: `${ok ? '✓' : ''}${k + 1}` }),
+          h('span', { class: 'ch-live-opt-t', text: (t || o).textContent.trim() }),
+          h('i', { 'aria-hidden': 'true' }),
+          h('em', { text: `${n[k]}명` }));
+      })));
+  },
+
+  // 단답: 이름 없이 카드로. 교사는 칠판에 띄우기 곤란한 답을 숨길 수 있다(학생 기기에는 아무 변화 없음).
+  shortRow(item, i) {
+    const key = this.partKey(item, i, 's');
+    const all = [...(this.texts.get(`${i}|${key}`) || new Map()).entries()].sort((a, b) => a[1].at - b[1].at);
+    const shown = all.filter(([sid]) => !this.hidden.has(`${i}|${key}|${sid}`));
+    const hid = all.length - shown.length;
+    return h('div', { class: 'ch-live-row ch-live-short', 'data-key': key },
+      h('span', { class: 'ch-live-name', text: this.askOf(item.box) || '단답' }),
+      h('span', { class: 'ch-live-n', text: hid ? `${all.length}명 · 숨김 ${hid}` : `${all.length}명` }),
+      shown.length ? h('ul', { class: 'ch-live-cards' }, shown.map(([sid, a]) => h('li', null,
+        h('span', { text: a.t }),
+        h('button', { type: 'button', class: 'ch-live-x', text: '×', 'aria-label': '이 답 숨기기', onclick: () => { this.hidden.add(`${i}|${key}|${sid}`); this.renderDist(); } }))))
+        : h('p', { class: 'ch-live-empty', text: all.length ? '모두 숨겼어요' : '아직 보낸 답이 없어요' }));
   },
 
   peekAt(input, v) {
@@ -6283,6 +6398,9 @@ const Live = {
     this.role = null;
     this.code = '';
     this.vals.clear();
+    this.picks.clear();
+    this.texts.clear();
+    this.hidden.clear();
     this.seen.clear();
     this.reach = [];
     this.toggleDist(false);
@@ -6316,6 +6434,8 @@ const Live = {
     }, true);
     Stage.deck.addEventListener('input', (e) => this.onInput(e, false));
     Stage.deck.addEventListener('change', (e) => this.onInput(e, true));
+    on('quiz-answer', (item, c) => this.sendPart('pick', item, 'q', { c }));
+    on('short-answer', (item, t) => this.sendPart('text', item, 's', { t }));
     this.buildJoin(code);
     this.bar = h('div', { class: 'ch-live-bar ch-live-ui', 'data-no-ink': '', role: 'status', hidden: true });
     document.body.append(this.bar);
@@ -6479,6 +6599,13 @@ const Live = {
     else this.pending.set(id, setTimeout(send, LIVE_VAL_MS));
   },
 
+  sendPart(event, item, kind, data) {
+    if (this.role !== 'student' || !this.inbox) return;
+    const slide = Stage.slides.indexOf(item.slide);
+    if (slide < 0) return;
+    this.inbox.send(event, Object.assign({ sid: this.sid, slide, key: this.partKey(item, slide, kind) }, data));
+  },
+
   ended() {
     this.reset();
     this.joinUi.form.replaceChildren(h('h2', { text: '수업이 끝났어요' }), h('p', { text: '선생님이 실시간 수업을 끝냈어요' }),
@@ -6539,7 +6666,7 @@ function boot() {
   ClassHTML.next = () => Nav.next();
   ClassHTML.prev = () => Nav.prev();
   ClassHTML.audit = () => Audit.run();
-  ClassHTML._internal = { on, emit, Stage, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Anim, MathTex, Particles, Editor, Live, LiveCore };
+  ClassHTML._internal = { on, emit, Stage, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Anim, MathTex, Particles, Editor, Live, LiveCore };
   start().then(() => readyResolve(ClassHTML), (err) => {
     console.error('[class-html]', err);
     readyResolve(ClassHTML);

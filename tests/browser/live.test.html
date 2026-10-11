@@ -184,6 +184,55 @@ test('코드를 아는 다른 사람이 보낸 가짜 끝·상태는 무시한�
   eq(A.Nav.state.slide, 3, '가짜 상태로 장이 바뀌지 않았다');
 });
 
+test('퀴즈: 학생이 처음 고른 보기만 모이고, 「학생 보기」에 보기마다 인원과 정답 ✓', async () => {
+  T.Nav.go(4);
+  await until(() => A.Nav.state.slide === 4 && B.Nav.state.slide === 4);
+  const opts = (n) => doc(n).querySelectorAll('#quiz .opt');
+  opts('a')[1].click();   // 틀림
+  opts('a')[0].click();   // 다시 골라 맞힘: 모으지 않는다
+  opts('b')[0].click();
+  await until(() => (T.Live.picks.get('4|q0') || new Map()).size === 2);
+  eq(T.Live.picks.get('4|q0').get(A.Live.sid).join(), '1', '처음 고른 것');
+  eq(T.Live.picks.get('4|q0').get(B.Live.sid).join(), '0');
+  await until(() => (doc('t').querySelector('.ch-live-quiz .ch-live-n') || {}).textContent === '2명');
+  const li = doc('t').querySelectorAll('.ch-live-quiz .ch-live-opts li');
+  eq(li.length, 3);
+  assert(li[0].classList.contains('is-ok') && li[0].textContent.includes('✓'), '정답 보기 표시');
+  assert(li[0].textContent.includes('1명') && li[1].textContent.includes('1명') && li[2].textContent.includes('0명'), li[0].textContent);
+  assert(doc('t').querySelector('.ch-live-quiz .ch-live-n').textContent.includes('2명'));
+});
+
+test('단답: 이름 없이 카드로 모이고, 교사가 숨긴 답은 고쳐 보내면 다시 보인다', async () => {
+  T.Nav.go(5);
+  await until(() => A.Nav.state.slide === 5 && B.Nav.state.slide === 5);
+  const send = (n, t) => {
+    doc(n).querySelector('#short .ch-short-in').value = t;
+    doc(n).querySelector('#short .ch-short-send').click();
+  };
+  send('a', '');
+  assert(doc('a').querySelector('#short .ch-fb').textContent.includes('먼저'), '빈 답은 안 보낸다');
+  send('a', '  입자는\n스스로 움직인다  ');
+  send('b', '<img src=x onerror=alert(1)>');
+  await until(() => (T.Live.texts.get('5|s0') || new Map()).size === 2);
+  eq(T.Live.texts.get('5|s0').get(A.Live.sid).t, '입자는 스스로 움직인다', '줄바꿈·앞뒤 빈칸 정리');
+  assert(doc('a').querySelector('#short .ch-fb').textContent.includes('보냈어요'));
+  await until(() => doc('t').querySelectorAll('.ch-live-cards li').length === 2);
+  const cards = doc('t').querySelector('.ch-live-cards');
+  assert(!cards.querySelector('img'), '받은 글은 글자로만 보인다');
+  assert(cards.textContent.includes('<img'), cards.textContent);
+  assert(!cards.textContent.includes(A.Live.sid), '학생 표시는 보이지 않는다');
+  cards.querySelector('li:last-child .ch-live-x').click();
+  await until(() => doc('t').querySelectorAll('.ch-live-cards li').length === 1);
+  assert(doc('t').querySelector('.ch-live-short .ch-live-n').textContent.includes('숨김 1'));
+  send('b', '확산');
+  await until(() => doc('t').querySelectorAll('.ch-live-cards li').length === 2);
+  B.Live.inbox.send('text', { sid: B.Live.sid, slide: 5, key: 'none', t: 'x' });
+  B.Live.inbox.send('text', { sid: B.Live.sid, slide: 5, key: 's0', t: '   ' });
+  await wait(300);
+  eq(T.Live.texts.get('5|s0').get(B.Live.sid).t, '확산', '모르는 키·빈 글은 버린다');
+  eq(T.Live.texts.size, 1);
+});
+
 test('코드 없이 학생 역할이면 입장 화면에서 코드를 넣고 들어간다', async () => {
   const C = await open('c', '&join=');
   assert(visible(doc('c').querySelector('.ch-live-join')), '입장 화면');
