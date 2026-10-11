@@ -1,11 +1,10 @@
 <!doctype html>
-<html lang="ko" data-deck="training-v2-2026-10">
-<head>
+<html lang="ko" data-deck="training-v2-2026-10"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exploragram 교직원 연수</title>
 <link rel="stylesheet" href="../engine/class-html.css">
-<script defer src="../engine/class-html.js"></script>
+<script defer="" src="../engine/class-html.js"></script>
 <style>
 /* 이야기(story) 테마: 따뜻한 종이 바탕 · 필름 그레인 · 기하 산세리프 제목 · 모노 라벨 · 어두운 둥근 패널 · 주황 강조.
    글꼴 3종은 모두 OFL 1.1(assets/fonts/README.md). */
@@ -35,11 +34,11 @@ body[data-theme="story"] section.slide {
 }
 /* 머리줄(점선 아래) · 쪽 번호 */
 body[data-theme="story"] section.slide::before {
-  content: "CLASS-HTML  ·  " attr(data-sec); left: 64px; right: 64px; top: 0; height: 58px;
+  content: "EXPLORAGRAM  ·  " attr(data-sec); left: 64px; right: 64px; top: 0; height: 58px;
   display: flex; align-items: center; border-bottom: 1px dashed var(--st-line);
   font: 600 15px/1 var(--st-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--st-muted);
 }
-body[data-theme="story"] section.slide:not([data-sec])::before { content: "CLASS-HTML"; }
+body[data-theme="story"] section.slide:not([data-sec])::before { content: "EXPLORAGRAM"; }
 body[data-theme="story"] section.slide::after { right: 64px; bottom: 18px; font: 700 14px/1 var(--st-mono); color: var(--st-ink); }
 
 /* 글 */
@@ -274,6 +273,10 @@ section.slide button.map-live { margin-top: 18px; background: var(--st-dark); bo
 .demo-zone span { font: 600 24px/1 var(--st-mono); color: var(--st-muted); }
 
 /* 실시간 */
+.live-mock .lm-box { display: flex; align-items: center; gap: 22px; padding: 12px 18px; border-radius: 16px; background: rgba(255, 255, 255, .08); }
+.live-mock .lm-qr { width: 104px; height: 104px; flex: none; padding: 8px; border-radius: 10px; background: #fff; }
+.live-mock .lm-code { margin: 0; font: 800 40px/1.1 var(--st-mono); letter-spacing: .06em; color: var(--st-on-dark); }
+.live-mock .lm-code small { display: block; margin-bottom: 6px; font: 600 20px/1 var(--ch-font); letter-spacing: 0; color: var(--st-on-dark-2); }
 .site-url { margin: 0; font: 700 26px/1.35 var(--st-mono); color: var(--st-on-dark); }
 
 /* 익스플로라그램 수요 표 */
@@ -297,9 +300,9 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
 
 <!-- 여는 장면 -->
 <section class="slide" id="cover" data-title="표지">
-  <p class="kicker">2026. 10. 13. · 교직원 연수</p>
-  <h1 class="cover-title">내 수업 PPT,<br>학생이 만지는 수업으로</h1>
-  <p class="lead">오늘 끝날 때, 선생님 수업 HTML 하나를 갖고 가세요.</p>
+  <p class="kicker">2026. 10. 13.(화) 13:00</p>
+  <h1 class="cover-title">일반 [수업 PPT]를<br>상호 작용이 가득한 [수업 HTML]로 바꾸기</h1>
+  <p class="lead">연수가 끝난 후, 선생님 만의 수업 HTML 하나를&nbsp;갖고 가세요!</p>
   <div class="panel">
     <p class="panel-head"><span>오늘 90분</span><span>보기 35 · 실습 40 · 모으기 15</span></p>
     <ol class="index">
@@ -311,12 +314,12 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
       <li><b>05</b><span>모으기 · 설문</span><small>15분</small></li>
     </ol>
   </div>
-  <p class="byline">N-LIFESCIENCE · GITHUB.COM/N-LIFESCIENCE/CLASS-HTML</p>
+  <p class="byline">N-LIFESCIENCE · GITHUB.COM/N-LIFESCIENCE/EXPLORAGRAM</p>
 </section>
 
 <section class="slide" id="reveal" data-sec="여는 장면" data-title="방금 본 수업">
-  <p class="kicker">방금 본 수업</p>
-  <h2>이 수업, 원래는 PPT였어요</h2>
+  <p class="kicker">동적인 수업</p>
+  <h2>무엇을 하는 걸까요? 어떻게 하면 될까요?</h2>
   <div class="versus">
     <div class="side light"><span class="pill-tag">원래 PPT</span><ul><li>그림을 차례로 넘겨 보여 줬어요.</li><li>판서하려면 펜 모드를 바꿔야 했어요.</li><li>수업이 끝나면 판서를 다시 꺼내 보기 어려웠어요.</li></ul></div>
     <div class="arrow">→</div>
@@ -327,7 +330,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
 
 <!-- 01 기능 한눈에 -->
 <section class="slide" id="map" data-sec="01 · 기능 한눈에" data-title="기능 지도">
-  <p class="kicker">방금 쓴 기능, 한눈에</p>
+  <p class="kicker">4가지 기능이 있어요</p>
   <h2>수업 HTML에 들어 있는 것</h2>
   <div class="map-cards">
     <button type="button" class="map-card c-blue" data-go="ink"><b>판서 · 칠판</b><span>펜을 든 채로 넘기기 · 손등 지우개 · 빈 칠판 · 반별 판서</span><i aria-hidden="true">→</i></button>
@@ -342,11 +345,11 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
 <section class="slide" id="ink" data-sec="01 · 기능 한눈에" data-title="판서">
   <p class="kicker">앞에서 보여 드릴게요</p>
   <h2>펜을 든 채로 수업해요</h2>
-  <div class="ink-demo" data-activity>
+  <div class="ink-demo" data-activity="">
     <ol class="vsteps">
       <li><i>1</i><div><b>펜을 든 채로 ◀ ▶</b><p>모드를 바꾸지 않고 넘겨요.</p></div></li>
       <li><i>2</i><div><b>톡은 누르기, 쭉은 판서</b><p>단추 위에서도 그대로 써져요.</p></div></li>
-      <li><i>3</i><div><b>손등으로 문질러 지우기</b><p>칠판이 손등을 알아보면 돼요. ⚙ 「손으로 맞추기」로 확인해요.</p></div></li>
+      <li><i>3</i><div><b>손등으로 문질러 지우기</b><p>칠판이 손등을 알아보면 돼요. <br>⚙ 「손으로 맞추기」로 확인해요.</p></div></li>
       <li><i>4</i><div><b>양옆 ‹ › 탭에 도구</b><p>두 번 누르면 떠 있는 도구가 돼요.</p></div></li>
     </ol>
     <div class="demo-zone"><span>여기에 써 볼게요</span></div>
@@ -385,16 +388,16 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
     </div>
     <div class="dx-view">
       <svg id="ik-svg" width="504" height="360" viewBox="0 0 560 400" aria-label="잉크 입자와 물 입자가 움직이는 상자">
-        <rect x="1.5" y="1.5" width="557" height="397" fill="#FFFFFF" stroke="#3B4A5A" stroke-width="3"/>
+        <rect x="1.5" y="1.5" width="557" height="397" fill="#FFFFFF" stroke="#3B4A5A" stroke-width="3"></rect>
         <g id="ik-cells"></g>
         <g stroke="#C9D3DC" stroke-width="2" stroke-dasharray="8 8">
-          <line x1="186.7" y1="3" x2="186.7" y2="397"/><line x1="373.3" y1="3" x2="373.3" y2="397"/>
-          <line x1="3" y1="133.3" x2="557" y2="133.3"/><line x1="3" y1="266.7" x2="557" y2="266.7"/>
+          <line x1="186.7" y1="3" x2="186.7" y2="397"></line><line x1="373.3" y1="3" x2="373.3" y2="397"></line>
+          <line x1="3" y1="133.3" x2="557" y2="133.3"></line><line x1="3" y1="266.7" x2="557" y2="266.7"></line>
         </g>
         <g id="ik-water"></g>
-        <polyline id="ik-trail" fill="none" stroke="#1E5FA8" stroke-width="3" stroke-linejoin="round" stroke-dasharray="2 6" stroke-linecap="round"/>
+        <polyline id="ik-trail" fill="none" stroke="#1E5FA8" stroke-width="3" stroke-linejoin="round" stroke-dasharray="2 6" stroke-linecap="round"></polyline>
         <g id="ik-ink"></g>
-        <circle id="ik-me" cx="-50" cy="-50" r="10" fill="#1E5FA8" stroke="#FBBF24" stroke-width="4"/>
+        <circle id="ik-me" cx="-50" cy="-50" r="10" fill="#1E5FA8" stroke="#FBBF24" stroke-width="4"></circle>
       </svg>
       <p class="dx-out" id="ik-out"></p>
       <div class="dx-veil" id="ik-veil"><span>시간 막대를 밀면<br>잉크 한 방울을 떨어뜨려요</span></div>
@@ -414,7 +417,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
         <div class="mk-bar"><p class="c-sup">공급량(팔려는 양) <span id="mk-qs-t"></span></p><div><i id="mk-qs" style="background:var(--sup)"></i></div></div>
       </div>
       <p class="mk-calc" id="mk-calc"></p>
-      <button class="dh-b" id="mk-run" type="button" disabled>시장에 맡기기 ▶</button>
+      <button class="dh-b" id="mk-run" type="button" disabled="">시장에 맡기기 ▶</button>
     </div>
     <div class="dh-view">
       <svg class="dh-svg" id="mk-svg" width="652" height="360" viewBox="0 0 652 360" aria-label="가격선과 초과 수요·초과 공급을 보여 주는 수요·공급 그래프"></svg>
@@ -442,21 +445,21 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
       </div>
       <div class="ms-view">
         <svg width="660" height="345" viewBox="0 0 660 345" aria-label="이성과 정서의 무게를 비교하는 저울">
-          <path d="M330 80 L330 320" stroke="#9AA6B2" stroke-width="10" stroke-linecap="round"/>
-          <rect x="260" y="318" width="140" height="16" rx="8" fill="#9AA6B2"/>
-          <line id="ds-beam" x1="100" y1="80" x2="560" y2="80" stroke="#3F3F3F" stroke-width="12" stroke-linecap="round"/>
-          <circle cx="330" cy="80" r="14" fill="#3F3F3F"/>
+          <path d="M330 80 L330 320" stroke="#9AA6B2" stroke-width="10" stroke-linecap="round"></path>
+          <rect x="260" y="318" width="140" height="16" rx="8" fill="#9AA6B2"></rect>
+          <line id="ds-beam" x1="100" y1="80" x2="560" y2="80" stroke="#3F3F3F" stroke-width="12" stroke-linecap="round"></line>
+          <circle cx="330" cy="80" r="14" fill="#3F3F3F"></circle>
           <g id="ds-L" transform="translate(100 80)">
-            <path d="M0 0 L-80 90 M0 0 L80 90" stroke="#3F3F3F" stroke-width="3" fill="none"/>
-            <rect id="ds-Lw" x="-50" y="60" width="100" height="30" rx="6" fill="#006DBB"/>
-            <path d="M-95 90 Q0 140 95 90 Z" fill="#CFE3F3" stroke="#006DBB" stroke-width="4"/>
+            <path d="M0 0 L-80 90 M0 0 L80 90" stroke="#3F3F3F" stroke-width="3" fill="none"></path>
+            <rect id="ds-Lw" x="-50" y="60" width="100" height="30" rx="6" fill="#006DBB"></rect>
+            <path d="M-95 90 Q0 140 95 90 Z" fill="#CFE3F3" stroke="#006DBB" stroke-width="4"></path>
             <text id="ds-Lt" x="0" y="160" text-anchor="middle" font-size="28" font-weight="800" fill="#006DBB">이성</text>
             <text x="0" y="188" text-anchor="middle" font-size="20" fill="#3F3F3F">더 살리는 사람 수</text>
           </g>
           <g id="ds-R" transform="translate(560 80)">
-            <path d="M0 0 L-80 90 M0 0 L80 90" stroke="#3F3F3F" stroke-width="3" fill="none"/>
-            <rect id="ds-Rw" x="-50" y="60" width="100" height="30" rx="6" fill="#C8325F"/>
-            <path d="M-95 90 Q0 140 95 90 Z" fill="#F7D5DF" stroke="#C8325F" stroke-width="4"/>
+            <path d="M0 0 L-80 90 M0 0 L80 90" stroke="#3F3F3F" stroke-width="3" fill="none"></path>
+            <rect id="ds-Rw" x="-50" y="60" width="100" height="30" rx="6" fill="#C8325F"></rect>
+            <path d="M-95 90 Q0 140 95 90 Z" fill="#F7D5DF" stroke="#C8325F" stroke-width="4"></path>
             <text id="ds-Rt" x="0" y="160" text-anchor="middle" font-size="28" font-weight="800" fill="#C8325F">정서</text>
             <text x="0" y="188" text-anchor="middle" font-size="20" fill="#3F3F3F">직접 해치는 거부감</text>
           </g>
@@ -479,13 +482,13 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
         <li><kbd>B</kbd>검정 화면</li><li><kbd>F</kbd>전체 화면</li>
         <li><kbd>D</kbd>자동 점검</li><li><kbd>?</kbd>도움말</li>
       </ul>
-      <div class="box" style="margin-top:24px"><p style="margin:0;font-size:23px;line-height:1.5">퀴즈 · 분류 카드 · 순서 맞히기 · 타이머 · 발표자 뽑기 · 판서까지 인쇄</p></div>
+      <div class="box" style="margin-top:24px"><p style="margin:0;font-size:23px;line-height:1.5">퀴즈 · 분류 카드 · 순서 맞히기 <br>타이머 · 발표자 뽑기 · 판서까지 인쇄</p></div>
       <p class="note" style="margin-top:12px">프레젠터 리모컨의 넘기기 단추도 그대로 돼요.</p>
     </div>
     <div>
       <p class="q" data-n="?" style="font-size:26px;margin-bottom:10px">잉크가 물에 퍼지는 까닭은?</p>
       <div class="quiz">
-        <button class="opt" data-ok data-why="맞아요. 입자가 스스로 움직이기 때문이에요.">입자가 스스로 끊임없이 움직여서</button>
+        <button class="opt" data-ok="" data-why="맞아요. 입자가 스스로 움직이기 때문이에요.">입자가 스스로 끊임없이 움직여서</button>
         <button class="opt" data-why="끌어당김이 아니라 입자 운동이에요.">물이 잉크를 끌어당겨서</button>
         <button class="opt" data-why="무게와 상관없이 퍼져요.">잉크가 물보다 무거워서</button>
       </div>
@@ -496,15 +499,15 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
 <section class="slide" id="fix" data-sec="01 · 기능 한눈에" data-title="고치기">
   <p class="kicker">AI에게 다시 부탁하지 않아도</p>
   <h2>바로 고치고, 스스로 점검해요</h2>
-  <ol class="steps" style="--n:4" data-activity>
+  <ol class="steps" style="--n:4" data-activity="">
     <li><i>1</i><small>툴바</small><b>「편집」을 눌러요</b><p>위에 편집 막대가 나와요.</p></li>
-    <li><i>2</i><small>고르기</small><b>고칠 곳을 눌러요</b><p>글·상자·그림·SVG 도형 무엇이든 골라요.</p></li>
+    <li><i>2</i><small>고르기</small><b>고칠 곳을 눌러요</b><p>글·상자·그림·SVG 도형<br>무엇이든 골라요.</p></li>
     <li><i>3</i><small>고치기</small><b>글, 크기, 색, 위치</b><p>두 번 누르면 글을 고치고, 모서리를 끌면 크기가 바뀌어요.</p></li>
     <li><i>4</i><small>저장</small><b>「HTML 저장」</b><p>고친 파일을 새로 받아요(Ctrl+S).</p></li>
   </ol>
   <div class="cols" style="margin-top:30px;gap:24px">
     <div class="box"><h3>D 키 · 자동 점검</h3><p style="font-size:23px;line-height:1.45">넘친 글자와 빈 그림을 찾아 표시해요.</p></div>
-    <div class="box"><h3>⚙ 그림 넣어 저장</h3><p style="font-size:23px;line-height:1.45">그림이 회색 상자면 원본 PPT를 화면에 끌어다 놓아요.</p></div>
+    <div class="box"><h3>그림 넣어 저장</h3><p style="font-size:23px;line-height:1.45">그림이 회색 상자면 원본 PPT를 화면에 끌어다 놓아요.</p></div>
   </div>
 </section>
 
@@ -548,19 +551,23 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
 <!-- 02 실시간 체험 -->
 <section class="slide" id="live" data-sec="02 · 실시간 체험" data-title="실시간 수업">
   <p class="kicker">휴대폰을 꺼내 주세요</p>
-  <h2>선생님 화면과 내 휴대폰이 함께 움직여요</h2>
-  <div class="cols" style="grid-template-columns:1fr 460px;gap:36px" data-activity>
+  <h2>이번에는 선생님들이 학생이 되어 봐요</h2>
+  <div class="cols" style="grid-template-columns:1fr 470px;gap:40px" data-activity>
     <ol class="vsteps">
-      <li><i>1</i><div><b>QR을 찍거나 코드 6자리</b><p>사이트에 코드를 넣어도 돼요.</p></div></li>
-      <li><i>2</i><div><b>선생님 화면을 따라가요</b><p>실시간을 켠 뒤 선생님이 연 장은 다시 볼 수 있어요.</p></div></li>
-      <li><i>3</i><div><b>시간 막대를 직접 밀어요</b><p>내 휴대폰의 익스플로라그램이 움직여요.</p></div></li>
-      <li><i>4</i><div><b>모두의 값이 모여요</b><p>막대 하나를 누르면 그 값이 칠판 익스플로라그램에 떠요.</p></div></li>
+      <li><i>1</i><div><b>칠판에 뜬 QR을 찍어요</b><p>카메라로 비추면 코드 없이 바로 들어와요.</p></div></li>
+      <li><i>2</i><div><b>제 화면을 따라와요</b><p>제가 장을 넘기면 휴대폰도 같이 넘어가요.</p></div></li>
+      <li><i>3</i><div><b>시간 막대를 직접 밀어요</b><p>휴대폰 속 잉크가 퍼지는 모습이 바뀌어요.</p></div></li>
+      <li><i>4</i><div><b>모두의 값이 칠판에 모여요</b><p>누가 어디에 두었는지 막대그래프로 보여요.</p></div></li>
     </ol>
-    <div class="panel" style="display:flex;flex-direction:column;gap:18px">
-      <p class="panel-head"><span>참여 주소</span></p>
-      <p class="site-url">n-lifescience.github.io<br>/exploragram</p>
-      <a class="btn" href="https://n-lifescience.github.io/exploragram/lessons/sci-diffusion.html" target="_blank" rel="noopener">확산 수업 열기 →</a>
-      <p style="margin:0;font-size:22px;line-height:1.45;color:var(--st-on-dark-2)">이름을 받지 않고, 아무것도 저장하지 않아요. 창을 닫으면 사라져요.</p>
+    <div class="panel live-mock" style="display:flex;flex-direction:column;gap:12px">
+      <p class="panel-head"><span>칠판에 이런 창이 떠요</span></p>
+      <div class="lm-box">
+        <svg class="lm-qr" viewBox="0 0 21 21" aria-hidden="true"><path fill="#1F2328" d="M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zm1 1v5h5V1zm1 1h3v3h-3zM0 14h7v7H0zm1 1v5h5v-5zm1 1h3v3H2zM9 0h2v2H9zm2 2h1v3h-1zM8 4h2v2H8zm1 4h3v1H9zm-1 2h2v2H8zm4-1h2v3h-2zm3 0h3v1h-3zm4 1h2v2h-2zm-3 2h2v2h-2zM9 13h2v2H9zm3 1h2v1h-2zm-2 2h2v3h-2zm3 2h3v3h-3zm4-3h4v2h-4zm1 4h3v2h-3zM0 8h2v2H0zm3 1h2v2H3zm2 2h2v1H5z"/></svg>
+        <p class="lm-code"><small>예시</small>482 915</p>
+      </div>
+      <p style="margin:0;font-size:22px;line-height:1.45;color:var(--st-on-dark-2)">QR이 안 찍히면 <b style="color:var(--st-on-dark)">n-lifescience.github.io/exploragram</b>에 들어가 숫자 6자리를 넣어요.</p>
+      <a class="btn" href="https://n-lifescience.github.io/exploragram/lessons/sci-diffusion.html" target="_blank" rel="noopener">확산 수업 열고 실시간 켜기 →</a>
+      <p style="margin:0;font-size:20px;line-height:1.45;color:var(--st-on-dark-2)">이름을 받지 않고 아무것도 저장하지 않아요.</p>
     </div>
   </div>
 </section>
@@ -586,11 +593,11 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
   <p class="kicker">내 AI가 하는 일</p>
   <h2>PPT 하나가 수업 HTML이 되기까지</h2>
   <ol class="steps" style="--n:5">
-      <li><i>1</i><small>올리기</small><b>PPT + 저장소 주소</b><p>내 AI에 PPT를 올리고 한 줄을 붙여요.</p></li>
-      <li><i>2</i><small>인터뷰</small><b>AI가 먼저 물어요</b><p>교과·차시, 수업 장면, 헷갈리는 곳, 넣을 활동, 지킬 것.</p></li>
-      <li><i>3</i><small>설계표</small><b>개념마다 익스플로라그램 하나</b><p>채팅에서만 확인해요. 학생 화면에는 안 들어가요.</p></li>
-      <li><i>4</i><small>파일</small><b>HTML 한 파일</b><p>판서·저장·점검은 엔진이 맡아요.</p></li>
-      <li><i>5</i><small>점검</small><b>D 키로 확인</b><p>넘친 글자를 찾고, 편집이나 AI 부탁으로 고쳐요.</p></li>
+      <li><i>1</i><small>올리기</small><b style="font-size: 20px;">PPT + 깃허브 주소</b><p>내 AI에 PPT를 올리고<br>한 줄을 붙여요.</p></li>
+      <li><i>2</i><small>인터뷰</small><b style="font-size: 20px;">AI가 먼저 물어요</b><p>교과·차시, 수업 장면, 헷갈리는 곳, 넣을 활동, 지킬 것.</p></li>
+      <li><i>3</i><small>설계표</small><b style="font-size: 20px;">1개념&nbsp;1익스플로라그램&nbsp;</b><p>채팅에서만 확인해요. <br>학생 화면에는<br>안 들어가요.</p></li>
+      <li><i>4</i><small>파일</small><b style="font-size: 20px;">HTML 한 파일</b><p>판서·저장·점검은<br>엔진이 맡아요.</p></li>
+      <li><i>5</i><small>점검</small><b style="font-size: 20px;">D 키로 확인</b><p>넘친 글자를 찾고, 편집이나 AI 부탁으로 고쳐요.</p></li>
     </ol>
   <div class="cols" style="margin-top:30px;gap:24px">
     <div class="side light"><span class="pill-tag">저작권</span><ul><li>교과서 그림이 든 HTML은 내 수업에서만 써요.</li></ul></div>
@@ -604,7 +611,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
   <h2>실습 준비</h2>
   <div class="cols" style="grid-template-columns:480px 1fr;gap:36px">
     <div><ul class="checklist">
-      <li>내 수업 PPT 하나 (10~20장이면 알맞아요)</li>
+      <li>내 수업 PPT 하나<br>(10~20장이면 알맞아요)</li>
       <li>학생 개인정보가 든 장은 지웠어요</li>
       <li>AI 하나에 로그인했어요</li>
       <li>이 자료를 크롬으로 열었어요</li>
@@ -657,7 +664,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
       <h3>해 볼 것</h3>
       <ol style="margin:0;padding-left:30px;font-size:24px;line-height:1.55">
         <li>펜으로 판서하며 넘겨 보기</li>
-        <li>그림이 비어 있으면 원본 PPT를 화면에 끌어다 놓고 ⚙ 「그림 넣어 저장」</li>
+        <li>그림이 비어 있으면 원본 PPT를 화면에 끌어다 놓고 「그림 넣어 저장」</li>
         <li>D 키로 자동 점검 열어 보기</li>
         <li>「편집」으로 글 한 줄 고쳐 저장하기</li>
       </ol>
@@ -665,7 +672,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
     <div style="display:flex;flex-direction:column;gap:12px">
       <h3 style="margin:0">AI에게 고쳐 달라고 말하기</h3>
       <div class="quote"><p>5쪽은 글이 많아. 두 장으로 나눠 줘.</p></div>
-      <div class="quote"><p>7쪽 그래프에 단위를 넣고, 농도 슬라이더 범위를 0~10으로 해 줘.</p></div>
+      <div class="quote"><p>7쪽 그래프에 단위를 넣고,<br>농도 슬라이더 범위를 0~10으로 해 줘.</p></div>
       <div class="quote"><p>자동 점검에 나온 오류를 모두 고쳐 줘.</p></div>
     </div>
   </div>
@@ -678,8 +685,8 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
     <div><dt>AI가 질문 없이 바로 만들어요</dt><dd>"지침의 인터뷰부터 다시 해 줘"라고 써요.</dd></div>
     <div><dt>답이 중간에 끊겨요</dt><dd>"계속"이라고 쓰거나, "전체 HTML을 코드 블록 하나로" 부탁해요.</dd></div>
     <div><dt>그림이 회색 상자로 나와요</dt><dd>원본 PPT를 그 화면에 끌어다 놓고 ⚙ 「그림 넣어 저장」을 눌러요.</dd></div>
-    <div><dt>학교 PC에서 화면이 깨져요</dt><dd>인터넷이 막힌 PC에서 쓸 파일은 인터넷 되는 PC에서 ⚙ 「오프라인용 저장」으로 받아 가요.</dd></div>
-    <div><dt>글이 상자 밖으로 넘쳐요</dt><dd>D 키로 점검하고 "점검 오류를 모두 고쳐 줘"라고 하거나 편집으로 줄여요.</dd></div>
+    <div><dt>학교 PC에서 화면이 깨져요</dt><dd>인터넷이 막힌 PC에서 쓸 파일은 인터넷 되는 PC에서 「오프라인용 저장」으로 받아 가요.</dd></div>
+    <div><dt>글이 상자 밖으로 넘쳐요</dt><dd>D 키로 점검하고 "점검 오류를 모두 고쳐 줘"라고 하거나<br>편집으로 줄여요.</dd></div>
     <div><dt>판서가 사라졌어요</dt><dd>반 메뉴에서 반을 확인하고, 백업 파일이 있으면 불러와요.</dd></div>
   </dl>
 </section>
@@ -706,7 +713,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
     <div style="display:flex;flex-direction:column;gap:16px">
       <div class="box"><h3>1부 · 오늘 연수</h3><p style="font-size:23px;line-height:1.45">만족도, 쓸모 있었던 부분, 실습 결과</p></div>
       <div class="box"><h3>2부 · 내 수업의 익스플로라그램</h3><p style="font-size:23px;line-height:1.45">단원, PPT로 어려운 장면, 학생이 바꾸는 것, 달라지는 것</p></div>
-      <p class="note">이름 없이 통계로만 묶어서 Exploragram을 고치고 발표 자료를 만드는 데 써요.</p>
+      <p class="note">이름 없이 통계로만 묶어서 Exploragram을 고치고<br>발표 자료를 만드는 데 써요.</p>
     </div>
     <div class="panel" style="display:flex;flex-direction:column;gap:16px">
       <div class="qr"><img src="assets/training/form-qr.svg" alt="연수 설문 QR 코드"><p style="margin:0;font-size:22px;line-height:1.45;color:var(--st-on-dark-2)">휴대폰 카메라로 찍거나 아래 단추를 눌러요.</p></div>
@@ -730,7 +737,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
         <a class="btn ghost" href="https://n-lifescience.github.io/exploragram/examples/training.html" target="_blank" rel="noopener">이 연수 자료 다시 보기</a>
         <a class="btn ghost" href="https://docs.google.com/forms/d/e/1FAIpQLSe4DfQKW7-8lPddGTpcaFvEHNzqouGJ5jtAxoqpY96aH9vQrg/viewform" target="_blank" rel="noopener">설문</a>
       </div>
-      <p class="handle">GITHUB.COM/N-LIFESCIENCE/CLASS-HTML</p>
+      <p class="handle">GITHUB.COM/N-LIFESCIENCE/EXPLORAGRAM</p>
     </div>
   </div>
 </section>
@@ -954,5 +961,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
-</body>
-</html>
+
+
+</body></html>

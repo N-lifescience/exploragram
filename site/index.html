@@ -61,7 +61,8 @@
   .hero { --night: #121418; --night-2: #1C1F25; --on: #F4F1EA; --on-2: #A9ADB5; --hl: #FF8A4C;
     position: relative; overflow: hidden; background: var(--night); color: var(--on);
     background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-    background-size: 32px 32px; }
+    background-size: 32px 32px;
+    display: flex; align-items: center; min-height: 100vh; min-height: 100svh; }
   .hero-in { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 28px 40px; align-items: center; width: min(1180px, 100%); padding: 56px 16px 40px; }
   .hero .tag { margin: 0 0 10px; color: var(--hl); font-weight: 800; font-size: 15px; letter-spacing: .02em; }
   .hero .tag span { color: var(--on-2); font-weight: 600; }
@@ -139,6 +140,15 @@
   .amb i:nth-child(4) { left: 12%; top: 78%; } .amb i:nth-child(5) { left: 52%; top: 90%; } .amb i:nth-child(6) { left: 94%; top: 70%; }
   .amb i:nth-child(7) { left: 30%; top: 52%; } .amb i:nth-child(8) { left: 70%; top: 4%; } .amb i:nth-child(9) { left: 3%; top: 46%; } .amb i:nth-child(10) { left: 60%; top: 62%; }
   .hero .btn:focus-visible, .xg-chip:focus-visible, .lite:focus-visible { outline: 3px solid #6EA0FF; outline-offset: 2px; }
+  @media (min-width: 1400px) and (min-height: 820px) {
+    .hero-in { width: min(1400px, 100%); gap: 36px 64px; }
+    .hero h1 { font-size: 104px; }
+    .hero .tag { font-size: 17px; } .hero .def { font-size: 32px; } .hero .origin { font-size: 19px; }
+    .btn { min-height: 60px; padding: 0 26px; font-size: 18px; } .code-link { font-size: 17px; }
+    .xg-chip { min-height: 40px; font-size: 15px; } .xg figcaption, .xg-ctrl output { font-size: 17px; } .xg-ctrl label { font-size: 15px; }
+    .feats li { padding: 20px 22px; } .feats b { font-size: 19px; } .feats span { font-size: 16px; }
+  }
+  @media (min-width: 901px) and (max-height: 800px) { .hero-in { padding-top: 40px; padding-bottom: 28px; } }
   @media (max-width: 900px) { .hero-in { grid-template-columns: 1fr; padding-top: 64px; } .hero h1 { font-size: clamp(40px, 14vw, 96px); } .feats { grid-template-columns: 1fr; } }
   @media (max-width: 480px) { .btn { flex: 1 1 100%; justify-content: center; } .xg-board { padding: 10px; } }
   @media (max-width: 640px) { .ba .pair { grid-template-columns: 1fr; } .ba .to { transform: rotate(90deg); justify-self: center; } }
