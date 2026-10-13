@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko" data-deck="test-labeling">
+<head>
+<meta charset="utf-8">
+<title>labeling</title>
+<link rel="stylesheet" href="../../engine/class-html.css">
+<script defer src="../../engine/class-html.js"></script>
+<script src="harness.js"></script>
+<script src="pointer.js"></script>
+</head>
+<body>
+<section class="slide" id="l1">
+  <figure class="labeling" id="lb" style="width:500px">
+    <img alt="네모 그림" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='250'%3E%3Crect width='500' height='250' fill='%23dde'/%3E%3C/svg%3E">
+    <span class="lb" style="--x:20%; --y:40%" data-why="가운데 큰 공이 핵이다." data-hint="가장 큰 것을 찾아보자.">핵</span>
+    <span class="lb" style="--x:50%; --y:60%" data-why="초록 알갱이가 엽록체다.">엽록체</span>
+    <span class="lb" style="--x:80%; --y:30%" data-hint="바깥을 둘러싼 것.">세포벽</span>
+    <figcaption>식물 세포</figcaption>
+  </figure>
+  <p class="step" id="after">세포벽은 식물 세포에만 있다.</p>
+</section>
+<section class="slide" id="l2">
+  <figure class="labeling" id="twin" style="width:400px">
+    <img alt="네모" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'/%3E">
+    <span class="lb" style="--x:25%; --y:50%">콩팥</span>
+    <span class="lb" style="--x:75%; --y:50%">콩팥</span>
+  </figure>
+  <figure class="labeling" id="bad" style="width:300px">
+    <img alt="네모" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='100'/%3E">
+    <span class="lb" id="nopos">자리 없음</span>
+    <span class="lb" style="--x:60%; --y:50%">하나</span>
+  </figure>
+  <figure class="labeling" id="solo" style="width:300px">
+    <img alt="네모" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='100'/%3E">
+    <span class="lb" style="--x:60%; --y:50%">혼자</span>
+  </figure>
+</section>
+<pre id="results" data-summary="pending"></pre>
+<script>
+const I = () => ClassHTML._internal;
+const $ = (id) => document.getElementById(id);
+const item = (id) => I().Labeling.list.find((x) => x.fig.id === id);
+const spot = (it, key) => it.spots.find((s) => s.key === key);
+const mid = (el) => { const r = el.getBoundingClientRect(); return { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }; };
+// 이름표를 자리(dot) 위로 끈다. 놓는 곳은 자리 가운데에서 (dx, dy)만큼 떨어진 화면 좌표.
+function dragTo(from, to, dx = 0, dy = 0) {
+  const a = mid(from.chip);
+  const r = to.el.getBoundingClientRect();
+  const b = { clientX: r.left + dx, clientY: r.top + dy };
+  ptr('pointerdown', from.chip, 0, 0, a);
+  ptr('pointermove', from.chip, 0, 0, { clientX: (a.clientX + b.clientX) / 2, clientY: (a.clientY + b.clientY) / 2 });
+  ptr('pointermove', from.chip, 0, 0, b);
+  ptr('pointerup', from.chip, 0, 0, b);
+}
+
+test('만들기: 번호 자리가 그림 비율 자리에, 이름표는 아래 더미에, 캡션은 맨 아래', () => {
+  const it = item('lb');
+  eq(it.spots.map((s) => s.key), ['핵', '엽록체', '세포벽']);
+  eq(Array.from($('lb').querySelectorAll('.ch-lb-dot')).map((d) => d.textContent), ['1', '2', '3']);
+  eq(it.pool.children.length, 3);
+  assert(I().Labeling.list.every((x) => x.order.some((s, i) => s !== x.spots[i])), '더미 순서가 번호 순서와 같으면 답이 드러난다');
+  eq(Array.from(it.pool.children), it.order.map((s) => s.chip));
+  const art = $('lb').querySelector('.ch-lb-art').getBoundingClientRect();
+  const d = spot(it, '핵').dot.getBoundingClientRect();
+  assert(Math.abs(d.left + d.width / 2 - (art.left + art.width * 0.2)) < 2, 'x');
+  assert(Math.abs(d.top + d.height / 2 - (art.top + art.height * 0.4)) < 2, 'y');
+  eq($('lb').lastElementChild.tagName, 'FIGCAPTION');
+  assert(d.width >= 52 * I().Stage.scale - 0.5, '52px');
+  eq(item('solo'), undefined);
+});
+test('끌어서 맞는 자리에 놓으면 붙고 이유가 나온다', () => {
+  const it = item('lb');
+  dragTo(spot(it, '핵'), spot(it, '핵'));
+  const s = spot(it, '핵');
+  assert(s.done && s.el.contains(s.chip) && s.chip.classList.contains('is-done'), 'placed');
+  eq(it.fb.textContent, '가운데 큰 공이 핵이다.');
+  eq(getComputedStyle(s.dot).display, 'none');
+  const c = mid(s.chip);
+  const p = s.el.getBoundingClientRect();
+  assert(Math.abs(c.clientX - p.left) < 2 && Math.abs(c.clientY - p.top) < 2, 'chip centered on the spot');
+});
+test('틀린 자리에 놓으면 흔들리고 실마리, 더미에 남는다', () => {
+  const it = item('lb');
+  dragTo(spot(it, '세포벽'), spot(it, '엽록체'));
+  const s = spot(it, '세포벽');
+  assert(!s.done && it.pool.contains(s.chip), 'stays');
+  assert(s.chip.classList.contains('ch-shake'), 'shake');
+  eq(it.fb.textContent, '다시 생각해 보자. 바깥을 둘러싼 것.');
+  eq(s.chip.style.transform, '');
+});
+test('자리 가까이(80px 안)에 놓아도 붙고, 멀리 놓으면 제자리로 돌아간다', () => {
+  const it = item('lb');
+  const sc = I().Stage.scale;
+  dragTo(spot(it, '세포벽'), spot(it, '세포벽'), 0, -200 * sc);
+  assert(!spot(it, '세포벽').done, 'too far');
+  dragTo(spot(it, '세포벽'), spot(it, '세포벽'), 40 * sc, 30 * sc);
+  assert(spot(it, '세포벽').done, 'near');
+});
+test('이름표를 누르고 자리를 눌러도 된다. 다 맞히면 더미가 사라지고 다음 단계가 열린다', async () => {
+  const it = item('lb');
+  const s = spot(it, '엽록체');
+  const a = mid(s.chip);
+  ptr('pointerdown', s.chip, 0, 0, a);
+  ptr('pointerup', s.chip, 0, 0, a);
+  assert(s.chip.classList.contains('is-sel') && it.sel === s, 'selected');
+  s.dot.click();
+  assert(s.done, 'placed by tap');
+  eq(it.fb.textContent, '모두 맞혔다! 초록 알갱이가 엽록체다.');
+  eq(it.pool.hidden, true);
+  await wait(800);
+  assert($('after').classList.contains('is-shown'), 'next step opened');
+});
+test('펜을 든 채로 끌어도 판서가 아니라 이름표가 움직인다. 「다시」로 처음으로', () => {
+  const it = item('lb');
+  $('lb').querySelector('.ch-reset').click();
+  eq(it.pool.children.length, 3);
+  eq(it.pool.hidden, false);
+  assert(it.spots.every((s) => !s.done && getComputedStyle(s.dot).display !== 'none'), 'dots back');
+  I().Tools.set('pen');
+  const before = I().Ink.page.length;
+  dragTo(spot(it, '핵'), spot(it, '핵'));
+  I().Tools.set('hand');
+  assert(spot(it, '핵').done, 'placed with pen');
+  eq(I().Ink.page.length, before, 'no ink');
+});
+test('이름이 같은 자리가 둘이면 어느 쪽에 놓아도 맞다', () => {
+  ClassHTML.go(1);
+  const it = item('twin');
+  const [a, b] = it.spots;
+  dragTo(a, b);
+  assert(b.done && b.el.contains(a.chip), 'a chip on b spot');
+  dragTo(b, a);
+  assert(a.done && it.spots.every((s) => s.done), 'both');
+});
+test('키보드: 이름표에서 Enter로 고르고 자리 단추로 놓는다(장은 넘어가지 않는다)', () => {
+  const it = item('twin');
+  $('twin').querySelector('.ch-reset').click();
+  const s = it.spots[0];
+  s.chip.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+  eq(it.sel, s);
+  eq(I().Nav.state.slide, 1);
+  it.spots[1].dot.click();
+  assert(it.spots[1].done, 'dropped');
+});
+test('점검: 자리 없는 이름표·이름표 하나뿐인 그림은 부품 오류, 다 붙인 상태로 재고 되돌린다', () => {
+  ClassHTML.go(0);
+  const it = item('lb');
+  $('lb').querySelector('.ch-reset').click();
+  dragTo(spot(it, '핵'), spot(it, '핵'));
+  const r = ClassHTML.audit();
+  const part = r.errors.filter((e) => e.code === 'part').map((e) => e.msg);
+  eq(part.length, 2, JSON.stringify(part));
+  assert(part.some((m) => m.includes('#nopos') && m.includes('자리가 없어요')), 'no position');
+  assert(part.some((m) => m.includes('#solo') && m.includes('2개 이상')), 'solo');
+  eq(it.spots.map((s) => s.done), [true, false, false], 'restored');
+  eq(it.pool.children.length, 2);
+  eq(it.pool.hidden, false);
+  eq(it.fb.textContent, '가운데 큰 공이 핵이다.');
+  assert(r.info.activityPages.includes(1), 'counts as activity');
+});
+</script>
+</body>
+</html>

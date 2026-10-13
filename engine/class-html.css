@@ -1,4 +1,4 @@
-/*! class-html engine v1.3.0 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.4.0 | MIT | https://github.com/N-lifescience/exploragram */
 /* ---- 00-tokens.css ---- */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
@@ -804,6 +804,8 @@ html:not(.ch-editing) .ch-ed-ui { display: none !important; }
 .ch-live-opts em { font-style: normal; text-align: right; color: var(--ch-ui-mute); }
 .ch-live-opts .is-ok b { color: #4ADE80; }
 .ch-live-opts .is-ok i { background: linear-gradient(90deg, #22A06B calc(var(--w, 0) * 100%), #2E323A 0); }
+/* 투표: 모인 인원을 칠판의 투표에 넣는 단추 */
+.ch-live-ui .ch-live-put { grid-column: 1 / -1; justify-self: end; }
 /* 단답: 이름 없는 카드 */
 .ch-live-cards { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; max-height: 320px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
 .ch-live-cards li { display: flex; align-items: flex-start; gap: 4px; max-width: 100%; padding: 8px 4px 8px 14px; border-radius: 10px; background: var(--ch-ui-2); font-size: 22px; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
@@ -826,3 +828,65 @@ html.ch-live-student :is(.ch-toolbar, .ch-tb-handle, .ch-hud, .ch-progress, .ch-
 html.ch-live-student :is(.ch-stops, .ch-yearline) input:disabled, html.ch-live-student .ch-switch-btn:disabled { opacity: 1; cursor: default; }
 
 @media print { .ch-live-ui { display: none !important; } }
+
+/* ---- 87-poll.css ---- */
+/* 손들기 투표 */
+.ch-poll-list { display: grid; gap: 10px; margin: 6px 0 12px; }
+.ch-poll-row { display: flex; align-items: stretch; gap: 10px; }
+:where(.slide) .ch-poll-opt { position: relative; flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; min-height: 64px; box-sizing: border-box; margin: 0; padding: 8px 22px; border: 2px solid #C3C9D1; border-radius: 16px; background: var(--ch-card); color: var(--ch-ink); font: 700 26px/1.35 var(--ch-font); text-align: left; overflow: hidden; }
+.ch-poll-bar { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--w, 0) * 100%); background: rgba(232, 84, 26, .16); transition: width .3s var(--ch-ease-out); pointer-events: none; }
+.ch-poll-t, .ch-poll-n { position: relative; }
+:where(.slide) .ch-poll-n { margin: 0; color: var(--ch-mute); font-variant-numeric: tabular-nums; }
+.ch-poll-opt.is-top { border-color: var(--accent); }
+.ch-poll-opt.is-top .ch-poll-n { color: var(--accent); }
+.ch-poll-opt.is-mine { border-color: var(--accent); background: rgba(232, 84, 26, .07); }
+:where(.slide) .ch-poll-minus { flex: none; min-width: 64px; min-height: 64px; padding: 0 12px; border-color: #AEB4BC; color: var(--ch-mute); font-size: 22px; }
+:where(.slide) .ch-poll-total { flex: 1; margin: 0; font-size: 24px; font-weight: 700; color: var(--ch-mute); }
+
+/* 실시간 학생 화면: 고르기만 한다(인원은 교사 화면에 모인다) */
+.ch-live-student .ch-poll-bar, .ch-live-student .ch-poll-n, .ch-live-student .ch-poll-minus, .ch-live-student .poll .ch-reset { display: none; }
+
+@media print {
+  .ch-poll-minus, .slide .poll .ch-reset { display: none !important; }
+}
+
+/* ---- 88-labeling.css ---- */
+/* 라벨 붙이기. 그림은 figure 폭을 꽉 채우고, 자리(.lb)는 그림의 왼쪽 위에서 잰 비율(--x, --y)에 놓인다. */
+:where(.slide) figure.labeling { display: grid; gap: 12px; margin: 0; }
+.ch-lb-art { position: relative; }
+.ch-lb-art > img, .ch-lb-art > svg { display: block; width: 100%; height: auto; }
+:where(.slide) .lb { position: absolute; left: var(--x, 50%); top: var(--y, 50%); z-index: 2; width: 0; height: 0; }
+:where(.slide) .ch-lb-dot { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; padding: 0; border: 3px dashed var(--accent); border-radius: 50%; background: rgba(255, 255, 255, .94); color: var(--accent); font: 800 22px/1 var(--ch-font); box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+.lb.is-hover > .ch-lb-dot { border-style: solid; background: var(--accent); color: #fff; }
+.lb.is-done > .ch-lb-dot { display: none; }
+/* 붙은 이름표: 자리 한가운데에 */
+:where(.slide) .lb > .ch-lb-chip { position: absolute; left: 0; top: 0; min-height: 44px; padding: 4px 14px; font-size: 22px; white-space: nowrap; transform: translate(-50%, -50%); box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+
+/* ---- 89-media.css ---- */
+/* 영상 카드: 16:9 상자. 누르면 그 자리에서 재생한다(파일로 연 수업은 새 탭). */
+:where(.slide) .video { position: relative; display: grid; width: 100%; max-width: 760px; aspect-ratio: 16 / 9; box-sizing: border-box; border-radius: 20px; background: #16181D; color: #F4F1EA; overflow: hidden; }
+:where(.slide) .ch-video-play { display: grid; align-content: center; justify-items: center; gap: 10px; width: 100%; height: 100%; padding: 24px; border: 0; border-radius: 0; background: none; color: inherit; font: 700 28px/1.35 var(--ch-font); }
+.ch-video-tri { position: relative; width: 96px; height: 96px; margin-bottom: 6px; border-radius: 50%; background: var(--accent); }
+.ch-video-tri::after { content: ""; position: absolute; left: 37px; top: 28px; border: 20px solid transparent; border-left: 32px solid #fff; border-right: 0; }
+.ch-video-play small { font-size: 20px; font-weight: 500; color: #9AA0A6; }
+.ch-video-url { display: none; }
+:where(.slide) .ch-video-note { position: absolute; left: 0; right: 0; bottom: 14px; margin: 0; font-size: 20px; color: #9AA0A6; text-align: center; pointer-events: none; }
+.ch-video-frame { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 0; }
+.video > .ch-qr { position: absolute; right: 16px; bottom: 16px; }
+
+/* 링크 카드 */
+:where(.slide) a.link-card { display: flex; align-items: center; gap: 18px; min-height: 88px; box-sizing: border-box; padding: 14px 22px; border: 2px solid var(--ch-line); border-radius: 18px; background: var(--ch-card); color: var(--ch-ink); font-size: 26px; font-weight: 700; line-height: 1.35; text-decoration: none; }
+.ch-link-ico { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 14px; background: var(--accent); color: #fff; font-style: normal; font-size: 30px; }
+.ch-link-body { flex: 1; min-width: 0; display: grid; gap: 2px; text-wrap: balance; }
+:where(.slide) .ch-link-body small { font-size: 22px; font-weight: 500; color: var(--ch-mute); }
+.ch-link-host { font-style: normal; font-size: 20px; font-weight: 500; color: var(--ch-info); overflow-wrap: anywhere; }
+
+/* QR: 영상·링크 카드에 data-qr을 붙였을 때 */
+.ch-qr { flex: none; display: block; line-height: 0; }
+.ch-qr img { display: block; width: 120px; height: 120px; border-radius: 8px; background: #fff; image-rendering: pixelated; }
+.ch-qr small { display: block; max-width: 240px; font-size: 20px; line-height: 1.3; overflow-wrap: anywhere; }
+
+@media print {
+  .ch-video-note { display: none !important; }
+  .ch-video-url { display: block; }
+}

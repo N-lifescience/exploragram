@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko" data-deck="test-media">
+<head>
+<meta charset="utf-8">
+<title>media</title>
+<link rel="stylesheet" href="../../engine/class-html.css">
+<script defer src="../../engine/class-html.js"></script>
+<script src="harness.js"></script>
+<script src="pointer.js"></script>
+</head>
+<body>
+<section class="slide" id="m1">
+  <div class="video" id="v1" data-youtube="https://youtu.be/M7lc1UVf-VE?t=80" data-title="확산 실험 영상" data-end="3:05">지워질 글</div>
+  <div class="video" id="v2" data-youtube="M7lc1UVf-VE" data-qr></div>
+  <div class="video" id="vbad" data-youtube="https://example.com/video"></div>
+</section>
+<section class="slide" id="m2">
+  <a class="link-card" id="a1" href="https://www.example.org/path?x=1" data-qr>국가통계포털<small>인구 통계 찾아보기</small></a>
+  <a class="link-card" id="abad" href="javascript:alert(1)">나쁜 주소</a>
+</section>
+<pre id="results" data-summary="pending"></pre>
+<script>
+const I = () => ClassHTML._internal;
+const $ = (id) => document.getElementById(id);
+const vid = (id) => I().Media.videos.find((v) => v.box.id === id);
+// 바깥(유튜브·QR 라이브러리)에 요청하지 않게 막아 둔다
+const opened = [];
+window.open = (...a) => { opened.push(a); return null; };
+let qrAsked = 0;
+window.qrcode = () => ({ addData() { qrAsked += 1; }, make() {}, createDataURL: () => 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' });
+
+test('QR: 처음 열린 장의 QR만 그린다(다른 장은 아직 요청하지 않는다)', async () => {
+  await wait(50);
+  const q = $('v2').querySelector('.ch-qr img');
+  assert(q, 'video QR on the first slide');
+  eq(q.alt, 'QR 코드: https://www.youtube.com/watch?v=M7lc1UVf-VE');
+  eq($('v1').querySelector('.ch-qr'), null, 'no data-qr, no QR');
+  eq($('a1').querySelector('.ch-qr').children.length, 0, 'slide 2 not drawn yet');
+  eq(qrAsked, 1);
+});
+test('영상 카드: 제목·구간이 보이고, 누르기 전에는 iframe이 없다', () => {
+  const v = vid('v1');
+  eq([v.id, v.start, v.end], ['M7lc1UVf-VE', 80, 185]);
+  eq($('v1').querySelector('.ch-video-title').textContent, '확산 실험 영상');
+  eq($('v1').querySelector('.ch-video-play small').textContent, '유튜브 · 1:20~3:05');
+  eq(document.querySelectorAll('iframe').length, 0);
+  assert(!$('v1').textContent.includes('지워질 글'), 'old content removed');
+  assert($('v1').hasAttribute('data-no-ink'), 'pen passes through');
+  eq(vid('v2').start, 0);
+  eq($('v2').querySelector('.ch-video-play small').textContent, '유튜브');
+  eq(vid('vbad'), undefined);
+  const r = $('v1').getBoundingClientRect();
+  assert(Math.abs(r.width / r.height - 16 / 9) < 0.02, '16:9');
+});
+test('파일로 연 수업(file://): 새 탭으로 유튜브를 열고 알린다', () => {
+  eq(I().Media.embedOk(), false);
+  $('v1').querySelector('.ch-video-play').click();
+  eq(opened.length, 1);
+  eq(opened[0][0], 'https://www.youtube.com/watch?v=M7lc1UVf-VE&t=80s');
+  eq(opened[0][2], 'noopener');
+  eq(vid('v1').note.textContent, '새 탭에서 열었어요.');
+  eq(document.querySelectorAll('iframe').length, 0);
+});
+test('사이트로 연 수업(https): 쿠키 없는 주소로 그 자리에서 재생하고, 장을 넘기면 끈다', () => {
+  const M = I().Media;
+  const v = vid('v1');
+  eq(M.src(v), 'https://www.youtube-nocookie.com/embed/M7lc1UVf-VE?autoplay=1&rel=0&playsinline=1&start=80&end=185');
+  eq(M.src(vid('v2')), 'https://www.youtube-nocookie.com/embed/M7lc1UVf-VE?autoplay=1&rel=0&playsinline=1');
+  const [ok, src] = [M.embedOk, M.src];
+  M.embedOk = () => true;
+  M.src = () => 'about:blank';
+  try {
+    $('v1').querySelector('.ch-video-play').click();
+    $('v1').querySelector('.ch-video-play').click();
+    const frames = $('v1').querySelectorAll('iframe');
+    eq(frames.length, 1, 'one frame');
+    eq(frames[0].getAttribute('referrerpolicy'), 'strict-origin-when-cross-origin');
+    eq(frames[0].title, '확산 실험 영상');
+    const f = frames[0].getBoundingClientRect();
+    const b = $('v1').getBoundingClientRect();
+    assert(Math.abs(f.width - b.width) < 1 && Math.abs(f.height - b.height) < 1, 'fills the card');
+    eq(opened.length, 1, 'no new tab');
+    ClassHTML.go(1);
+    eq(document.querySelectorAll('iframe').length, 0, 'closed on leaving');
+    eq(v.note.textContent, '');
+  } finally { M.embedOk = ok; M.src = src; }
+});
+test('링크 카드: 새 탭으로 열리고 주소의 사이트 이름이 붙는다', () => {
+  const a = $('a1');
+  eq(a.target, '_blank');
+  eq(a.rel, 'noopener noreferrer');
+  eq(a.querySelector('.ch-link-host').textContent, 'example.org');
+  assert(a.querySelector('.ch-link-body').textContent.startsWith('국가통계포털'), 'title kept');
+  eq(a.querySelector('small').textContent.replace(/⁠/g, ''), '인구 통계 찾아보기');
+  eq($('abad').querySelector('.ch-link-ico'), null, 'bad href untouched');
+  eq($('abad').target, '');
+});
+test('QR: 다른 장의 QR은 그 장을 열 때 그리고, 다시 열어도 한 번만 그린다', async () => {
+  ClassHTML.go(1);
+  await wait(50);
+  const q = $('a1').querySelector('.ch-qr img');
+  assert(q, 'link QR drawn on show');
+  eq(q.alt, 'QR 코드: https://www.example.org/path?x=1');
+  eq(qrAsked, 2);
+  ClassHTML.go(0);
+  ClassHTML.go(1);
+  await wait(50);
+  eq(qrAsked, 2, 'only once');
+});
+test('점검: 못 읽는 영상 주소와 http가 아닌 링크는 부품 오류', () => {
+  const part = ClassHTML.audit().errors.filter((e) => e.code === 'part').map((e) => e.msg);
+  eq(part.length, 2, JSON.stringify(part));
+  assert(part.some((m) => m.includes('#vbad') && m.includes('data-youtube')), 'video');
+  assert(part.some((m) => m.includes('#abad') && m.includes('https://')), 'link');
+});
+</script>
+</body>
+</html>

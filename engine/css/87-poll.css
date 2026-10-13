@@ -1,0 +1,19 @@
+/* 손들기 투표 */
+.ch-poll-list { display: grid; gap: 10px; margin: 6px 0 12px; }
+.ch-poll-row { display: flex; align-items: stretch; gap: 10px; }
+:where(.slide) .ch-poll-opt { position: relative; flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; min-height: 64px; box-sizing: border-box; margin: 0; padding: 8px 22px; border: 2px solid #C3C9D1; border-radius: 16px; background: var(--ch-card); color: var(--ch-ink); font: 700 26px/1.35 var(--ch-font); text-align: left; overflow: hidden; }
+.ch-poll-bar { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--w, 0) * 100%); background: rgba(232, 84, 26, .16); transition: width .3s var(--ch-ease-out); pointer-events: none; }
+.ch-poll-t, .ch-poll-n { position: relative; }
+:where(.slide) .ch-poll-n { margin: 0; color: var(--ch-mute); font-variant-numeric: tabular-nums; }
+.ch-poll-opt.is-top { border-color: var(--accent); }
+.ch-poll-opt.is-top .ch-poll-n { color: var(--accent); }
+.ch-poll-opt.is-mine { border-color: var(--accent); background: rgba(232, 84, 26, .07); }
+:where(.slide) .ch-poll-minus { flex: none; min-width: 64px; min-height: 64px; padding: 0 12px; border-color: #AEB4BC; color: var(--ch-mute); font-size: 22px; }
+:where(.slide) .ch-poll-total { flex: 1; margin: 0; font-size: 24px; font-weight: 700; color: var(--ch-mute); }
+
+/* 실시간 학생 화면: 고르기만 한다(인원은 교사 화면에 모인다) */
+.ch-live-student .ch-poll-bar, .ch-live-student .ch-poll-n, .ch-live-student .ch-poll-minus, .ch-live-student .poll .ch-reset { display: none; }
+
+@media print {
+  .ch-poll-minus, .slide .poll .ch-reset { display: none !important; }
+}

@@ -132,7 +132,7 @@ const Audit = {
       Stepper.openAll('audit');
       // 풀기 전(분류 카드 더미가 칸 위에 있을 때)이 더 긴 부품도 있으므로 두 상태를 모두 잰다.
       // 푸는 부품이 있는 장은 알림에 어느 상태였는지 적는다.
-      const SOLVABLE = '.sort, .quiz, .ch-order, .blank';
+      const SOLVABLE = '.sort, .labeling, .quiz, .ch-order, .blank';
       const state = (slide, name) => (slide.querySelector(SOLVABLE) ? name : undefined);
       Stage.slides.forEach((slide, i) => measure(slide, i, state(slide, '부품을 풀기 전')));
       emit('audit-expand');   // 부품: 다 맞힌 뒤·이유가 나온 뒤처럼 가장 길어지는 상태로 잠깐 바꾼다
@@ -223,6 +223,14 @@ const Audit = {
     }
     for (const ol of qsa('ol.yearline', Stage.deck)) if (!ol.querySelector('li[data-year]')) part(ol, '연도(li[data-year])가 없어요');
     for (const ol of qsa('ol.order', Stage.deck)) if (ol.querySelectorAll(':scope > li').length < 2) part(ol, '항목이 2개 이상이어야 해요');
+    for (const box of qsa('.poll', Stage.deck)) if (Poll.names(box).length < 2) part(box, '보기가 2개 이상이어야 해요(data-options="가|나")');
+    for (const fig of qsa('figure.labeling', Stage.deck)) {
+      const lbs = qsa('.lb', fig);
+      if (lbs.length < 2) part(fig, '이름표(.lb)가 2개 이상이어야 해요');
+      for (const lb of lbs) if (!lb.style.getPropertyValue('--x') || !lb.style.getPropertyValue('--y')) part(lb, '자리가 없어요(style="--x:30%; --y:40%")');
+    }
+    for (const box of qsa('.video', Stage.deck)) if (!Media.parse(box.dataset.youtube)) part(box, '유튜브 주소나 영상 ID를 읽지 못했어요(data-youtube)');
+    for (const a of qsa('a.link-card', Stage.deck)) if (!/^https?:\/\//i.test(a.getAttribute('href') || '')) part(a, '주소는 http:// 또는 https://로 시작해야 해요(href)');
     // 엔진 부품 밖의 슬라이더가 최솟값이 아닌 곳에서 시작하면 단계형인지 확인하게 한다(7.2-9)
     for (const r of qsa('input[type="range"]', Stage.deck)) {
       if (r.closest('.calc, .ch-stops, .ch-yearline')) continue;
@@ -231,7 +239,7 @@ const Audit = {
       }
     }
     // 활동 = 입력에 따라 화면이 달라지는 부품. 글만 차례로 여는 .reveal·.switch는 그림·도식·계산이 함께 있을 때만 센다.
-    const ACT = '.map-reveal, .ch-yearline, .sort, .quiz, .short, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
+    const ACT = '.map-reveal, .ch-yearline, .sort, .labeling, .quiz, .short, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
     const visual = (st) => st.el.matches('[data-name]') || !!st.el.closest('.calc')
       || !!st.el.querySelector('.veil, img, svg, figure, canvas');
     const activityPages = Stage.slides.map((s, i) => (s.querySelector(ACT)

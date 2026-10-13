@@ -1,0 +1,10 @@
+/* 라벨 붙이기. 그림은 figure 폭을 꽉 채우고, 자리(.lb)는 그림의 왼쪽 위에서 잰 비율(--x, --y)에 놓인다. */
+:where(.slide) figure.labeling { display: grid; gap: 12px; margin: 0; }
+.ch-lb-art { position: relative; }
+.ch-lb-art > img, .ch-lb-art > svg { display: block; width: 100%; height: auto; }
+:where(.slide) .lb { position: absolute; left: var(--x, 50%); top: var(--y, 50%); z-index: 2; width: 0; height: 0; }
+:where(.slide) .ch-lb-dot { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; padding: 0; border: 3px dashed var(--accent); border-radius: 50%; background: rgba(255, 255, 255, .94); color: var(--accent); font: 800 22px/1 var(--ch-font); box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+.lb.is-hover > .ch-lb-dot { border-style: solid; background: var(--accent); color: #fff; }
+.lb.is-done > .ch-lb-dot { display: none; }
+/* 붙은 이름표: 자리 한가운데에 */
+:where(.slide) .lb > .ch-lb-chip { position: absolute; left: 0; top: 0; min-height: 44px; padding: 4px 14px; font-size: 22px; white-space: nowrap; transform: translate(-50%, -50%); box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }

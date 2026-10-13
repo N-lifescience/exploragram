@@ -1,7 +1,7 @@
-/*! class-html engine v1.3.0 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.4.0 | MIT | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '1.3.0';
+const VERSION = '1.4.0';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
 // 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 ClassHTML.
@@ -2241,7 +2241,7 @@ const Audit = {
       Stepper.openAll('audit');
       // 풀기 전(분류 카드 더미가 칸 위에 있을 때)이 더 긴 부품도 있으므로 두 상태를 모두 잰다.
       // 푸는 부품이 있는 장은 알림에 어느 상태였는지 적는다.
-      const SOLVABLE = '.sort, .quiz, .ch-order, .blank';
+      const SOLVABLE = '.sort, .labeling, .quiz, .ch-order, .blank';
       const state = (slide, name) => (slide.querySelector(SOLVABLE) ? name : undefined);
       Stage.slides.forEach((slide, i) => measure(slide, i, state(slide, '부품을 풀기 전')));
       emit('audit-expand');   // 부품: 다 맞힌 뒤·이유가 나온 뒤처럼 가장 길어지는 상태로 잠깐 바꾼다
@@ -2332,6 +2332,14 @@ const Audit = {
     }
     for (const ol of qsa('ol.yearline', Stage.deck)) if (!ol.querySelector('li[data-year]')) part(ol, '연도(li[data-year])가 없어요');
     for (const ol of qsa('ol.order', Stage.deck)) if (ol.querySelectorAll(':scope > li').length < 2) part(ol, '항목이 2개 이상이어야 해요');
+    for (const box of qsa('.poll', Stage.deck)) if (Poll.names(box).length < 2) part(box, '보기가 2개 이상이어야 해요(data-options="가|나")');
+    for (const fig of qsa('figure.labeling', Stage.deck)) {
+      const lbs = qsa('.lb', fig);
+      if (lbs.length < 2) part(fig, '이름표(.lb)가 2개 이상이어야 해요');
+      for (const lb of lbs) if (!lb.style.getPropertyValue('--x') || !lb.style.getPropertyValue('--y')) part(lb, '자리가 없어요(style="--x:30%; --y:40%")');
+    }
+    for (const box of qsa('.video', Stage.deck)) if (!Media.parse(box.dataset.youtube)) part(box, '유튜브 주소나 영상 ID를 읽지 못했어요(data-youtube)');
+    for (const a of qsa('a.link-card', Stage.deck)) if (!/^https?:\/\//i.test(a.getAttribute('href') || '')) part(a, '주소는 http:// 또는 https://로 시작해야 해요(href)');
     // 엔진 부품 밖의 슬라이더가 최솟값이 아닌 곳에서 시작하면 단계형인지 확인하게 한다(7.2-9)
     for (const r of qsa('input[type="range"]', Stage.deck)) {
       if (r.closest('.calc, .ch-stops, .ch-yearline')) continue;
@@ -2340,7 +2348,7 @@ const Audit = {
       }
     }
     // 활동 = 입력에 따라 화면이 달라지는 부품. 글만 차례로 여는 .reveal·.switch는 그림·도식·계산이 함께 있을 때만 센다.
-    const ACT = '.map-reveal, .ch-yearline, .sort, .quiz, .short, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
+    const ACT = '.map-reveal, .ch-yearline, .sort, .labeling, .quiz, .short, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
     const visual = (st) => st.el.matches('[data-name]') || !!st.el.closest('.calc')
       || !!st.el.querySelector('.veil, img, svg, figure, canvas');
     const activityPages = Stage.slides.map((s, i) => (s.querySelector(ACT)
@@ -2422,6 +2430,9 @@ const Parts = {
     Score.init();
     Checklist.init();
     Hotspots.init();
+    Poll.init();
+    Labeling.init();
+    Media.init();
     Stepper.sort();   // 모든 단계 막대를 만든 뒤 문서 순서로 정렬하고 0단계로 둔다(계산 상자는 ch-stepper 이벤트로 다시 계산)
   },
 };
@@ -5881,6 +5892,15 @@ function loadScript(src) {
   });
 }
 
+// QR 그림(<img>). 처음 쓸 때 QR 라이브러리를 불러온다(인터넷이 없으면 reject).
+async function qrImage(url) {
+  if (!window.qrcode) await loadScript(LIVE_QR_JS);
+  const qr = window.qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  return h('img', { src: qr.createDataURL(4, 2), alt: `QR 코드: ${url}` });
+}
+
 // 전송: open(채널 이름, 받기(event, payload), 듣기) → { send(event, payload), close() }. 연결하지 못하면 reject.
 // 듣지 않는 채널은 구독하지 않는다(학생 → 교사). 그래서 학생은 다른 학생의 메시지를 받지 않는다.
 const LocalLink = {
@@ -5995,10 +6015,12 @@ const Live = {
   keyOf(el, i) { return el.id || el.getAttribute('name') || `r${this.ranges(i).indexOf(el)}`; },
   // ponytail: 한 장에 같은 name이 둘이면(계산 상자 둘) 앞의 것으로만 모인다. 따로 모으려면 id를 붙인다.
   rangeOf(i, key) { return this.ranges(i).find((el) => this.keyOf(el, i) === key) || null; },
-  // 장 안의 퀴즈·단답: 키는 id, 없으면 장 안 순서(q0, s0…)
+  // 장 안의 퀴즈·투표·단답: 키는 id, 없으면 장 안 순서(q0, p0, s0…)
   quizzes(i) { return Quiz.list.filter((q) => q.slide === Stage.slides[i]); },
+  polls(i) { return Poll.list.filter((q) => q.slide === Stage.slides[i]); },
   shorts(i) { return Short.list.filter((q) => q.slide === Stage.slides[i]); },
-  partKey(item, i, kind) { return item.box.id || `${kind}${(kind === 'q' ? this.quizzes(i) : this.shorts(i)).indexOf(item)}`; },
+  partsOf(i, kind) { return kind === 'q' ? this.quizzes(i) : kind === 'p' ? this.polls(i) : this.shorts(i); },
+  partKey(item, i, kind) { return item.box.id || `${kind}${this.partsOf(i, kind).indexOf(item)}`; },
   // 학생 보기에 쓸 물음: 상자 안 첫 글, 없으면 바로 앞 문단, 그것도 없으면 장 제목
   askOf(box) {
     const prev = box.previousElementSibling;
@@ -6006,7 +6028,7 @@ const Live = {
     const slide = box.closest('section.slide');
     return ((el && (el.innerText || el.textContent)) || (slide && slide.dataset.title) || '').replace(/\s+/g, ' ').trim();   // innerText: <br> 자리를 띄어 쓴다
   },
-  partOf(i, key, kind) { return (kind === 'q' ? this.quizzes(i) : this.shorts(i)).find((it) => this.partKey(it, i, kind) === key) || null; },
+  partOf(i, key, kind) { return this.partsOf(i, kind).find((it) => this.partKey(it, i, kind) === key) || null; },
 
   // ---- 교사 ----
   async startTeacher() {
@@ -6128,12 +6150,14 @@ const Live = {
     }
     if (event === 'pick' || event === 'text') {
       const kind = event === 'pick' ? 'q' : 's';
-      const item = this.partOf(p.slide, p.key, kind);
+      const poll = kind === 'q' && !this.partOf(p.slide, p.key, 'q') ? this.partOf(p.slide, p.key, 'p') : null;   // 투표도 pick으로 온다(한 학생 한 표)
+      const item = poll || this.partOf(p.slide, p.key, kind);
       if (item) {
         const key = `${p.slide}|${p.key}`;
         const store = kind === 'q' ? this.picks : this.texts;
         if (!store.has(key)) store.set(key, new Map());
-        if (kind === 'q') store.get(key).set(p.sid, p.c.filter((c) => c < item.opts.length));
+        if (poll) store.get(key).set(p.sid, p.c.filter((c) => c < poll.names.length).slice(0, 1));
+        else if (kind === 'q') store.get(key).set(p.sid, p.c.filter((c) => c < item.opts.length));
         else {
           const old = store.get(key).get(p.sid);
           if (!old || old.t !== p.t) this.hidden.delete(`${key}|${p.sid}`);   // 고쳐 보낸 답은 다시 보인다
@@ -6220,12 +6244,9 @@ const Live = {
   async drawQr(url) {
     const code = this.code;
     try {
-      if (!window.qrcode) await loadScript(LIVE_QR_JS);
+      const img = await qrImage(url);
       if (this.code !== code) return;   // 불러오는 사이에 끝냈거나 새 코드가 생겼다
-      const qr = window.qrcode(0, 'M');
-      qr.addData(url);
-      qr.make();
-      this.ui.qr.replaceChildren(h('img', { src: qr.createDataURL(4, 2), alt: `QR 코드: ${url}` }));
+      this.ui.qr.replaceChildren(img);
     } catch (err) {
       if (this.code === code) this.ui.qr.replaceChildren(h('small', { text: url }));   // QR을 못 그리면 주소라도
     }
@@ -6295,14 +6316,14 @@ const Live = {
         h('div', { class: 'ch-live-bins' }, bars),
         h('span', { class: 'ch-live-n', text: `${vals.length}명` }));
     });
-    rows.push(...this.quizzes(i).map((item) => this.quizRow(item, i)), ...this.shorts(i).map((item) => this.shortRow(item, i)));
+    rows.push(...this.quizzes(i).map((item) => this.quizRow(item, i)), ...this.polls(i).map((item) => this.pollRow(item, i)), ...this.shorts(i).map((item) => this.shortRow(item, i)));
     const slider = this.ranges(i).length > 0;
     const head = h('div', { class: 'ch-live-dhead' },
       h('b', { text: '학생 응답' }),
       h('span', { text: this.peek ? '학생 값을 칠판에 띄우는 중' : slider ? '막대를 누르면 그 값을 칠판 익스플로라그램에 띄워요' : '이름 없이 모아요' }),
       this.peek ? h('button', { type: 'button', class: 'ch-live-back', text: '내 값으로', onclick: () => this.unpeek() }) : null,
       h('button', { type: 'button', class: 'ch-live-x', text: '×', 'aria-label': '학생 보기 닫기', onclick: () => this.toggleDist(false) }));
-    const empty = h('p', { class: 'ch-live-empty', text: '이 장에는 학생이 답하는 활동(슬라이더·퀴즈·단답)이 없어요' });
+    const empty = h('p', { class: 'ch-live-empty', text: '이 장에는 학생이 답하는 활동(슬라이더, 퀴즈, 투표, 단답)이 없어요' });
     this.dist.replaceChildren(head, ...(rows.length ? rows : [empty]));
   },
 
@@ -6324,6 +6345,23 @@ const Live = {
           h('i', { 'aria-hidden': 'true' }),
           h('em', { text: `${n[k]}명` }));
       })));
+  },
+
+  // 투표: 보기마다 고른 학생 수. 「칠판에 넣기」를 누르면 그 인원이 칠판의 투표에 들어간다(교사가 보일 때를 정한다).
+  pollRow(item, i) {
+    const key = this.partKey(item, i, 'p');
+    const all = [...(this.picks.get(`${i}|${key}`) || new Map()).values()];
+    const n = item.names.map((_, k) => all.filter((c) => c.includes(k)).length);
+    const top = Math.max(1, ...n);
+    return h('div', { class: 'ch-live-row ch-live-quiz ch-live-poll', 'data-key': key },
+      h('span', { class: 'ch-live-name', text: this.askOf(item.box) || '투표' }),
+      h('span', { class: 'ch-live-n', text: `${all.length}명` }),
+      h('ol', { class: 'ch-live-opts' }, item.names.map((name, k) => h('li', { style: `--w:${(n[k] / top).toFixed(3)}` },
+        h('b', { text: String(k + 1) }),
+        h('span', { class: 'ch-live-opt-t', text: name }),
+        h('i', { 'aria-hidden': 'true' }),
+        h('em', { text: `${n[k]}명` })))),
+      h('button', { type: 'button', class: 'ch-live-back ch-live-put', text: '칠판에 넣기', onclick: (e) => { Poll.set(item, n); e.currentTarget.blur(); } }));
   },
 
   // 단답: 이름 없이 카드로. 교사는 칠판에 띄우기 곤란한 답을 숨길 수 있다(학생 기기에는 아무 변화 없음).
@@ -6413,6 +6451,7 @@ const Live = {
     this.role = 'student';
     this.sid = LiveCore.sid();
     document.documentElement.classList.add('ch-live-student');
+    emit('live-role');   // 투표는 학생 화면에서 '세기'가 아니라 '고르기'가 된다
     Nav.override = { next: () => this.move(1), prev: () => this.move(-1), close() {} };
     Nav.revealTo = () => false;   // 정답 상자 ✓ 등이 교사보다 먼저 단계를 열지 않게
     // 차례 장의 단추·ClassHTML.go도 교사가 연 장으로만
@@ -6436,6 +6475,7 @@ const Live = {
     Stage.deck.addEventListener('change', (e) => this.onInput(e, true));
     on('quiz-answer', (item, c) => this.sendPart('pick', item, 'q', { c }));
     on('short-answer', (item, t) => this.sendPart('text', item, 's', { t }));
+    on('poll-vote', (item, k) => this.sendPart('pick', item, 'p', { c: [k] }));
     this.buildJoin(code);
     this.bar = h('div', { class: 'ch-live-bar ch-live-ui', 'data-no-ink': '', role: 'status', hidden: true });
     document.body.append(this.bar);
@@ -6630,6 +6670,374 @@ const Live = {
   },
 };
 
+/* ---- 69-poll.js ---- */
+// 손들기 투표: 의견을 모은다(정답이 없다). 교사는 손을 세며 보기를 누르고(한 번에 1명) −1로 고친다.
+// 실시간 수업이면 학생은 자기 기기에서 하나를 고르고(바꿔도 된다), 교사 「학생 보기」에 보기별 인원이 모인다.
+// 작성 모양: <div class="poll" data-options="찬성|반대|잘 모르겠다"><p>물음</p></div>
+const POLL_MAX = 6;
+
+const Poll = {
+  list: [],
+
+  // data-options → 보기 이름들(빈 것은 버리고 POLL_MAX개까지)
+  names(box) { return String(box.dataset.options || '').split('|').map((s) => s.trim()).filter(Boolean).slice(0, POLL_MAX); },
+
+  init() {
+    this.list = [];
+    for (const box of qsa('.poll', Stage.deck)) {
+      const names = this.names(box);
+      if (names.length < 2) continue;
+      const total = h('p', { class: 'ch-poll-total', 'aria-live': 'polite' });
+      const item = { box, names, n: names.map(() => 0), rows: [], total, mine: -1, slide: box.closest('section.slide') };
+      const list = h('div', { class: 'ch-poll-list' }, names.map((name, k) => {
+        const num = h('output', { class: 'ch-poll-n' });
+        const add = h('button', { type: 'button', class: 'ch-poll-opt', onclick: (e) => { this.tap(item, k); e.currentTarget.blur(); } },
+          h('i', { class: 'ch-poll-bar', 'aria-hidden': 'true' }), h('span', { class: 'ch-poll-t', text: name }), num);
+        const minus = h('button', { type: 'button', class: 'ch-poll-minus', 'aria-label': `${name} 1명 빼기`, text: '−1',
+          onclick: (e) => { this.add(item, k, -1); e.currentTarget.blur(); } });
+        item.rows.push({ add, num });
+        return h('div', { class: 'ch-poll-row' }, add, minus);
+      }));
+      box.append(list, h('div', { class: 'ch-row' }, total,
+        h('button', { type: 'button', class: 'ch-reset', text: '다시', onclick: (e) => { this.reset(item); e.currentTarget.blur(); } })));
+      this.list.push(item);
+      this.render(item);
+    }
+    on('live-role', () => { for (const item of this.list) this.render(item); });
+  },
+
+  // 교사 화면: 누를 때마다 1명. 실시간 학생 화면: 하나를 고른다.
+  tap(item, k) {
+    if (Live.role !== 'student') { this.add(item, k, 1); return; }
+    item.mine = k;
+    this.render(item);
+    emit('poll-vote', item, k);
+  },
+
+  add(item, k, d) { item.n[k] = clamp(item.n[k] + d, 0, 999); this.render(item); },
+
+  // 실시간 「학생 보기」의 인원을 칠판 투표에 넣는다
+  set(item, counts) { item.n = item.names.map((_, k) => clamp(Math.round(Number(counts[k]) || 0), 0, 999)); this.render(item); },
+
+  reset(item) { item.n = item.names.map(() => 0); item.mine = -1; this.render(item); },
+
+  render(item) {
+    const student = Live.role === 'student';
+    const top = Math.max(...item.n);
+    item.rows.forEach((r, k) => {
+      r.num.textContent = `${item.n[k]}명`;
+      r.add.style.setProperty('--w', top ? (item.n[k] / top).toFixed(3) : '0');
+      r.add.classList.toggle('is-top', !student && top > 0 && item.n[k] === top);
+      r.add.classList.toggle('is-mine', student && item.mine === k);
+      if (student) r.add.setAttribute('aria-pressed', String(item.mine === k));
+      else r.add.removeAttribute('aria-pressed');
+    });
+    if (student) item.total.textContent = item.mine >= 0 ? '골랐어요. 바꿔도 돼요.' : '하나를 골라요.';
+    else item.total.textContent = `모두 ${item.n.reduce((a, b) => a + b, 0)}명`;
+  },
+};
+
+/* ---- 70-labeling.js ---- */
+// 라벨 붙이기: 그림 위 번호 자리에 이름표를 끌어다 놓거나, 이름표를 누른 뒤 자리를 누른다.
+// 맞으면 그 자리에 붙고 이유, 틀리면 흔들림과 실마리.
+// 작성 모양: <figure class="labeling" style="width:560px"><img src="…" alt="…">
+//              <span class="lb" style="--x:30%; --y:40%" data-why="맞을 때 이유" data-hint="틀릴 때 실마리">핵</span> …</figure>
+// 자리(--x, --y)는 그림의 왼쪽 위에서 잰 비율이다. 펜을 든 채로 끌어도 이름표가 움직인다(data-no-ink).
+const LABEL_SNAP = 80;   // 자리 가운데에서 이 거리(무대 px) 안에 놓으면 그 자리로 본다
+
+const Labeling = {
+  list: [],
+
+  init() {
+    this.list = [];
+    qsa('figure.labeling', Stage.deck).forEach((fig, n) => {
+      const els = qsa(':scope > .lb', fig);
+      if (els.length < 2) return;
+      const slide = fig.closest('section.slide');
+      // 그림과 자리를 한 상자에 넣어 자리 비율이 그림 크기를 따르게 한다
+      const cap = fig.querySelector(':scope > figcaption');
+      const art = h('div', { class: 'ch-lb-art' });
+      art.append(...Array.from(fig.childNodes).filter((x) => x !== cap));
+      fig.prepend(art);
+      const pool = h('div', { class: 'ch-pool ch-lb-pool' });
+      const fb = h('p', { class: 'ch-fb', 'aria-live': 'polite' });
+      const item = { fig, slide, pool, fb, sel: null, spots: [] };
+      els.forEach((el, i) => {
+        const spot = { el, done: false };
+        spot.chip = h('span', { class: 'ch-card ch-lb-chip', 'data-no-ink': '', role: 'button', tabindex: '0' }, ...Array.from(el.childNodes));
+        spot.key = spot.chip.textContent.replace(/\s+/g, ' ').trim();
+        spot.dot = h('button', { type: 'button', class: 'ch-lb-dot', 'aria-label': `자리 ${i + 1}`, text: String(i + 1),
+          onclick: (e) => { if (item.sel) this.drop(item, item.sel, spot); e.currentTarget.blur(); } });
+        el.replaceChildren(spot.dot);
+        this.bindDrag(item, spot);
+        spot.chip.addEventListener('keydown', (e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          e.stopPropagation();   // 장 넘기기로 가지 않게
+          this.select(item, spot);
+        });
+        item.spots.push(spot);
+      });
+      item.order = shuffled(item.spots, `${slide ? slide.dataset.key : ''}#label${n}`);
+      // 섞었는데도 번호 순서와 같으면 답이 드러나므로 한 칸 돌린다
+      if (item.order.every((s, i) => s === item.spots[i])) item.order.push(item.order.shift());
+      const row = h('div', { class: 'ch-row' }, fb,
+        h('button', { type: 'button', class: 'ch-reset', text: '다시', onclick: (e) => { this.reset(item); e.currentTarget.blur(); } }));
+      art.after(pool, row);
+      this.reset(item);
+      this.list.push(item);
+    });
+    on('print-before', () => this.open());
+    on('print-after', () => this.close());
+    // 점검: 다 붙인 상태(이름표가 그림 위에, 가장 긴 이유)로 재고 되돌린다
+    on('audit-expand', () => {
+      this.open();
+      for (const item of this.list) {
+        item.fbSnap = [item.fb.textContent, item.fb.className];
+        const why = item.spots.map((s) => s.el.dataset.why || '').reduce((a, b) => (b.length > a.length ? b : a), '');
+        item.fb.textContent = `모두 맞혔다! ${why}`;
+      }
+    });
+    on('audit-restore', () => {
+      for (const item of this.list) if (item.fbSnap) [item.fb.textContent, item.fb.className] = item.fbSnap;
+      this.close();
+    });
+  },
+
+  reset(item) {
+    item.sel = null;
+    for (const s of item.spots) { s.done = false; s.el.classList.remove('is-done', 'is-hover'); }
+    for (const s of item.order) {
+      s.chip.classList.remove('is-done', 'is-sel', 'is-drag', 'ch-shake');
+      s.chip.style.transform = '';
+      item.pool.append(s.chip);
+    }
+    item.pool.hidden = false;
+    item.fb.textContent = '';
+    item.fb.className = 'ch-fb';
+  },
+
+  select(item, from) {
+    if (from.chip.classList.contains('is-done')) return;
+    const on = !from.chip.classList.contains('is-sel');
+    for (const s of item.spots) s.chip.classList.remove('is-sel');
+    from.chip.classList.toggle('is-sel', on);
+    item.sel = on ? from : null;
+  },
+
+  // from의 이름표를 to 자리에 놓는다. 이름이 같은 자리가 둘이면 어느 쪽에 놓아도 맞다.
+  drop(item, from, to) {
+    from.chip.classList.remove('is-sel', 'is-drag');
+    from.chip.style.transform = '';
+    item.sel = null;
+    if (to.done) return;
+    if (from.key === to.key) {
+      to.done = true;
+      to.el.classList.add('is-done');
+      to.el.append(from.chip);
+      from.chip.classList.add('is-done');
+      item.fb.textContent = to.el.dataset.why || '맞다.';
+      item.fb.className = 'ch-fb is-ok';
+      if (item.spots.every((s) => s.done)) this.finish(item, to);
+    } else {
+      item.fb.textContent = `다시 생각해 보자. ${from.el.dataset.hint || ''}`.trim();
+      item.fb.className = 'ch-fb is-bad';
+      shake(from.chip);
+    }
+  },
+
+  // 다 맞히면 같은 장에서 이 부품 뒤의 첫 단계를 연다(조금 뒤에).
+  finish(item, last) {
+    item.fb.textContent = `모두 맞혔다! ${last.el.dataset.why || ''}`.trim();
+    item.pool.hidden = true;
+    const next = item.slide && qsa('.step', item.slide).find((s) => item.fig.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING && !item.fig.contains(s));
+    if (next) setTimeout(() => Nav.revealTo(next), 600);
+  },
+
+  // 화면 좌표에서 가장 가까운 빈 자리(LABEL_SNAP 안)
+  spotAt(item, x, y) {
+    let best = null;
+    let near = LABEL_SNAP * Stage.scale;
+    for (const s of item.spots) {
+      if (s.done) continue;
+      const r = s.el.getBoundingClientRect();
+      const d = Math.hypot(x - r.left, y - r.top);
+      if (d < near) { best = s; near = d; }
+    }
+    return best;
+  },
+
+  bindDrag(item, from) {
+    const chip = from.chip;
+    let d = null;
+    chip.addEventListener('pointerdown', (e) => {
+      if (chip.classList.contains('is-done') || !e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      e.preventDefault();
+      d = { x: e.clientX, y: e.clientY, moved: false, id: e.pointerId };
+      try { chip.setPointerCapture(e.pointerId); } catch (err) { /* 합성 이벤트 */ }
+    });
+    chip.addEventListener('pointermove', (e) => {
+      if (!d || e.pointerId !== d.id) return;
+      const dx = (e.clientX - d.x) / Stage.scale;
+      const dy = (e.clientY - d.y) / Stage.scale;
+      if (!d.moved && Math.hypot(dx, dy) < DRAG_PX) return;
+      d.moved = true;
+      chip.classList.add('is-drag');
+      chip.style.transform = `translate(${dx}px, ${dy}px)`;
+      const to = this.spotAt(item, e.clientX, e.clientY);
+      for (const s of item.spots) s.el.classList.toggle('is-hover', s === to);
+    });
+    const end = (e, cancel) => {
+      if (!d || e.pointerId !== d.id) return;
+      const moved = d.moved;
+      d = null;
+      for (const s of item.spots) s.el.classList.remove('is-hover');
+      if (!moved) { chip.classList.remove('is-drag'); if (!cancel) this.select(item, from); return; }
+      const to = cancel ? null : this.spotAt(item, e.clientX, e.clientY);
+      if (to) this.drop(item, from, to);
+      else { chip.style.transform = ''; chip.classList.remove('is-drag'); }
+    };
+    chip.addEventListener('pointerup', (e) => end(e, false));
+    chip.addEventListener('pointercancel', (e) => end(e, true));
+  },
+
+  // 인쇄·점검: 이름표를 모두 제자리에 붙였다가 되돌린다.
+  open() {
+    this.snap = [];
+    for (const item of this.list) {
+      this.snap.push({ item, poolHidden: item.pool.hidden,
+        places: item.spots.map((s) => [s, s.chip.parentNode, s.chip.nextSibling, s.chip.className, s.done]) });
+      for (const s of item.spots) {
+        s.el.append(s.chip);
+        s.el.classList.add('is-done');
+        s.chip.classList.add('is-done');
+      }
+      item.pool.hidden = true;
+    }
+  },
+
+  close() {
+    for (const { item, places, poolHidden } of (this.snap || []).reverse()) {
+      for (const [s, parent, next, cls, done] of places.slice().reverse()) {
+        parent.insertBefore(s.chip, next && next.parentNode === parent ? next : null);
+        s.chip.className = cls;
+        s.el.classList.toggle('is-done', done);
+      }
+      item.pool.hidden = poolHidden;
+    }
+    this.snap = null;
+  },
+};
+
+/* ---- 71-media.js ---- */
+// 영상 카드와 링크 카드. 누르기 전에는 바깥 서버에 아무 요청도 보내지 않는다.
+// 영상: <div class="video" data-youtube="주소 또는 영상 ID" data-title="제목" data-start="1:20" data-end="3:05"></div>
+// 링크: <a class="link-card" href="https://…">제목<small>설명</small></a>
+// 둘 다 data-qr을 붙이면 학생이 자기 기기로 찍을 QR을 그린다(그 장을 처음 열 때, 인터넷이 있어야 한다).
+const Media = {
+  videos: [],
+
+  // 'https://youtu.be/ID?t=80', '…/watch?v=ID', '…/embed/ID', '…/shorts/ID', 'ID' → { id, start }. 못 읽으면 null.
+  parse(raw) {
+    const s = String(raw || '').trim();
+    if (/^[\w-]{11}$/.test(s)) return { id: s, start: 0 };
+    const m = /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})(?![\w-])/.exec(s);
+    if (!m) return null;
+    const t = /[?&#](?:t|start)=([\dhms:]+)/.exec(s);
+    return { id: m[1], start: t ? this.sec(t[1]) : 0 };
+  },
+
+  // '80', '1:20', '1:02:03', '1m20s' → 초. 못 읽으면 0.
+  sec(v) {
+    const s = String(v == null ? '' : v).trim();
+    if (/^\d+(:\d{1,2}){0,2}$/.test(s)) return s.split(':').reduce((a, x) => a * 60 + Number(x), 0);
+    const m = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/.exec(s);
+    return m && s ? Number(m[1] || 0) * 3600 + Number(m[2] || 0) * 60 + Number(m[3] || 0) : 0;
+  },
+
+  // 80 → '1:20'
+  clock(sec) { return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; },
+
+  // 끼워 넣은 영상 주소. 쿠키 없는 주소를 쓴다.
+  src(item) {
+    const q = [`autoplay=1`, `rel=0`, `playsinline=1`];
+    if (item.start) q.push(`start=${item.start}`);
+    if (item.end > item.start) q.push(`end=${item.end}`);
+    return `https://www.youtube-nocookie.com/embed/${item.id}?${q.join('&')}`;
+  },
+
+  // 더블클릭으로 연 파일(file://)에서는 유튜브가 끼워 넣은 영상을 막는다(오류 153). 그때는 새 탭으로 연다.
+  embedOk() { return /^https?:$/.test(location.protocol); },
+
+  init() {
+    this.videos = [];
+    for (const box of qsa('.video[data-youtube]', Stage.deck)) {
+      const v = this.parse(box.dataset.youtube);
+      if (!v) continue;
+      const slide = box.closest('section.slide');
+      const start = box.dataset.start != null ? this.sec(box.dataset.start) : v.start;
+      const end = this.sec(box.dataset.end);
+      const title = box.dataset.title || '영상';
+      const range = end > start ? `${this.clock(start)}~${this.clock(end)}` : start ? `${this.clock(start)}부터` : '';
+      const item = { box, slide, id: v.id, start, end, title, frame: null,
+        watch: `https://www.youtube.com/watch?v=${v.id}${start ? `&t=${start}s` : ''}` };
+      item.note = h('p', { class: 'ch-video-note', 'aria-live': 'polite' });
+      item.play = h('button', { type: 'button', class: 'ch-video-play', onclick: (e) => { this.play(item); e.currentTarget.blur(); } },
+        h('i', { class: 'ch-video-tri', 'aria-hidden': 'true' }),
+        h('span', { class: 'ch-video-title', text: title }),
+        h('small', { text: ['유튜브', range].filter(Boolean).join(' · ') }),
+        h('small', { class: 'ch-video-url', text: `youtu.be/${v.id}` }));
+      box.setAttribute('data-no-ink', '');   // 펜을 든 채로도 영상 단추가 눌리게
+      box.replaceChildren(item.play, item.note);
+      if (box.hasAttribute('data-qr')) this.qrFor(box, item.watch, slide);
+      this.videos.push(item);
+    }
+    for (const a of qsa('a.link-card[href]', Stage.deck)) {
+      if (!/^https?:\/\//i.test(a.getAttribute('href'))) continue;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      let host = '';
+      try { host = new URL(a.href).host.replace(/^www\./, ''); } catch (err) { /* 주소 모양이 아니면 비워 둔다 */ }
+      const body = h('span', { class: 'ch-link-body' }, ...Array.from(a.childNodes), h('em', { class: 'ch-link-host', text: host }));
+      a.replaceChildren(h('i', { class: 'ch-link-ico', 'aria-hidden': 'true', text: '↗' }), body);
+      if (a.hasAttribute('data-qr')) this.qrFor(a, a.href, a.closest('section.slide'));
+    }
+    on('show', () => { for (const item of this.videos) this.close(item); });   // 장을 넘기면 영상을 끈다
+  },
+
+  play(item) {
+    if (item.frame) return;
+    if (!this.embedOk()) {
+      window.open(item.watch, '_blank', 'noopener');
+      item.note.textContent = '새 탭에서 열었어요.';
+      return;
+    }
+    item.frame = h('iframe', { class: 'ch-video-frame', src: this.src(item), title: item.title, allowfullscreen: true,
+      allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen', referrerpolicy: 'strict-origin-when-cross-origin' });
+    item.box.append(item.frame);
+  },
+
+  close(item) {
+    item.note.textContent = '';
+    if (!item.frame) return;
+    item.frame.remove();
+    item.frame = null;
+  },
+
+  // QR은 그 장을 처음 열 때 그린다. 못 그리면(인터넷 없음) 주소를 글로 보인다.
+  qrFor(el, url, slide) {
+    const holder = h('span', { class: 'ch-qr' });
+    el.append(holder);
+    let asked = false;
+    on('show', (shown) => {
+      if (asked || shown !== slide) return;
+      asked = true;
+      qrImage(url).then((img) => holder.replaceChildren(img),
+        () => holder.replaceChildren(h('small', { text: url.replace(/^https?:\/\//, '') })));
+    });
+  },
+};
+
 /* ---- 99-boot.js ---- */
 // 시작 순서. 엔진이 두 번 포함돼도 한 번만 실행한다.
 let readyResolve;
@@ -6666,7 +7074,7 @@ function boot() {
   ClassHTML.next = () => Nav.next();
   ClassHTML.prev = () => Nav.prev();
   ClassHTML.audit = () => Audit.run();
-  ClassHTML._internal = { on, emit, Stage, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Anim, MathTex, Particles, Editor, Live, LiveCore };
+  ClassHTML._internal = { on, emit, Stage, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Editor, Live, LiveCore };
   start().then(() => readyResolve(ClassHTML), (err) => {
     console.error('[class-html]', err);
     readyResolve(ClassHTML);

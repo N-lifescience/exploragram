@@ -51,7 +51,7 @@ node tools/shots.mjs examples/m2-parts.html /tmp/shots --open
 
 ## M2 다음에 더한 것 (같은 날)
 
-- 부품: 빈칸, 교실 도구(타이머·뽑기·점수판·체크리스트·핫스팟), 모션 어휘(`data-anim`), 수식(KaTeX), 장 표지·목차 슬라이드, 입자 상자(`figure.particles`). 설계서 6.1 ★ 공통 부품 가운데 남은 것은 라벨 붙이기, 투표, 영상·링크 카드(QR).
+- 부품: 빈칸, 교실 도구(타이머·뽑기·점수판·체크리스트·핫스팟), 모션 어휘(`data-anim`), 수식(KaTeX), 장 표지·목차 슬라이드, 입자 상자(`figure.particles`). 설계서 6.1 ★ 공통 부품 가운데 남았던 라벨 붙이기(`figure.labeling`), 투표(`.poll`), 영상·링크 카드(`.video`, `a.link-card`, QR)는 v1.4.0(2026-10-13)에 넣었다.
 - 스킬 지침(M4 일부): `skills/class-html/`(SKILL.md, references, 교과별 7개, template, extract_pptx.py, bundle.py), 합본 지침 `guide/class-html-guide.md`(빌드 때 생성), README, 지침 예시 점검 `tests/run-docs.mjs`.
 - 연수 HTML 공개본 `examples/training.html`(21장 연수 진행용; 이전 23장 이야기 테마는 `examples/intro-story.html`, 레퍼런스 익스플로라그램(Exploragram) 3개, 실습 구간 타이머). 2026-10-08 다시 만듦.
 

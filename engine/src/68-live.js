@@ -119,6 +119,15 @@ function loadScript(src) {
   });
 }
 
+// QR 그림(<img>). 처음 쓸 때 QR 라이브러리를 불러온다(인터넷이 없으면 reject).
+async function qrImage(url) {
+  if (!window.qrcode) await loadScript(LIVE_QR_JS);
+  const qr = window.qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  return h('img', { src: qr.createDataURL(4, 2), alt: `QR 코드: ${url}` });
+}
+
 // 전송: open(채널 이름, 받기(event, payload), 듣기) → { send(event, payload), close() }. 연결하지 못하면 reject.
 // 듣지 않는 채널은 구독하지 않는다(학생 → 교사). 그래서 학생은 다른 학생의 메시지를 받지 않는다.
 const LocalLink = {
@@ -233,10 +242,12 @@ const Live = {
   keyOf(el, i) { return el.id || el.getAttribute('name') || `r${this.ranges(i).indexOf(el)}`; },
   // ponytail: 한 장에 같은 name이 둘이면(계산 상자 둘) 앞의 것으로만 모인다. 따로 모으려면 id를 붙인다.
   rangeOf(i, key) { return this.ranges(i).find((el) => this.keyOf(el, i) === key) || null; },
-  // 장 안의 퀴즈·단답: 키는 id, 없으면 장 안 순서(q0, s0…)
+  // 장 안의 퀴즈·투표·단답: 키는 id, 없으면 장 안 순서(q0, p0, s0…)
   quizzes(i) { return Quiz.list.filter((q) => q.slide === Stage.slides[i]); },
+  polls(i) { return Poll.list.filter((q) => q.slide === Stage.slides[i]); },
   shorts(i) { return Short.list.filter((q) => q.slide === Stage.slides[i]); },
-  partKey(item, i, kind) { return item.box.id || `${kind}${(kind === 'q' ? this.quizzes(i) : this.shorts(i)).indexOf(item)}`; },
+  partsOf(i, kind) { return kind === 'q' ? this.quizzes(i) : kind === 'p' ? this.polls(i) : this.shorts(i); },
+  partKey(item, i, kind) { return item.box.id || `${kind}${this.partsOf(i, kind).indexOf(item)}`; },
   // 학생 보기에 쓸 물음: 상자 안 첫 글, 없으면 바로 앞 문단, 그것도 없으면 장 제목
   askOf(box) {
     const prev = box.previousElementSibling;
@@ -244,7 +255,7 @@ const Live = {
     const slide = box.closest('section.slide');
     return ((el && (el.innerText || el.textContent)) || (slide && slide.dataset.title) || '').replace(/\s+/g, ' ').trim();   // innerText: <br> 자리를 띄어 쓴다
   },
-  partOf(i, key, kind) { return (kind === 'q' ? this.quizzes(i) : this.shorts(i)).find((it) => this.partKey(it, i, kind) === key) || null; },
+  partOf(i, key, kind) { return this.partsOf(i, kind).find((it) => this.partKey(it, i, kind) === key) || null; },
 
   // ---- 교사 ----
   async startTeacher() {
@@ -366,12 +377,14 @@ const Live = {
     }
     if (event === 'pick' || event === 'text') {
       const kind = event === 'pick' ? 'q' : 's';
-      const item = this.partOf(p.slide, p.key, kind);
+      const poll = kind === 'q' && !this.partOf(p.slide, p.key, 'q') ? this.partOf(p.slide, p.key, 'p') : null;   // 투표도 pick으로 온다(한 학생 한 표)
+      const item = poll || this.partOf(p.slide, p.key, kind);
       if (item) {
         const key = `${p.slide}|${p.key}`;
         const store = kind === 'q' ? this.picks : this.texts;
         if (!store.has(key)) store.set(key, new Map());
-        if (kind === 'q') store.get(key).set(p.sid, p.c.filter((c) => c < item.opts.length));
+        if (poll) store.get(key).set(p.sid, p.c.filter((c) => c < poll.names.length).slice(0, 1));
+        else if (kind === 'q') store.get(key).set(p.sid, p.c.filter((c) => c < item.opts.length));
         else {
           const old = store.get(key).get(p.sid);
           if (!old || old.t !== p.t) this.hidden.delete(`${key}|${p.sid}`);   // 고쳐 보낸 답은 다시 보인다
@@ -458,12 +471,9 @@ const Live = {
   async drawQr(url) {
     const code = this.code;
     try {
-      if (!window.qrcode) await loadScript(LIVE_QR_JS);
+      const img = await qrImage(url);
       if (this.code !== code) return;   // 불러오는 사이에 끝냈거나 새 코드가 생겼다
-      const qr = window.qrcode(0, 'M');
-      qr.addData(url);
-      qr.make();
-      this.ui.qr.replaceChildren(h('img', { src: qr.createDataURL(4, 2), alt: `QR 코드: ${url}` }));
+      this.ui.qr.replaceChildren(img);
     } catch (err) {
       if (this.code === code) this.ui.qr.replaceChildren(h('small', { text: url }));   // QR을 못 그리면 주소라도
     }
@@ -533,14 +543,14 @@ const Live = {
         h('div', { class: 'ch-live-bins' }, bars),
         h('span', { class: 'ch-live-n', text: `${vals.length}명` }));
     });
-    rows.push(...this.quizzes(i).map((item) => this.quizRow(item, i)), ...this.shorts(i).map((item) => this.shortRow(item, i)));
+    rows.push(...this.quizzes(i).map((item) => this.quizRow(item, i)), ...this.polls(i).map((item) => this.pollRow(item, i)), ...this.shorts(i).map((item) => this.shortRow(item, i)));
     const slider = this.ranges(i).length > 0;
     const head = h('div', { class: 'ch-live-dhead' },
       h('b', { text: '학생 응답' }),
       h('span', { text: this.peek ? '학생 값을 칠판에 띄우는 중' : slider ? '막대를 누르면 그 값을 칠판 익스플로라그램에 띄워요' : '이름 없이 모아요' }),
       this.peek ? h('button', { type: 'button', class: 'ch-live-back', text: '내 값으로', onclick: () => this.unpeek() }) : null,
       h('button', { type: 'button', class: 'ch-live-x', text: '×', 'aria-label': '학생 보기 닫기', onclick: () => this.toggleDist(false) }));
-    const empty = h('p', { class: 'ch-live-empty', text: '이 장에는 학생이 답하는 활동(슬라이더·퀴즈·단답)이 없어요' });
+    const empty = h('p', { class: 'ch-live-empty', text: '이 장에는 학생이 답하는 활동(슬라이더, 퀴즈, 투표, 단답)이 없어요' });
     this.dist.replaceChildren(head, ...(rows.length ? rows : [empty]));
   },
 
@@ -562,6 +572,23 @@ const Live = {
           h('i', { 'aria-hidden': 'true' }),
           h('em', { text: `${n[k]}명` }));
       })));
+  },
+
+  // 투표: 보기마다 고른 학생 수. 「칠판에 넣기」를 누르면 그 인원이 칠판의 투표에 들어간다(교사가 보일 때를 정한다).
+  pollRow(item, i) {
+    const key = this.partKey(item, i, 'p');
+    const all = [...(this.picks.get(`${i}|${key}`) || new Map()).values()];
+    const n = item.names.map((_, k) => all.filter((c) => c.includes(k)).length);
+    const top = Math.max(1, ...n);
+    return h('div', { class: 'ch-live-row ch-live-quiz ch-live-poll', 'data-key': key },
+      h('span', { class: 'ch-live-name', text: this.askOf(item.box) || '투표' }),
+      h('span', { class: 'ch-live-n', text: `${all.length}명` }),
+      h('ol', { class: 'ch-live-opts' }, item.names.map((name, k) => h('li', { style: `--w:${(n[k] / top).toFixed(3)}` },
+        h('b', { text: String(k + 1) }),
+        h('span', { class: 'ch-live-opt-t', text: name }),
+        h('i', { 'aria-hidden': 'true' }),
+        h('em', { text: `${n[k]}명` })))),
+      h('button', { type: 'button', class: 'ch-live-back ch-live-put', text: '칠판에 넣기', onclick: (e) => { Poll.set(item, n); e.currentTarget.blur(); } }));
   },
 
   // 단답: 이름 없이 카드로. 교사는 칠판에 띄우기 곤란한 답을 숨길 수 있다(학생 기기에는 아무 변화 없음).
@@ -651,6 +678,7 @@ const Live = {
     this.role = 'student';
     this.sid = LiveCore.sid();
     document.documentElement.classList.add('ch-live-student');
+    emit('live-role');   // 투표는 학생 화면에서 '세기'가 아니라 '고르기'가 된다
     Nav.override = { next: () => this.move(1), prev: () => this.move(-1), close() {} };
     Nav.revealTo = () => false;   // 정답 상자 ✓ 등이 교사보다 먼저 단계를 열지 않게
     // 차례 장의 단추·ClassHTML.go도 교사가 연 장으로만
@@ -674,6 +702,7 @@ const Live = {
     Stage.deck.addEventListener('change', (e) => this.onInput(e, true));
     on('quiz-answer', (item, c) => this.sendPart('pick', item, 'q', { c }));
     on('short-answer', (item, t) => this.sendPart('text', item, 's', { t }));
+    on('poll-vote', (item, k) => this.sendPart('pick', item, 'p', { c: [k] }));
     this.buildJoin(code);
     this.bar = h('div', { class: 'ch-live-bar ch-live-ui', 'data-no-ink': '', role: 'status', hidden: true });
     document.body.append(this.bar);

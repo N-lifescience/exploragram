@@ -4,7 +4,7 @@
 > **AI에게**: 이 파일 하나가 Exploragram(옛 이름 class-html) 지침 전체다. 선생님이 수업 PPT를 주면 이 지침대로 수업용 HTML을 만든다.
 > **반드시**: `<head>`에 아래 엔진 css·js 두 줄을 넣는다(지금 환경에서 안 열려도 그대로 둔다). 넘기기·툴바를 직접 짜지 않고, PPT 장을 통째로 그림으로 넣지 않는다(1절 기준 8·9).
 > 본문의 `references/…`는 이 파일의 해당 절을, `scripts/…`는 저장소 https://github.com/N-lifescience/exploragram 의 `skills/class-html/scripts/`를 가리킨다.
-> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css`·`.js` (v1.3.0)
+> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css`·`.js` (v1.4.0)
 > 레퍼런스 완성본(`references/examples/`): https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/elem-shadow.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/eth-exploragram.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/mid-linear.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/sci-diffusion.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/soc-supply-demand.html
 
 ## 차례
@@ -39,7 +39,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 - 장 하나는 `<section class="slide" id="고정-id" data-title="…">` 하나다. 무대는 1280×720이고 엔진이 화면에 맞춰 키운다.
 - 답이나 결론은 `class="step"`으로 숨긴다. → 키를 누르면 차례로 열린다.
 - 익스플로라그램 스크립트는 `</body>` 앞 `<script>` 하나에 `document.addEventListener('DOMContentLoaded', () => { … })`로 쓴다. 학생 입력을 `innerHTML`로 넣지 않는다.
-- 엔진 부품으로는 퀴즈, 분류 카드, 순서 배열, 연표, 지도 단계 공개, 입자 상자, 계산 상자와 그래프가 있다(`references/components.md`). 딱 맞으면 쓴다. 익스플로라그램은 부품에 개념을 맞추지 말고 개념에 맞춰 직접 짠다. 코드를 실행해 화면을 확인할 수 없는 환경이면 스크립트 대신 계산 상자와 CSS 변수로 익스플로라그램을 만든다(`references/exploragram.md`의 '스크립트 없이').
+- 엔진 부품으로는 퀴즈, 분류 카드, 라벨 붙이기, 순서 배열, 연표, 지도 단계 공개, 입자 상자, 계산 상자와 그래프가 있다(`references/components.md`). 딱 맞으면 쓴다. 익스플로라그램은 부품에 개념을 맞추지 말고 개념에 맞춰 직접 짠다. 코드를 실행해 화면을 확인할 수 없는 환경이면 스크립트 대신 계산 상자와 CSS 변수로 익스플로라그램을 만든다(`references/exploragram.md`의 '스크립트 없이').
 
 ### 절차
 
@@ -637,6 +637,17 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 </figure>
 ```
 
+```html
+<div class="poll" data-options="찬성|반대|잘 모르겠다">              <!-- 손들기 투표. 보기는 2~6개 -->
+  <p>급식에 채식의 날을 늘리는 데 찬성하나요?</p>
+</div>
+```
+
+- 투표는 정답이 없는 물음에 쓴다. 정답이 있는 물음은 `.quiz`를 쓴다.
+- 교사는 손 든 학생을 세면서 보기를 누른다. 누를 때마다 1명이 늘고 잘못 누르면 옆의 −1로 고친다. 「다시」는 모두 0명으로 돌린다.
+- 실시간 수업에서는 학생이 자기 기기에서 하나를 고른다(바꿀 수 있다). 인원은 교사 「학생 보기」에 모이고 교사가 「칠판에 넣기」를 누르면 칠판의 투표에 들어간다.
+- 높이: 보기 한 줄 64px, 사이 10px, 아래 줄 56px. 보기 3개면 약 290px다.
+
 ### 12. 맞춤 스크립트(익스플로라그램)
 
 ```html
@@ -673,6 +684,43 @@ document.addEventListener('DOMContentLoaded', () => {
 - 장이 보이면 움직이고 넘기면 멈춘다. 「멈추기」·「다시」 단추, 아래에 양쪽 개수. 입자는 모두 300개까지.
 - 삼투: 막을 못 지나는 입자(`data-pass="0"`, 용질)는 자기 쪽 막 구멍을 가려, 그쪽 물이 막을 지날 확률이 용질 비율만큼 줄어든다. 그래서 물은 용질이 많은 쪽으로 더 많이 모인다(교과서의 설명 모형).
 - 움직임은 모형이다. 개수의 비율이 개념과 맞는지만 지키고, '실제 분자 수'처럼 말하지 않는다.
+
+### 14. 라벨 붙이기 `figure.labeling`
+
+```html
+<figure class="labeling" style="width:560px">
+  <img src="data:…" alt="식물 세포 모식도(이름 없음)">
+  <span class="lb" style="--x:28%; --y:38%" data-why="핵에는 유전 물질이 들어 있다." data-hint="둥글고 보라색인 곳이다.">핵</span>
+  <span class="lb" style="--x:55%; --y:50%" data-why="액포는 물과 양분을 저장한다." data-hint="가운데에서 가장 넓은 곳이다.">액포</span>
+</figure>
+<p class="step">다 붙이면 열리는 정리</p>
+```
+
+- `.lb` 하나가 자리 하나이자 이름표 하나다. `--x`, `--y`는 그림의 왼쪽 위에서 잰 비율이다. 그림(`<img>`나 `viewBox`가 있는 `<svg>`)은 `figure` 폭을 꽉 채운다.
+- 엔진이 자리마다 번호 동그라미를 놓고 이름표를 섞어 그림 아래에 모은다. 이름표를 끌어 자리에 놓거나 이름표를 누른 뒤 번호를 누른다. 펜을 든 채로도 이름표가 움직인다.
+- 맞으면 그 자리에 붙고 자리의 `data-why`가 나온다. 틀리면 이름표가 흔들리고 "다시 생각해 보자." 뒤에 그 이름표의 `data-hint`가 나온다. 다 붙이면 이 부품 뒤의 첫 `.step`을 연다. 「다시」 단추가 붙는다.
+- 이름이 적힌 그림은 쓰지 않는다(답이 보인다). 이름을 지운 그림이나 직접 그린 SVG를 쓴다.
+- 이름표는 2~8개가 알맞다. 번호 동그라미가 52px이므로 자리 사이를 60px 넘게 띄운다. 이름이 같은 자리가 둘이면 어느 쪽에 놓아도 맞다.
+- 붙은 이름표는 자리 한가운데를 덮는다. 작은 구조는 자리를 구조 바로 옆에 잡는다.
+- 높이: 그림 + 이름표 한 줄 60px + 알림 줄 56px + 사이 24px. 알림 줄은 `figure` 폭 안에서 줄을 바꾸므로 이유는 한 문장으로 짧게 쓴다. 점검은 붙이기 전과 다 붙인 뒤를 모두 잰다. 인쇄는 다 붙인 모습이다.
+
+### 15. 영상 카드와 링크 카드 `.video`, `a.link-card`
+
+```html
+<div class="video" data-youtube="https://youtu.be/M7lc1UVf-VE" data-title="영상 제목" data-start="1:20" data-end="3:05"></div>
+```
+
+```html
+<a class="link-card" href="https://n-lifescience.github.io/exploragram/" data-qr>예시 수업 모음<small>QR을 찍으면 학생 기기에서 열린다</small></a>
+```
+
+- 주소는 선생님이 준 것만 쓴다. 기억이나 짐작으로 영상이나 사이트 주소를 만들지 않는다(위 예시의 주소도 그대로 쓰지 않는다). 주소를 받지 못했으면 카드를 넣지 말고 파일을 전달할 때 넣을 주소를 묻는다.
+- `data-youtube`에는 유튜브 주소나 영상 ID를 쓴다. 볼 구간은 `data-start`와 `data-end`로 정한다(`80` 또는 `1:20`). 주소에 `t=80`이 있으면 시작 시각으로 읽는다.
+- 누르기 전에는 유튜브에 아무것도 요청하지 않는다. 사이트에 올린 수업(`https://`)은 그 자리에서 재생하고 장을 넘기면 꺼진다. 더블클릭으로 연 파일에서는 유튜브가 끼워 넣기를 막으므로(오류 153) 새 탭으로 연다.
+- 영상 카드는 16:9 상자이고 폭은 760px까지다(높이 약 430px). 줄이려면 `style="width:560px"`.
+- 링크 카드는 새 탭으로 열린다. `<small>`은 한 줄 설명이고 사이트 이름은 엔진이 주소에서 뽑아 붙인다. `href`는 `https://`나 `http://`로 시작해야 한다.
+- `data-qr`을 붙이면 학생이 자기 기기로 찍을 QR이 붙는다(영상 카드와 링크 카드 모두). 그 장을 처음 열 때 그리며 인터넷이 없으면 주소가 글로 나온다.
+- 영상 카드와 링크 카드는 활동 장으로 세지 않는다.
 
 ### 점검 코드(D 키, `?audit`)
 

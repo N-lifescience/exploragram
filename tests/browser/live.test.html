@@ -233,6 +233,40 @@ test('단답: 이름 없이 카드로 모이고, 교사가 숨긴 답은 고쳐 
   eq(T.Live.texts.size, 1);
 });
 
+test('투표: 학생이 고른 것(바꾸면 마지막 것)이 모이고, 「칠판에 넣기」로 칠판 투표에 들어간다', async () => {
+  T.Nav.go(6);
+  await until(() => A.Nav.state.slide === 6 && B.Nav.state.slide === 6);
+  const opts = (n) => doc(n).querySelectorAll('#poll .ch-poll-opt');
+  eq(getComputedStyle(doc('a').querySelector('#poll .ch-poll-minus')).display, 'none', '학생은 세지 않는다');
+  eq(doc('a').querySelector('#poll .ch-poll-total').textContent, '하나를 골라요.');
+  opts('a')[0].click();
+  opts('a')[2].click();   // 바꿈
+  opts('b')[2].click();
+  const votes = () => T.Live.picks.get('6|poll') || new Map();   // 키는 상자 id
+  await until(() => votes().size === 2 && votes().get(A.Live.sid).join() === '2');
+  eq(votes().get(B.Live.sid).join(), '2');
+  eq(doc('a').querySelector('#poll .ch-poll-total').textContent, '골랐어요. 바꿔도 돼요.');
+  await until(() => (doc('t').querySelector('.ch-live-poll .ch-live-n') || {}).textContent === '2명');
+  const li = () => doc('t').querySelectorAll('.ch-live-poll .ch-live-opts li');
+  eq(li().length, 3);
+  assert(li()[2].textContent.includes('2명') && li()[0].textContent.includes('0명'), li()[2].textContent);
+  assert(!doc('t').querySelector('.ch-live-poll .is-ok'), '정답 표시 없음');
+  eq(doc('t').querySelector('.ch-live-poll .ch-live-name').textContent, '교복을 없애는 데 찬성하나요?');
+  const p = T.Poll.list[0];
+  eq(p.n.join(), '0,0,0', '칠판에는 교사가 넣을 때까지 안 보인다');
+  doc('t').querySelector('.ch-live-put').click();
+  eq(p.n.join(), '0,0,2');
+  eq(doc('t').querySelector('#poll .ch-poll-total').textContent, '모두 2명');
+  // 한 학생 한 표: 여러 개를 보내면 앞의 하나만, 없는 보기 번호는 버린다
+  B.Live.inbox.send('pick', { sid: B.Live.sid, slide: 6, key: 'poll', c: [1, 2] });
+  await until(() => votes().get(B.Live.sid).join() === '1');
+  A.Live.inbox.send('pick', { sid: A.Live.sid, slide: 6, key: 'poll', c: [7] });
+  await until(() => votes().get(A.Live.sid).length === 0);
+  await until(() => li()[1].textContent.includes('1명') && li()[2].textContent.includes('0명'));
+  doc('t').querySelector('#poll .ch-poll-opt').click();   // 교사 화면에서는 손으로도 센다
+  eq(p.n.join(), '1,0,2');
+});
+
 test('코드 없이 학생 역할이면 입장 화면에서 코드를 넣고 들어간다', async () => {
   const C = await open('c', '&join=');
   assert(visible(doc('c').querySelector('.ch-live-join')), '입장 화면');

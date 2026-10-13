@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko" data-deck="test-poll">
+<head>
+<meta charset="utf-8">
+<title>poll</title>
+<link rel="stylesheet" href="../../engine/class-html.css">
+<script defer src="../../engine/class-html.js"></script>
+<script src="harness.js"></script>
+<script src="pointer.js"></script>
+</head>
+<body>
+<section class="slide" id="p1">
+  <div class="poll" id="po" data-options="찬성| 반대 ||잘 모르겠다"><p>급식에 채식의 날을 늘릴까?</p></div>
+  <div class="poll" id="many" data-options="1|2|3|4|5|6|7|8"></div>
+  <div class="poll" id="one" data-options="하나뿐"></div>
+</section>
+<pre id="results" data-summary="pending"></pre>
+<script>
+const I = () => ClassHTML._internal;
+const $ = (id) => document.getElementById(id);
+const poll = (id) => I().Poll.list.find((p) => p.box.id === id);
+
+test('보기: 빈 것은 버리고, 6개까지만, 2개가 안 되면 만들지 않는다', () => {
+  eq(poll('po').names, ['찬성', '반대', '잘 모르겠다']);
+  eq(poll('many').names.length, 6);
+  eq(poll('one'), undefined);
+  eq($('one').querySelector('.ch-poll-list'), null);
+});
+test('교사 화면: 누를 때마다 1명, −1로 고치고 0 아래로는 안 간다', () => {
+  const p = poll('po');
+  const opts = $('po').querySelectorAll('.ch-poll-opt');
+  const minus = $('po').querySelectorAll('.ch-poll-minus');
+  opts[0].click(); opts[0].click(); opts[0].click(); opts[1].click();
+  minus[0].click(); minus[2].click();
+  eq(p.n, [2, 1, 0]);
+  eq(Array.from($('po').querySelectorAll('.ch-poll-n')).map((o) => o.textContent), ['2명', '1명', '0명']);
+  eq(p.total.textContent, '모두 3명');
+  eq(minus[1].getAttribute('aria-label'), '반대 1명 빼기');
+});
+test('막대는 가장 많은 보기를 기준으로, 1등 표시', async () => {
+  const opts = $('po').querySelectorAll('.ch-poll-opt');
+  await wait(400);   // 막대가 늘어나는 0.3초
+  eq(opts[0].style.getPropertyValue('--w'), '1.000');
+  eq(opts[1].style.getPropertyValue('--w'), '0.500');
+  assert(opts[0].classList.contains('is-top') && !opts[1].classList.contains('is-top'), 'top');
+  const bar = opts[1].querySelector('.ch-poll-bar').getBoundingClientRect();
+  const box = opts[1].getBoundingClientRect();
+  assert(Math.abs(bar.width - box.width / 2) < box.width * 0.02, `bar ${bar.width} / ${box.width}`);
+});
+test('펜을 든 채로 톡 눌러도 센다', () => {
+  const p = poll('po');
+  const o = $('po').querySelectorAll('.ch-poll-opt')[2];
+  I().Tools.set('pen');
+  const r = o.getBoundingClientRect();
+  ptr('pointerdown', o, 0, 0, { clientX: r.left + 30, clientY: r.top + 20 });
+  eq(I().Ink.gesture && I().Ink.gesture.started, false, 'tap waits');
+  ptr('pointerup', o, 0, 0, { clientX: r.left + 30, clientY: r.top + 20 });
+  o.click();
+  I().Tools.set('hand');
+  eq(p.n, [2, 1, 1]);
+});
+test('「다시」는 모두 0명으로, set은 학생 인원을 넣는다', () => {
+  const p = poll('po');
+  $('po').querySelector('.ch-reset').click();
+  eq(p.n, [0, 0, 0]);
+  eq($('po').querySelector('.ch-poll-opt').classList.contains('is-top'), false);
+  I().Poll.set(p, [4, 7.6, -2, 99]);
+  eq(p.n, [4, 8, 0]);
+  eq(p.total.textContent, '모두 12명');
+});
+test('실시간 학생 화면: 세지 않고 하나를 고른다(바꿀 수 있다), 고른 것을 알린다', () => {
+  const p = poll('po');
+  I().Poll.reset(p);
+  const sent = [];
+  I().on('poll-vote', (item, k) => sent.push([item.box.id, k]));
+  const live = I().Live;
+  const role = live.role;
+  live.role = 'student';
+  document.documentElement.classList.add('ch-live-student');
+  I().emit('live-role');
+  try {
+    eq(p.total.textContent, '하나를 골라요.');
+    const opts = $('po').querySelectorAll('.ch-poll-opt');
+    opts[1].click();
+    opts[2].click();
+    eq(sent, [['po', 1], ['po', 2]]);
+    eq(p.n, [0, 0, 0], 'no local count');
+    eq(Array.from(opts).map((o) => o.getAttribute('aria-pressed')), ['false', 'false', 'true']);
+    eq(p.total.textContent, '골랐어요. 바꿔도 돼요.');
+    eq(getComputedStyle($('po').querySelector('.ch-poll-minus')).display, 'none');
+    eq(getComputedStyle($('po').querySelector('.ch-poll-n')).display, 'none');
+  } finally {
+    live.role = role;
+    document.documentElement.classList.remove('ch-live-student');
+    I().Poll.reset(p);
+  }
+  eq(p.total.textContent, '모두 0명');
+});
+test('점검: 보기가 하나뿐인 투표는 부품 오류, 바른 투표는 넘치지 않는다', () => {
+  const r = ClassHTML.audit();
+  const part = r.errors.filter((e) => e.code === 'part');
+  eq(part.length, 1, JSON.stringify(r.errors));
+  assert(part[0].msg.includes('#one') && part[0].msg.includes('2개 이상'), part[0].msg);
+});
+</script>
+</body>
+</html>

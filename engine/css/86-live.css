@@ -46,6 +46,8 @@
 .ch-live-opts em { font-style: normal; text-align: right; color: var(--ch-ui-mute); }
 .ch-live-opts .is-ok b { color: #4ADE80; }
 .ch-live-opts .is-ok i { background: linear-gradient(90deg, #22A06B calc(var(--w, 0) * 100%), #2E323A 0); }
+/* 투표: 모인 인원을 칠판의 투표에 넣는 단추 */
+.ch-live-ui .ch-live-put { grid-column: 1 / -1; justify-self: end; }
 /* 단답: 이름 없는 카드 */
 .ch-live-cards { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; max-height: 320px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
 .ch-live-cards li { display: flex; align-items: flex-start; gap: 4px; max-width: 100%; padding: 8px 4px 8px 14px; border-radius: 10px; background: var(--ch-ui-2); font-size: 22px; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
