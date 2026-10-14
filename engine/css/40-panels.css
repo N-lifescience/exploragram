@@ -1,6 +1,6 @@
 .ch-panel { position: fixed; z-index: 70; display: none; box-sizing: border-box; background: var(--ch-ui); color: var(--ch-ui-fg); font-family: var(--ch-font); box-shadow: 0 20px 60px rgba(0, 0, 0, .4); }
 .ch-panel.is-open { display: block; animation: ch-pop .3s var(--ch-ease-out); }
-.ch-panel h2 { margin: 0 0 12px; font-size: 18px; font-weight: 700; }
+.ch-panel h2 { margin: 0 0 12px; font-size: 18px; font-weight: 700; line-height: 1.4; color: inherit; }   /* 수업 CSS의 h2 색이 창 제목에 묻지 않게 */
 .ch-toc { top: 0; right: 0; bottom: 0; width: min(420px, 90vw); padding: 24px 20px; overflow-y: auto; }
 .ch-toc ol { list-style: none; margin: 0; padding: 0; }
 .ch-toc button { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: 36px 1fr; column-gap: 8px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 16px; line-height: 1.4; }

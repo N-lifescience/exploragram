@@ -1,4 +1,4 @@
-/*! class-html engine v1.4.0 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.5.0 | MIT | https://github.com/N-lifescience/exploragram */
 /* ---- 00-tokens.css ---- */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
@@ -34,6 +34,11 @@ body { font-family: var(--ch-font); color: var(--ch-ink); word-break: keep-all; 
 .ch-deck { position: relative; width: 1280px; height: 720px; flex: none; transform-origin: center center; touch-action: none; }
 .slide { position: absolute; inset: 0; box-sizing: border-box; padding: 72px 80px 64px; display: none; flex-direction: column; overflow: hidden; background: var(--ch-paper); color: var(--ch-ink); font-size: var(--ch-body); }
 .slide.is-active { display: flex; animation: ch-slide-in .3s var(--ch-ease-out); }
+/* 수업 CSS가 장에 display를 줘도(.section-cover { display: flex }) 보고 있지 않은 장은 숨긴다. 안 그러면 그 장이 앞 장들을 모두 덮는다. */
+@media screen { .ch-deck > .slide:not(.is-active):not(.ch-measure) { display: none !important; } }
+/* 넘친 장을 줄여 보이는 안전망(14-fit.js). 점검·편집·인쇄는 줄이기 전 크기로 한다. */
+.ch-auditing .slide, .ch-editing .slide { zoom: 1 !important; }
+@media print { .slide { zoom: 1 !important; } }
 .slide > * { flex-shrink: 0; }   /* 넘치는 내용이 몰래 찌그러지지 않게: 넘치면 점검에서 잡힌다 */
 .slide::before { content: attr(data-sec); position: absolute; left: 80px; top: 28px; font: 600 15px/1 var(--ch-font); color: var(--ch-mute); letter-spacing: .01em; }
 .slide::after { content: attr(data-page); position: absolute; right: 80px; bottom: 24px; font: 500 13px/1 var(--ch-mono); color: var(--ch-mute); letter-spacing: .06em; }
@@ -161,7 +166,7 @@ body:not(.ch-board-on) .ch-board-only { display: none !important; }
 /* ---- 40-panels.css ---- */
 .ch-panel { position: fixed; z-index: 70; display: none; box-sizing: border-box; background: var(--ch-ui); color: var(--ch-ui-fg); font-family: var(--ch-font); box-shadow: 0 20px 60px rgba(0, 0, 0, .4); }
 .ch-panel.is-open { display: block; animation: ch-pop .3s var(--ch-ease-out); }
-.ch-panel h2 { margin: 0 0 12px; font-size: 18px; font-weight: 700; }
+.ch-panel h2 { margin: 0 0 12px; font-size: 18px; font-weight: 700; line-height: 1.4; color: inherit; }   /* 수업 CSS의 h2 색이 창 제목에 묻지 않게 */
 .ch-toc { top: 0; right: 0; bottom: 0; width: min(420px, 90vw); padding: 24px 20px; overflow-y: auto; }
 .ch-toc ol { list-style: none; margin: 0; padding: 0; }
 .ch-toc button { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: 36px 1fr; column-gap: 8px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 16px; line-height: 1.4; }
@@ -201,6 +206,15 @@ body:not(.ch-board-on) .ch-board-only { display: none !important; }
 .ch-audit li.is-error > * { border-left: 4px solid #FF6B5B; }
 .ch-audit li.is-warn > * { border-left: 4px solid #F5B83D; }
 .ch-audit-info { margin: 12px 0 0; font-size: 13px; color: var(--ch-ui-mute); }
+.ch-audit-actions { margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.ch-audit-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ch-audit-btn { all: unset; box-sizing: border-box; min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; border-radius: 10px; background: var(--ch-ui-2); font-size: 15px; font-weight: 600; cursor: pointer; }
+.ch-audit-btn.is-main { background: var(--accent); color: #fff; }
+.ch-audit-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ch-audit-said { margin: 10px 0 0; min-height: 20px; font-size: 14px; line-height: 1.5; color: var(--ch-ui-mute); word-break: keep-all; overflow-wrap: anywhere; text-wrap: pretty; }
+.ch-audit-said:empty { display: none; }
+.ch-audit-copybox { position: fixed; left: -9999px; top: 0; opacity: 0; }
+.ch-tb-btn.ch-audit-badge { color: #F5B83D; }
 .ch-auditing *, .ch-auditing *::before, .ch-auditing *::after { animation: none !important; transition: none !important; }
 .ch-auditing body.ch-board-on .slide.is-active { visibility: visible; }
 .ch-auditing .ch-deck > .ch-board, .ch-auditing .ch-ink { visibility: hidden; }

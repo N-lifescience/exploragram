@@ -6,6 +6,15 @@
 .ch-audit li.is-error > * { border-left: 4px solid #FF6B5B; }
 .ch-audit li.is-warn > * { border-left: 4px solid #F5B83D; }
 .ch-audit-info { margin: 12px 0 0; font-size: 13px; color: var(--ch-ui-mute); }
+.ch-audit-actions { margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.ch-audit-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ch-audit-btn { all: unset; box-sizing: border-box; min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; border-radius: 10px; background: var(--ch-ui-2); font-size: 15px; font-weight: 600; cursor: pointer; }
+.ch-audit-btn.is-main { background: var(--accent); color: #fff; }
+.ch-audit-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ch-audit-said { margin: 10px 0 0; min-height: 20px; font-size: 14px; line-height: 1.5; color: var(--ch-ui-mute); word-break: keep-all; overflow-wrap: anywhere; text-wrap: pretty; }
+.ch-audit-said:empty { display: none; }
+.ch-audit-copybox { position: fixed; left: -9999px; top: 0; opacity: 0; }
+.ch-tb-btn.ch-audit-badge { color: #F5B83D; }
 .ch-auditing *, .ch-auditing *::before, .ch-auditing *::after { animation: none !important; transition: none !important; }
 .ch-auditing body.ch-board-on .slide.is-active { visibility: visible; }
 .ch-auditing .ch-deck > .ch-board, .ch-auditing .ch-ink { visibility: hidden; }

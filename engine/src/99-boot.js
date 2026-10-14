@@ -23,6 +23,7 @@ async function start() {
   Live.init();     // 툴바(slots.misc)에 실시간 단추. 학생 역할이면 입장 화면
   // 수식이 있으면 그려질 때까지(최대 5초) 기다린다. 그래야 ready 뒤 점검이 그린 수식을 잰다.
   await Promise.race([MathTex.ready, new Promise((r) => setTimeout(r, 5000))]);
+  Fit.init();      // 부품·수식이 다 그려진 뒤: 넘친 장을 줄여 보인다
   Audit.init();    // ?audit도 모든 준비가 끝난 다음 실행한다
 }
 
@@ -33,7 +34,7 @@ function boot() {
   ClassHTML.next = () => Nav.next();
   ClassHTML.prev = () => Nav.prev();
   ClassHTML.audit = () => Audit.run();
-  ClassHTML._internal = { on, emit, Stage, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Editor, Live, LiveCore };
+  ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Editor, Live, LiveCore };
   start().then(() => readyResolve(ClassHTML), (err) => {
     console.error('[class-html]', err);
     readyResolve(ClassHTML);

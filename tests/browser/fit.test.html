@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko" data-deck="test-fit">
+<head>
+<meta charset="utf-8">
+<title>fit</title>
+<link rel="stylesheet" href="../../engine/class-html.css">
+<script defer src="../../engine/class-html.js"></script>
+<script src="harness.js"></script>
+<script src="pointer.js"></script>
+</head>
+<body>
+<section class="slide" id="f0"><h2>그림 때문에 넘치는 장</h2><div id="tall" style="height:600px;background:#DDE">줄지 않는 상자</div></section>
+<section class="slide" id="f1"><h2>들어가는 장</h2><p>짧은 글.</p></section>
+<section class="slide" id="f2"><h2>글 때문에 넘치는 장</h2>
+  <p>긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다. 긴 글이 여러 줄로 이어진다. 폭이 넓어지면 줄 수가 줄어든다.</p></section>
+<section class="slide" id="f3" data-allow-overflow><h2>넘쳐도 되는 장</h2><div style="height:900px">일부러 넘긴다</div></section>
+<section class="slide" id="f4"><h2>너무 많이 넘치는 장</h2><div style="height:1400px">아주 긴 상자</div></section>
+<section class="slide" id="f5"><h2>줄여 보인 장에서 카드 끌기</h2>
+  <div class="sort" id="so"><div class="bin" data-bin="a" id="binA"><h3>가</h3></div><div class="bin" data-bin="b"><h3>나</h3></div>
+  <span data-bin="a" id="c1">카드 하나</span><span data-bin="b" id="c2">카드 둘</span></div>
+  <div style="height:520px;background:#EEE">넘치게 하는 상자</div></section>
+<pre id="results" data-summary="pending"></pre>
+<script>
+const I = () => ClassHTML._internal;
+const $ = (id) => document.getElementById(id);
+const zoom = (id) => parseFloat($(id).style.zoom) || 1;
+const fits = (id) => $(id).scrollHeight <= $(id).clientHeight + 1 && $(id).scrollWidth <= $(id).clientWidth + 1;
+
+test('넘친 장은 다 보이게 줄인다', () => {
+  assert(zoom('f0') < 1 && zoom('f0') >= 0.75, `zoom ${zoom('f0')}`);
+  assert(fits('f0'), 'fits');
+  const r = $('f0').getBoundingClientRect();
+  const d = I().Stage.deck.getBoundingClientRect();
+  eq([Math.round(r.width), Math.round(r.height)], [Math.round(d.width), Math.round(d.height)], '장의 상자는 무대 그대로');
+});
+test('들어가는 장은 건드리지 않는다', () => {
+  I().Nav.go(1);
+  eq($('f1').style.zoom, '');
+});
+test('글은 폭이 넓어져 줄 수가 주는 만큼 덜 줄인다', () => {
+  I().Nav.go(2);
+  const k = zoom('f2');
+  assert(k < 1 && fits('f2'), `zoom ${k}`);
+  $('f2').style.zoom = '';
+  const r = $('f2').scrollHeight / $('f2').clientHeight;
+  $('f2').style.zoom = String(k);
+  assert(k > 1 / r + 0.01, `글이 다시 흐른 만큼 덜 줄였다: ${k} > ${1 / r}`);
+});
+test('data-allow-overflow 장은 그대로 둔다', () => {
+  I().Nav.go(3);
+  eq($('f3').style.zoom, '');
+});
+test('너무 많이 넘치면 0.75까지만 줄인다', () => {
+  I().Nav.go(4);
+  eq(zoom('f4'), 0.75);
+  assert(!fits('f4'), '그래도 넘친다');
+});
+test('자동 점검은 줄이기 전 크기로 재서 계속 알린다', () => {
+  I().Nav.go(0);
+  const report = ClassHTML.audit();
+  assert(report.errors.some((e) => e.code === 'slide-overflow' && e.slide === 0), 'f0');
+  assert(report.errors.some((e) => e.code === 'slide-overflow' && e.slide === 2), 'f2');
+  assert(zoom('f0') < 1, '점검 뒤에도 줄인 채로');
+});
+test('보는 동안 내용이 늘면 더 줄이고, 다시 들어오면 새로 잰다', async () => {
+  I().Nav.go(1);
+  const extra = document.createElement('div');
+  extra.style.height = '560px';
+  $('f1').append(extra);
+  await wait(400);
+  const k = zoom('f1');
+  assert(k < 1 && fits('f1'), `zoom ${k}`);
+  extra.remove();
+  await wait(400);
+  eq(zoom('f1'), k, '보는 동안에는 다시 키우지 않는다');
+  I().Nav.go(0);
+  I().Nav.go(1);
+  eq($('f1').style.zoom, '', '다시 들어오면 새로 잰다');
+});
+test('줄여 보인 장에서도 카드가 손가락을 따라온다', async () => {
+  I().Nav.go(5);
+  await wait(50);
+  const k = zoom('f5');
+  assert(k < 1, `zoom ${k}`);
+  const card = $('c1');
+  const a = card.getBoundingClientRect();
+  const o = (x, y) => ({ clientX: x, clientY: y });
+  ptr('pointerdown', card, 0, 0, o(a.left + 10, a.top + 10));
+  ptr('pointermove', card, 0, 0, o(a.left + 110, a.top + 70));
+  const b = card.getBoundingClientRect();
+  ptr('pointerup', card, 0, 0, o(a.left + 110, a.top + 70));
+  assert(Math.abs((b.left - a.left) - 100) < 3 && Math.abs((b.top - a.top) - 60) < 3, `moved ${b.left - a.left}, ${b.top - a.top}`);
+});
+</script>
+</body>
+</html>

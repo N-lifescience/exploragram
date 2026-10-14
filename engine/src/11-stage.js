@@ -35,6 +35,12 @@ const Stage = {
     emit('resize', this.scale);
   },
 
+  // 요소가 놓인 곳의 배율: 무대 배율 × 그 장을 줄여 보인 배율(Fit). 끌기 거리를 장 안의 px로 바꿀 때 쓴다.
+  scaleAt(el) {
+    const slide = el && el.closest ? el.closest('section.slide') : null;
+    return this.scale * ((slide && parseFloat(slide.style.zoom)) || 1);
+  },
+
   // 화면 좌표(clientX/Y) → 무대 좌표(0~1280, 0~720)
   toStage(clientX, clientY) {
     const r = this.deck.getBoundingClientRect();

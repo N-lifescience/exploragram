@@ -117,7 +117,7 @@ const Labeling = {
   // 화면 좌표에서 가장 가까운 빈 자리(LABEL_SNAP 안)
   spotAt(item, x, y) {
     let best = null;
-    let near = LABEL_SNAP * Stage.scale;
+    let near = LABEL_SNAP * Stage.scaleAt(item.fig);
     for (const s of item.spots) {
       if (s.done) continue;
       const r = s.el.getBoundingClientRect();
@@ -138,8 +138,9 @@ const Labeling = {
     });
     chip.addEventListener('pointermove', (e) => {
       if (!d || e.pointerId !== d.id) return;
-      const dx = (e.clientX - d.x) / Stage.scale;
-      const dy = (e.clientY - d.y) / Stage.scale;
+      const k = Stage.scaleAt(chip);   // 줄여 보인 장(Fit)에서도 카드가 손가락을 따라오게
+      const dx = (e.clientX - d.x) / k;
+      const dy = (e.clientY - d.y) / k;
       if (!d.moved && Math.hypot(dx, dy) < DRAG_PX) return;
       d.moved = true;
       chip.classList.add('is-drag');
