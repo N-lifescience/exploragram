@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>실시간 수업 녹화</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* tools/record-live.mjs가 이 쪽을 1600×900으로 열어 녹화한다.
+     선생님 전자칠판과 학생 디벗(가로)을 나란히 두고 차례대로 누르며, 누르는 곳을 카메라처럼 당겨 보여 준다. */
+  :root { --night: #121418; --on: #F4F1EA; --on-2: #A9ADB5; --hl: #FF8A4C; --accent: #E8541A;
+    --font: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: var(--night); color: var(--on); font-family: var(--font); word-break: keep-all; }
+  .cap { position: absolute; z-index: 20; left: 0; right: 0; top: 0; height: 112px; display: flex; align-items: center; gap: 20px; padding: 0 48px; background: var(--night); box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+  .cap i { flex: none; width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: #fff; font: 800 32px/60px var(--font); font-style: normal; text-align: center; }
+  .cap i[hidden] { display: none; }
+  .cap p { margin: 0; font-size: 44px; font-weight: 800; letter-spacing: -.025em; }
+  .cap p small { margin-left: 18px; color: var(--on-2); font-size: 30px; font-weight: 600; letter-spacing: -.01em; }
+  .cap p, .cap i { transition: opacity .25s, transform .25s; }
+  .cap.is-swap p, .cap.is-swap i { opacity: 0; transform: translateY(10px); }
+  #cam { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0; transition: transform .9s cubic-bezier(.65, 0, .35, 1); }
+  .pane { position: absolute; }
+  .pane > small { display: block; margin: 0 0 10px; color: var(--on-2); font-size: 22px; font-weight: 700; }
+  .frame { position: relative; overflow: hidden; background: #000; }
+  .frame iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; background: #fff; }
+  .t { left: 40px; top: 150px; }
+  .t .frame { width: 1080px; height: 608px; border-radius: 14px; }
+  .s { left: 1150px; top: 150px; }
+  .s .frame { width: 410px; height: 272px; border-radius: 16px; border: 6px solid #2A2E35; }
+  /* 다른 학생 7명: 화면 밖에 두면 녹화에 겹쳐 찍힌다. 제자리에 두고 숨긴다(스크립트는 그대로 돈다). */
+  .crowd { position: absolute; left: 0; top: 0; z-index: -1; visibility: hidden; }
+  .crowd iframe { width: 1024px; height: 640px; border: 0; }
+  #hand { position: absolute; left: 0; top: 0; z-index: 9; width: 38px; height: 44px; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.55));
+    transform: translate(1300px, 980px); transition: transform .7s cubic-bezier(.4, 0, .2, 1); }
+  #hand svg { display: block; margin: -4px 0 0 -10px; }
+  .tap { position: absolute; z-index: 8; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%; border: 4px solid var(--hl); pointer-events: none; animation: tap .55s ease-out forwards; }
+  @keyframes tap { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.2); opacity: 0; } }
+</style>
+</head>
+<body>
+<div class="cap" id="cap"><i id="cap-n">1</i><p id="cap-t"></p></div>
+<div id="cam">
+  <section class="pane t"><small>선생님 · 전자칠판</small><div class="frame"><iframe id="teacher" data-w="1280" data-h="720"></iframe></div></section>
+  <section class="pane s"><small>학생 · 디벗</small><div class="frame"><iframe id="student" data-w="1024" data-h="640"></iframe></div></section>
+  <div id="hand"><svg width="38" height="44" viewBox="0 0 34 40"><path d="M6 2c2 0 3.5 1.5 3.5 3.5V18l1.6-.5c1.9-.6 3.4.3 3.9 1.6 1.8-.8 3.6 0 4.1 1.5 1.8-.6 3.6.4 4 2 2-.2 3.4 1.2 3.4 3.2v4.4C26.5 36.6 22.6 39 17.6 39h-2.2c-3.6 0-6.4-1.6-8.4-4.6L1.6 26c-1.1-1.7-.6-3.6.9-4.4 1.4-.8 3-.3 4 .9V5.5C2.5 3.5 4 2 6 2Z" fill="#fff" stroke="#1F2328" stroke-width="2" stroke-linejoin="round"/></svg></div>
+</div>
+<div class="crowd" id="crowd"></div>
+<script>
+(async function () {
+  const LESSON = 'lessons/soc-supply-demand.html';
+  const CROWD = [11, 11, 12, 10, 9, 13, 11];        // 다른 학생 7명이 맞출 가격 칸(11 = 3,000원)
+  const PICKS = [1, 1, 1, 0, 1, 2, 1];              // 다른 학생 7명이 고를 퀴즈 보기(0부터, 정답 1)
+  const ME = 15;                                    // 보이는 학생이 맞출 칸(15 = 3,400원)
+  const VIEW = { x: 0, y: 112, w: 1600, h: 788 };   // 자막 아래 보이는 자리
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const cam = document.getElementById('cam');
+  const teacher = document.getElementById('teacher');
+  const student = document.getElementById('student');
+  const hand = document.getElementById('hand');
+  const log = (m) => { (window.__log = window.__log || []).push(m); };
+
+  const scaleOf = (f) => f.parentElement.clientWidth / Number(f.dataset.w);
+  for (const f of [teacher, student]) {
+    f.style.width = `${f.dataset.w}px`;
+    f.style.height = `${f.dataset.h}px`;
+    f.style.transform = `scale(${scaleOf(f)})`;
+  }
+  // 카메라 바깥(#cam 좌표)에서 iframe 안쪽 왼쪽 위
+  function origin(f) {
+    let x = f.parentElement.clientLeft, y = f.parentElement.clientTop, el = f.parentElement;
+    while (el && el !== cam) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+    return [x, y];
+  }
+  // iframe 안 요소의 자리(#cam 좌표)
+  function rectIn(f, el) {
+    const [ox, oy] = origin(f), k = scaleOf(f), r = el.getBoundingClientRect();
+    return { x: ox + r.left * k, y: oy + r.top * k, w: r.width * k, h: r.height * k };
+  }
+  const at = (f, el, fx = 0.5, fy = 0.5) => { const r = rectIn(f, el); return [r.x + r.w * fx, r.y + r.h * fy]; };
+  const frameRect = (f) => { const [x, y] = origin(f); return { x, y, w: f.parentElement.clientWidth, h: f.parentElement.clientHeight }; };
+
+  // 카메라: 상자 r을 자막 아래 자리에 맞춰 당긴다(여백 pad, 최대 배율 max)
+  async function look(r, pad = 40, max = 3, ms = 950) {
+    let s = 1, tx = 0, ty = 0;
+    if (r) {
+      s = Math.min(max, VIEW.w / (r.w + pad * 2), VIEW.h / (r.h + pad * 2));
+      tx = VIEW.x + VIEW.w / 2 - (r.x + r.w / 2) * s;
+      ty = VIEW.y + VIEW.h / 2 - (r.y + r.h / 2) * s;
+      tx = Math.min(0, Math.max(1600 - 1600 * s, tx));
+      ty = Math.min(0, Math.max(900 - 900 * s, ty));
+    }
+    cam.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+    await sleep(ms);
+  }
+  const union = (...rs) => { const x = Math.min(...rs.map((r) => r.x)), y = Math.min(...rs.map((r) => r.y)); return { x, y, w: Math.max(...rs.map((r) => r.x + r.w)) - x, h: Math.max(...rs.map((r) => r.y + r.h)) - y }; };
+
+  async function caption(n, text, sub) {
+    const cap = document.getElementById('cap');
+    cap.classList.add('is-swap');
+    await sleep(260);
+    const i = document.getElementById('cap-n');
+    i.textContent = n || '';
+    i.hidden = !n;
+    document.getElementById('cap-t').innerHTML = text + (sub ? `<small>${sub}</small>` : '');
+    cap.classList.remove('is-swap');
+    await sleep(300);
+  }
+  function loaded(f, src) {
+    return new Promise((res) => {
+      f.onload = async () => {
+        f.onload = null;
+        for (let i = 0; i < 100; i++) { if (f.contentWindow.ClassHTML && f.contentWindow.ClassHTML.ready) break; await sleep(100); }
+        await sleep(500);
+        res(f.contentDocument);
+      };
+      f.src = src;
+    });
+  }
+  async function until(fn, ms = 30000) {
+    const t0 = Date.now();
+    while (Date.now() - t0 < ms) { const v = fn(); if (v) return v; await sleep(100); }
+    throw new Error('timeout');
+  }
+  async function moveTo(xy, ms = 700) {
+    hand.style.transitionDuration = `${ms}ms`;
+    hand.style.transform = `translate(${xy[0]}px, ${xy[1]}px)`;
+    await sleep(ms + 80);
+  }
+  function tap(xy) {
+    const t = document.createElement('i');
+    t.className = 'tap';
+    t.style.left = `${xy[0]}px`;
+    t.style.top = `${xy[1]}px`;
+    cam.append(t);
+    setTimeout(() => t.remove(), 650);
+  }
+  async function press(f, el, pause = 450) {
+    const xy = at(f, el);
+    await moveTo(xy);
+    tap(xy);
+    el.click();
+    await sleep(pause);
+  }
+  // 막대 끌기: 손가락이 손잡이를 따라가며 값이 한 칸씩 바뀐다
+  async function drag(f, input, to, stepMs = 90) {
+    const min = Number(input.min), max = Number(input.max);
+    const pos = (v) => at(f, input, 0.03 + 0.94 * (v - min) / (max - min), 0.5);
+    await moveTo(pos(Number(input.value)));
+    tap(pos(Number(input.value)));
+    hand.style.transitionDuration = `${stepMs}ms`;
+    for (let v = Number(input.value) + 1; v <= to; v++) {
+      input.value = String(v);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      const xy = pos(v);
+      hand.style.transform = `translate(${xy[0]}px, ${xy[1]}px)`;
+      await sleep(stepMs);
+    }
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    await sleep(300);
+  }
+  const set = (input, v) => { input.value = String(v); input.dispatchEvent(new Event('input', { bubbles: true })); input.dispatchEvent(new Event('change', { bubbles: true })); };
+  const activeOpts = (d) => d.querySelectorAll('section.slide.is-active .quiz button');
+
+  try {
+    // 녹화 전 준비: 선생님 수업, 학생 디벗, 다른 학생 7명(코드 입력 칸에서 기다림)
+    const crowdBox = document.getElementById('crowd');
+    const others = CROWD.map(() => { const f = document.createElement('iframe'); crowdBox.append(f); return f; });
+    const [T, S] = await Promise.all([loaded(teacher, `${LESSON}?live=local#6`), loaded(student, `${LESSON}?join=&live=local`),
+      ...others.map((f) => loaded(f, `${LESSON}?join=&live=local`))]);
+    await caption(1, '선생님이 「실시간」을 누르면', '코드 6자리와 QR이 나와요');
+    window.__ready = true;   // 여기서부터 녹화
+    await sleep(1200);
+
+    const liveBtn = T.querySelector('.ch-toolbar button[data-name="live"]');
+    await press(teacher, liveBtn, 200);
+    const code = await until(() => { const el = T.querySelector('.ch-live-code'); const c = el ? el.textContent.replace(/\D/g, '') : ''; return /^\d{6}$/.test(c) && c; });
+    log(`code ${code}`);
+    await sleep(500);
+    await look(rectIn(teacher, T.querySelector('.ch-live')), 60, 2);
+    await sleep(1800);
+
+    await caption(2, '학생은 코드를 넣고 들어와요', '이름은 받지 않아요');
+    await look(frameRect(student), 50, 3);
+    const box = await until(() => S.querySelector('.ch-live-join input'));
+    await moveTo(at(student, box));
+    tap(at(student, box));
+    for (let i = 1; i <= 6; i++) { box.value = code.slice(0, i); await sleep(170); }
+    await sleep(250);
+    await press(student, S.querySelector('.ch-live-go'), 300);
+    others.forEach((f) => { const d = f.contentDocument; d.querySelector('.ch-live-join input').value = code; d.querySelector('.ch-live-go').click(); });
+    await sleep(1600);
+    await look(null);
+    await until(() => /8명/.test(T.querySelector('.ch-live-count').textContent));
+    await sleep(700);
+
+    await caption(3, '선생님이 넘기면 학생 화면도 따라와요');
+    await press(teacher, T.querySelector('.ch-live .ch-live-x'), 300);
+    // 6쪽에는 단계가 있다. 다음 장(7쪽)이 될 때까지 「다음」을 누른다.
+    const nav = teacher.contentWindow.ClassHTML._internal.Nav;
+    for (let i = 0; i < 6 && nav.state.slide < 6; i++) await press(teacher, T.querySelector('.ch-toolbar button[data-name="next"]'), 700);
+    await sleep(1300);
+
+    await caption(4, '학생은 자기 디벗에서 가격 막대를 밀어요');
+    await look(frameRect(student), 50, 3);
+    const mine = await until(() => S.querySelector('section.slide.is-active #mk-k'));
+    await drag(student, mine, ME);
+    others.forEach((f, i) => setTimeout(() => set(f.contentDocument.querySelector('#mk-k'), CROWD[i]), 100 * i));
+    await sleep(1500);
+
+    await caption(5, '「학생 보기」에 학생 값이 막대로 모여요');
+    await look(null, 0, 1, 800);
+    await press(teacher, liveBtn, 400);
+    await press(teacher, T.querySelector('.ch-live-dist-btn'), 300);
+    await press(teacher, T.querySelector('.ch-live .ch-live-x'), 500);
+    const dist = await until(() => { const d = T.querySelector('.ch-live-dist'); return d && !d.hidden && d.querySelector('.ch-live-bin') && d; });
+    await moveTo([1300, 1000], 400);
+    window.__mark = 'poster';   // 영상 표지: 두 화면과 「학생 응답」 막대가 한눈에
+    await sleep(700);
+    await look(rectIn(teacher, dist), 40, 2.2);
+    await sleep(1600);
+
+    await caption(6, '막대를 누르면 그 값이 칠판에 들어가요', '누가 낸 값인지는 몰라요');
+    const bins = [...T.querySelectorAll('.ch-live-bin')];
+    const top = bins.reduce((a, b) => (parseFloat(b.style.getPropertyValue('--h')) > parseFloat(a.style.getPropertyValue('--h')) ? b : a));
+    await press(teacher, top, 600);
+    await look(frameRect(teacher), 20, 1.3);
+    await sleep(2600);
+
+    await caption(7, '퀴즈는 보기별 인원으로 모여요');
+    await look(null, 0, 1, 800);
+    for (let i = 0; i < 6 && nav.state.slide < 7; i++) await press(teacher, T.querySelector('.ch-toolbar button[data-name="next"]'), 700);
+    await sleep(500);
+    await look(frameRect(student), 50, 3);
+    const opts = await until(() => { const o = activeOpts(S); return o.length ? o : null; });
+    await press(student, opts[1], 900);
+    others.forEach((f, i) => setTimeout(() => { const o = activeOpts(f.contentDocument); if (o[PICKS[i]]) o[PICKS[i]].click(); }, 120 * i));
+    await sleep(900);
+    await moveTo([1300, 1000], 500);
+    const dist2 = T.querySelector('.ch-live-dist');
+    await look(rectIn(teacher, dist2), 40, 2.2);
+    await sleep(2600);
+
+    await caption(null, '학생 값과 응답은 저장하지 않아요', '창을 닫으면 사라져요');
+    await look(null);
+    await sleep(2400);
+  } catch (err) {
+    log(`error ${err && err.message}`);
+  }
+  window.__done = true;
+}());
+</script>
+</body>
+</html>

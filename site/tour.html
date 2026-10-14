@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko" data-deck="exploragram-tour">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exploragram 체험 덱</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="engine/class-html.css">
+<script defer src="engine/class-html.js"></script>
+<style>
+/* 첫 화면(히어로)에 넣는 체험 덱. 사이트와 같은 종이색·주황 강조·Pretendard. */
+body { --accent: #E8541A; --ch-paper: #F4F1EA; --ch-card: #FFFFFF; --ch-ink: #1F2328; --ch-mute: #62666D;
+  --ch-font: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --teal: #0F766E; --yellow: #FBBF24; --gray: #62666D; --ink-dot: #E0464E; --water-dot: #9DC8F5; }
+section.slide { padding: 64px 72px 48px; }
+.slide h2 { margin: 0 0 26px; font-size: 48px; line-height: 1.2; letter-spacing: -.02em; }
+.hint { margin: 0; color: var(--gray); font-size: 24px; line-height: 1.45; }
+
+/* 1 익스플로라그램: 잉크 입자 상자(예시 수업 sci-diffusion에서 가져옴) */
+.dx { display: grid; grid-template-columns: 380px 588px; gap: 0 48px; align-items: start; }
+.dx-ctrl { display: flex; flex-direction: column; gap: 8px; }
+.dx-view { position: relative; }
+.dx-view > svg { display: block; }
+.dx-lab { margin: 0; font-size: 26px; font-weight: 700; }
+.dx-lab b { color: var(--teal); }
+.dx-ticks { position: relative; height: 28px; margin-top: -6px; font-size: 20px; color: var(--gray); }
+.dx-ticks span { position: absolute; top: 0; left: calc(22px + (100% - 44px) * var(--f)); transform: translateX(-50%); white-space: nowrap; }
+.dx-ticks span:first-child { transform: none; left: 0; }
+.dx-ticks span:last-child { transform: none; left: auto; right: 0; }
+section.slide input.dx-range { -webkit-appearance: none; appearance: none; width: 100%; height: 56px; margin: 0; background: transparent; cursor: pointer; }
+section.slide input.dx-range::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; background: #D7DEE6; }
+section.slide input.dx-range::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 44px; margin-top: -16px; border-radius: 50%; background: var(--teal); border: 5px solid #fff; box-shadow: 0 1px 6px rgba(0,0,0,.45); }
+section.slide input.dx-range::-moz-range-track { height: 12px; border-radius: 6px; background: #D7DEE6; }
+section.slide input.dx-range::-moz-range-thumb { width: 34px; height: 34px; border-radius: 50%; background: var(--teal); border: 5px solid #fff; }
+.dx-veil { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;
+  background: #EEF2F5; border: 3px dashed #B8C4CE; border-radius: 18px; color: #5C6B78; font-size: 28px; font-weight: 600; line-height: 1.5; }
+.dx-veil[hidden] { display: none; }
+.dx-out { margin: 10px 0 0; min-height: 36px; font-size: 25px; font-weight: 700; line-height: 1.4; }
+.dx-box { padding: 12px 16px; border-radius: 14px; background: #FFFFFF; font-size: 22px; line-height: 1.45; }
+.dx-model { font-size: 20px; color: var(--gray); font-weight: 500; }
+.dx-legend { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; font-size: 22px; line-height: 1.35; }
+.dot { display: inline-block; width: 20px; height: 20px; border-radius: 50%; vertical-align: -3px; margin-right: 8px; }
+.ink-n { margin: 2px 0 0; font-size: 46px; font-weight: 800; color: var(--ink-dot); line-height: 1.1; }
+.ink-n small { font-size: 26px; color: var(--ch-ink); font-weight: 700; }
+.ink-bar { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-top: 8px; }
+.ink-bar i { height: 22px; border-radius: 4px; background: #E3E8EC; }
+.ink-bar i.on { background: var(--ink-dot); }
+#try .hint { margin-top: auto; }
+
+/* 2 판서 */
+.pen { display: grid; grid-template-columns: 430px 1fr; gap: 0 40px; align-items: start; flex: 1; min-height: 0; }
+.todo { margin: 0; padding: 0; list-style: none; counter-reset: todo; display: grid; gap: 18px; }
+.todo li { counter-increment: todo; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; font-size: 27px; line-height: 1.4; }
+.todo li::before { content: counter(todo); width: 44px; height: 44px; border-radius: 50%; background: var(--ch-ink); color: #fff; font-weight: 800; font-size: 22px; display: grid; place-items: center; }
+.todo b { color: var(--accent); }
+.pad { display: flex; flex-direction: column; gap: 14px; height: 100%; }
+.pad-board { flex: 1; display: grid; place-items: center; border: 3px dashed #CFC7B8; border-radius: 22px;
+  background: linear-gradient(#E9E3D7 1px, transparent 1px) 0 0 / 40px 40px, linear-gradient(90deg, #E9E3D7 1px, transparent 1px) 0 0 / 40px 40px, #FFFFFF;
+  color: #B5AC9C; font-size: 30px; font-weight: 700; }
+.pad-slider { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; padding: 14px 22px; border-radius: 18px; background: #FFFFFF; font-size: 24px; font-weight: 700; }
+.pad-slider input { width: 100%; height: 44px; margin: 0; accent-color: var(--accent); }
+.pad-slider output { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; color: var(--accent); }
+
+/* 3 실시간: 영상 안 자막이 순서를 말하므로 장에는 제목과 단추만 */
+#live { padding-bottom: 36px; }
+.live-head { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 0 0 20px; }
+.live-head h2 { margin: 0; }
+#live video { display: block; align-self: center; width: 940px; height: 529px; border-radius: 16px; background: #121418; object-fit: contain; }
+.go { flex: none; display: inline-flex; align-items: center; justify-content: center; min-height: 60px; padding: 0 26px; border-radius: 14px;
+  background: var(--accent); color: #fff; font-size: 24px; font-weight: 800; text-decoration: none; }
+.go:hover { background: #D04712; }
+</style>
+</head>
+<body>
+
+<section class="slide" id="try" data-title="막대 밀어 보기" data-activity>
+  <h2>막대를 밀어 보세요</h2>
+  <div class="dx">
+    <div class="dx-ctrl">
+      <p class="dx-lab">잉크를 떨어뜨린 뒤 <b id="ik-t-out">시작</b></p>
+      <input class="dx-range" type="range" autocomplete="off" id="ik-t" min="0" max="31" value="0" aria-label="잉크를 떨어뜨린 뒤 지난 시간">
+      <div class="dx-ticks"><span>시작</span><span style="--f:0.2258">1분</span><span style="--f:0.6129">3분</span><span>5분</span></div>
+      <div class="dx-box">
+        잉크 입자가 있는 칸 <span class="dx-model">(모형)</span>
+        <p class="ink-n"><span id="ik-n">?</span><small> / 9칸</small></p>
+        <div class="ink-bar" id="ik-bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="dx-legend">
+        <span><i class="dot" style="background:var(--ink-dot)"></i>잉크 입자</span>
+        <span><i class="dot" style="background:var(--water-dot)"></i>물 입자</span>
+        <span><i class="dot" style="background:#1E5FA8;box-shadow:0 0 0 4px var(--yellow)"></i>물 입자 하나가 지나온 길</span>
+      </div>
+    </div>
+    <div class="dx-view">
+      <svg id="ik-svg" width="588" height="420" viewBox="0 0 560 400" aria-label="잉크 입자와 물 입자가 움직이는 상자">
+        <rect x="1.5" y="1.5" width="557" height="397" fill="#FFFFFF" stroke="#3B4A5A" stroke-width="3"/>
+        <g id="ik-cells"></g>
+        <g stroke="#C9D3DC" stroke-width="2" stroke-dasharray="8 8">
+          <line x1="186.7" y1="3" x2="186.7" y2="397"/><line x1="373.3" y1="3" x2="373.3" y2="397"/>
+          <line x1="3" y1="133.3" x2="557" y2="133.3"/><line x1="3" y1="266.7" x2="557" y2="266.7"/>
+        </g>
+        <g id="ik-water"></g>
+        <polyline id="ik-trail" fill="none" stroke="#1E5FA8" stroke-width="3" stroke-linejoin="round" stroke-dasharray="2 6" stroke-linecap="round"/>
+        <g id="ik-ink"></g>
+        <circle id="ik-me" cx="-50" cy="-50" r="10" fill="#1E5FA8" stroke="#FBBF24" stroke-width="4"/>
+      </svg>
+      <p class="dx-out" id="ik-out"></p>
+      <div class="dx-veil" id="ik-veil"><span>막대를 밀면<br>잉크 한 방울을 떨어뜨려요</span></div>
+    </div>
+  </div>
+  <p class="hint">PPT의 그림 세 장(처음, 1분 뒤, 5분 뒤)이 막대 하나가 됐어요.</p>
+</section>
+
+<section class="slide" id="pen" data-title="펜을 든 채로 넘기기" data-activity>
+  <h2>펜을 든 채로 넘겨 보세요</h2>
+  <div class="pen">
+    <ol class="todo">
+      <li><span>아래 도구 막대에서 <b>「펜」</b>을 골라요.</span></li>
+      <li><span>오른쪽 칸에 아무거나 써요.</span></li>
+      <li><span>펜을 든 채로 <b>막대</b>도 밀어 봐요.</span></li>
+      <li><span><b>「다음」</b>으로 넘겼다가 <b>「이전」</b>으로 돌아와요. 판서가 그대로 있어요.</span></li>
+    </ol>
+    <div class="pad">
+      <div class="pad-board">여기에 써 보세요</div>
+      <div class="pad-slider calc">
+        <span>막대</span>
+        <input type="range" name="v" min="0" max="100" value="30" aria-label="펜을 든 채로 밀어 볼 막대">
+        <output data-expr="v" data-unit="%"></output>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="live" data-title="실시간 수업 영상">
+  <div class="live-head">
+    <h2>학생 값이 선생님 화면에 모여요</h2>
+    <a class="go" data-no-ink href="live-demo.html" target="_top">직접 해 보기</a>
+  </div>
+  <video id="live-video" data-no-ink src="media/live.mp4" poster="media/live-poster.jpg" controls muted playsinline preload="metadata" aria-label="실시간 수업 영상: 선생님이 「실시간」을 켜고, 학생이 코드로 들어와 막대를 밀고 퀴즈에 답하면 선생님 화면에 모인다"></video>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const $ = (s) => document.querySelector(s);
+  const SVG = 'http://www.w3.org/2000/svg';
+
+  /* 1 잉크 입자 상자: sci-diffusion과 같은 모형. 잉크 36개와 물 90개가 같은 무작위 걸음(10초마다 4걸음)을 한다 */
+  {
+    const mk = (tag, attrs, parent) => { const e = document.createElementNS(SVG, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+    // 씨앗을 고정한 난수: 누가 언제 열어도 같은 그림이 나온다
+    const rng = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const gauss = (r) => () => Math.sqrt(-2 * Math.log(r() + 1e-12)) * Math.cos(2 * Math.PI * r());
+    const refl = (v, lo, hi) => { while (v < lo || v > hi) v = v < lo ? 2 * lo - v : 2 * hi - v; return v; };
+    const W = 560, H = 400, R = 9, NI = 36, NW = 90, F = 31, SUB = 4, SIG = 22;
+    const r = rng(1138), g = gauss(r);
+    const ps = [];
+    for (let i = 0; i < NI; i++) ps.push([refl(80 + g() * 20, R, 180), refl(70 + g() * 18, R, 125)]);
+    for (let i = 0; i < NW; i++) ps.push([R + r() * (W - 2 * R), R + r() * (H - 2 * R)]);
+    let me = NI; ps.forEach((p, i) => { if (i >= NI && Math.hypot(p[0] - 380, p[1] - 260) < Math.hypot(ps[me][0] - 380, ps[me][1] - 260)) me = i; });
+    const frames = [ps.map((p) => p.slice())], path = [ps[me].slice()];
+    for (let f = 1; f < F; f++) {
+      for (let s = 0; s < SUB; s++) { for (const p of ps) { p[0] = refl(p[0] + g() * SIG, R, W - R); p[1] = refl(p[1] + g() * SIG, R, H - R); } path.push(ps[me].slice()); }
+      frames.push(ps.map((p) => p.slice()));
+    }
+    const cellOf = ([x, y]) => Math.min(2, Math.floor(x / (W / 3))) + 3 * Math.min(2, Math.floor(y / (H / 3)));
+    const counts = frames.map((P) => new Set(P.slice(0, NI).map(cellOf)));
+    const fullAt = counts.findIndex((c) => c.size === 9);
+    const cells = [...Array(9)].map((_, c) => mk('rect', { x: (c % 3) * W / 3, y: Math.floor(c / 3) * H / 3, width: W / 3, height: H / 3, fill: '#E0464E', 'fill-opacity': 0 }, $('#ik-cells')));
+    const dots = ps.map((_, i) => i < NI ? mk('circle', { r: R, fill: '#E0464E' }, $('#ik-ink')) : mk('circle', { r: R, fill: '#9DC8F5' }, $('#ik-water')));
+    dots[me].setAttribute('visibility', 'hidden');
+    const bars = [...$('#ik-bar').children];
+    const clock = (t) => t < 60 ? t + '초' : Math.floor(t / 60) + '분' + (t % 60 ? ' ' + (t % 60) + '초' : '');
+    function drawInk() {
+      const k = +$('#ik-t').value;              // 0 = 시작(가림), 1 = 0초 … 31 = 5분
+      $('#ik-veil').hidden = k > 0;
+      if (!k) { $('#ik-t-out').textContent = '시작'; $('#ik-n').textContent = '?'; bars.forEach((b) => b.classList.remove('on')); $('#ik-out').textContent = ''; return; }
+      const f = k - 1, P = frames[f], n = counts[f].size;
+      $('#ik-t-out').textContent = clock(f * 10);
+      P.forEach((p, i) => { dots[i].setAttribute('cx', p[0].toFixed(1)); dots[i].setAttribute('cy', p[1].toFixed(1)); });
+      cells.forEach((c, i) => c.setAttribute('fill-opacity', counts[f].has(i) ? 0.10 : 0));
+      $('#ik-me').setAttribute('cx', P[me][0].toFixed(1)); $('#ik-me').setAttribute('cy', P[me][1].toFixed(1));
+      $('#ik-trail').setAttribute('points', path.slice(Math.max(0, f * SUB - 6 * SUB), f * SUB + 1).map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '));
+      $('#ik-n').textContent = n;
+      bars.forEach((b, i) => b.classList.toggle('on', i < n));
+      $('#ik-out').textContent = f === 0 ? '잉크 입자가 한 칸에 모여 있어요.'
+        : n < 9 ? `잉크 입자가 9칸 중 ${n}칸으로 퍼졌어요.`
+        : f === fullAt ? '9칸 모두에 잉크 입자가 있어요. 고르게 퍼졌어요.'
+        : '고르게 퍼진 뒤에도 입자는 계속 움직여요.';
+    }
+    $('#ik-t').addEventListener('input', drawInk);
+    $('#ik-t').addEventListener('change', (e) => e.target.blur());   // 손을 떼면 ◀ ▶ 키가 다시 장을 넘긴다
+    drawInk();
+  }
+
+  /* 3 영상: 이 장에 오면 소리 없이 재생하고, 떠나면 멈춘다. 동작 줄이기를 켠 화면에서는 저절로 재생하지 않는다 */
+  {
+    const slide = $('#live'), video = $('#live-video');
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const sync = () => {
+      if (slide.classList.contains('is-active')) { if (!still) video.play().catch(() => {}); }
+      else video.pause();
+    };
+    new MutationObserver(sync).observe(slide, { attributes: true, attributeFilter: ['class'] });
+    sync();   // 주소가 #3이면 처음부터 이 장이다
+  }
+});
+</script>
+</body>
+</html>

@@ -8,199 +8,161 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   :root {
-    --paper: #F4F1EA; --ink: #1F2328; --mute: #62666D; --line: #DDD7CC; --card: #FFFFFF;
-    --accent: #E8541A; --info: #2563EB; --ok: #2E7D4F; --bad: #C2362F;
+    --paper: #F4F1EA; --ink: #1F2328; --mute: #5B5F66; --line: #DDD7CC; --card: #FFFFFF;
+    --accent: #E8541A; --accent-ink: #B13F0E; --info: #2563EB; --bad: #C2362F;
+    --night: #121418; --night-2: #1C1F25; --on: #F4F1EA; --on-2: #A9ADB5; --hl: #FF8A4C;
     --font: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     --mono: ui-monospace, Consolas, "D2Coding", monospace;
+    --ease: cubic-bezier(.16, 1, .3, 1);
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--font); word-break: keep-all; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.65 var(--font); word-break: keep-all; overflow-wrap: anywhere; caret-color: var(--accent); accent-color: var(--accent); }
+  ::selection { background: rgba(232, 84, 26, .22); color: inherit; }
+  h1, h2, b { text-wrap: balance; }
+  p, li span { text-wrap: pretty; }
+  a { color: inherit; text-underline-offset: .2em; text-decoration-thickness: 1px; }
+  .i { width: 1em; height: 1em; flex: none; vertical-align: -.125em; }
   .wrap { width: min(960px, 100%); margin: 0 auto; padding: 0 16px; }
-  header { padding: 40px 0 8px; }
-  .mark { display: inline-block; margin: 0 0 14px; font-weight: 800; font-size: 15px; letter-spacing: .02em; color: var(--accent); }
-  h1 { margin: 0; font-size: clamp(28px, 5.4vw, 44px); line-height: 1.25; letter-spacing: -.01em; }
-  .lead { margin: 14px 0 0; max-width: 40em; color: var(--mute); font-size: 18px; }
-  main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 28px 16px 48px; }
-  h2 { margin: 0 0 12px; font-size: 20px; }
-  .join { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
-  .join p { margin: 0 0 14px; color: var(--mute); }
-  .field { display: flex; gap: 8px; }
-  .field input { flex: 1; min-width: 0; min-height: 56px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--paper);
-    font: 700 28px var(--mono); letter-spacing: .24em; text-align: center; color: var(--ink); }
-  .field input:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
-  button { min-height: 56px; padding: 0 22px; border: 0; border-radius: 12px; background: var(--ink); color: #fff; font: 700 17px var(--font); cursor: pointer; }
-  button:focus-visible, a:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
-  #msg { min-height: 1.6em; margin: 12px 0 0; }
-  #msg.is-bad { color: var(--bad); }
-  .lessons { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
-  .lessons a { display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: inherit; text-decoration: none; }
-  .lessons a:hover { border-color: var(--ink); }
-  .lessons small { color: var(--accent); font-weight: 700; }
-  .lessons b { font-size: 18px; line-height: 1.4; }
-  .lessons span { color: var(--mute); font-size: 15px; }
-  .note { margin: 10px 0 0; color: var(--mute); font-size: 15px; }
-  footer { padding: 20px 0 40px; border-top: 1px solid var(--line); color: var(--mute); font-size: 14px; }
-  footer a { color: inherit; }
-  .ba { display: grid; gap: 14px; }
-  .ba figure { margin: 0; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
-  .ba .pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
-  .ba img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; }
-  .ba .to { font-size: 22px; color: var(--accent); font-weight: 800; }
-  .ba small { display: block; margin: 0 0 6px; color: var(--mute); font-size: 13px; font-weight: 700; }
-  .ba figcaption { margin: 10px 0 0; color: var(--mute); font-size: 15px; }
-  .ba figcaption b { color: var(--ink); }
-  .how { margin: 0; padding: 0; list-style: none; counter-reset: how; display: grid; gap: 10px; }
-  .how li { counter-increment: how; position: relative; padding: 16px 16px 16px 58px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
-  .how li::before { content: counter(how); position: absolute; left: 16px; top: 15px; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 800; font-size: 15px; display: grid; place-items: center; }
-  .how b { display: block; margin-bottom: 2px; }
-  .how p { margin: 0; color: var(--mute); font-size: 15px; }
-  .how code { display: block; margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--paper); font: 14px/1.5 var(--mono); color: var(--ink); word-break: break-all; }
-  .copy { min-height: 44px; margin-top: 8px; padding: 0 16px; font-size: 15px; }
-  /* ── 히어로 ── */
-  .hero { --night: #121418; --night-2: #1C1F25; --on: #F4F1EA; --on-2: #A9ADB5; --hl: #FF8A4C;
-    position: relative; overflow: hidden; background: var(--night); color: var(--on);
+  button { min-height: 56px; padding: 0 22px; border: 0; border-radius: 12px; background: var(--ink); color: #fff; font: 700 17px var(--font); cursor: pointer; transition: background .15s; }
+  button:hover { background: #000; }
+  button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+
+  /* ── 히어로: 칠판(어두운 모눈) 위에 체험 덱을 크게 띄운다 ── */
+  .hero { position: relative; display: flex; justify-content: center; min-height: 100vh; min-height: 100svh; background-color: var(--night); color: var(--on);
     background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-    background-size: 32px 32px;
-    display: flex; align-items: center; min-height: 100vh; min-height: 100svh; }
-  .hero-in { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 28px 40px; align-items: center; width: min(1180px, 100%); padding: 56px 16px 40px; }
-  .hero .tag { margin: 0 0 10px; color: var(--hl); font-weight: 800; font-size: 15px; letter-spacing: .02em; }
-  .hero .tag span { color: var(--on-2); font-weight: 600; }
-  .hero h1 { margin: 0; white-space: nowrap; font-size: clamp(44px, 6.4vw, 88px); line-height: 1; letter-spacing: -.035em; font-weight: 900; }
-  .hero h1 .ln { display: inline-block; overflow: hidden; padding: .04em .02em .1em; }
-  .hero h1 .ch { display: inline-block; }
-  .hero h1 .ch:nth-child(-n+5) { color: var(--hl); }
-  .hero .def { margin: 16px 0 0; font-size: clamp(20px, 2.6vw, 26px); font-weight: 700; line-height: 1.4; }
-  .hero .origin { margin: 10px 0 0; max-width: 34em; color: var(--on-2); font-size: 16px; }
-  .hero .origin b { color: var(--on); }
-  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 26px 0 0; }
-  .btn { display: inline-flex; align-items: center; min-height: 52px; padding: 0 20px; border: 1.5px solid rgba(255,255,255,.28); border-radius: 12px; color: var(--on); font-weight: 700; text-decoration: none; transition: border-color .15s, background .15s; }
+    background-size: 32px 32px; }
+  .hero ::selection { background: rgba(255, 138, 76, .35); }
+  .hero-in { display: grid; align-content: center; gap: 22px; width: min(1220px, 100%); padding: 32px 16px 24px; }
+  .hero-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 40px; align-items: end; }
+  .hero h1 { margin: 0; font-size: clamp(48px, 7vw, 88px); line-height: .95; letter-spacing: -.035em; font-weight: 900; }
+  .hero h1 .hl { color: var(--hl); }
+  .hero .def { margin: 14px 0 0; font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; line-height: 1.4; }
+  .hero .origin { margin: 6px 0 0; max-width: 40em; color: var(--on-2); font-size: 16px; }
+  .hero .origin b { color: var(--on); font-weight: 700; }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; max-width: 580px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 20px; border: 1.5px solid rgba(255,255,255,.28); border-radius: 12px; color: var(--on); font-weight: 700; text-decoration: none; transition: border-color .15s, background .15s; }
   .btn:hover { border-color: var(--on); background: rgba(255,255,255,.06); }
   .btn.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
-  .btn.primary:hover { background: #D04712; }
-  .code-link { flex-basis: 100%; color: var(--on-2); font-size: 15px; }
+  .btn.primary:hover { background: #D04712; border-color: #D04712; }
+  .code-link { display: inline-flex; align-items: center; gap: 6px; flex-basis: 100%; justify-content: flex-end; min-height: 44px; color: var(--on-2); font-size: 15px; text-decoration: none; }
   .code-link:hover { color: var(--on); }
-  .xg { margin: 0; }
-  .xg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
-  .xg-chip { min-height: 36px; padding: 0 14px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; background: transparent; color: var(--on-2); font-size: 14px; font-weight: 700; }
-  .xg-chip[aria-pressed="true"] { border-color: var(--hl); background: rgba(232,84,26,.16); color: var(--on); }
-  .xg-board { position: relative; padding: 14px 14px 12px; border: 1px solid rgba(255,255,255,.14); border-radius: 20px; background: var(--night-2); box-shadow: 0 30px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); }
-  #xg-svg { display: block; width: 100%; height: auto; aspect-ratio: 480 / 300; cursor: pointer; }
-  .xg figcaption { margin: 10px 2px 0; color: var(--on-2); font-size: 15px; font-weight: 700; }
-  .xg-ctrl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: center; margin: 8px 4px 0; }
-  .xg-ctrl label { color: var(--on-2); font-size: 14px; font-weight: 700; }
-  .xg-ctrl input { width: 100%; height: 32px; margin: 0; accent-color: var(--accent); cursor: pointer; }
-  .xg-ctrl output { grid-column: 1 / -1; min-height: 1.5em; font: 700 16px/1.5 var(--font); font-variant-numeric: tabular-nums; }
-  #xg-hand { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; will-change: transform; filter: drop-shadow(0 4px 8px rgba(0,0,0,.5)); }
-  #xg-hand svg { display: block; margin: -4px 0 0 -6px; }
-  .xg-ppt { position: absolute; inset: 14px 14px auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; aspect-ratio: 480 / 300; align-items: center; }
-  .xg-ppt[hidden] { display: none; }
-  .xg-frame { padding: 8px; border-radius: 8px; background: #FBFAF7; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
-  .xg-frame small { display: block; margin: 0 0 4px; color: #62666D; font-size: 12px; font-weight: 700; }
-  .xg-frame svg { display: block; width: 100%; height: auto; }
-  .xg-frame .xg-box { fill: #fff; stroke: #C9C2B5; }
-  .xg-frame .xg-dot { fill: #2563EB; }
-  /* 익스플로라그램 그림 */
-  .xg-box { fill: rgba(255,255,255,.03); stroke: rgba(255,255,255,.35); stroke-width: 1.5; }
-  .xg-grid { stroke: rgba(255,255,255,.12); stroke-dasharray: 4 5; }
-  .xg-cell { fill: transparent; transition: fill .3s; }
-  .xg-cell.on { fill: rgba(37,99,235,.24); }
-  .xg-dot { fill: #6EA0FF; }
-  .xg-axis { stroke: rgba(255,255,255,.5); stroke-width: 1.5; }
-  .xg-t { fill: var(--on-2); font: 700 13px var(--font); }
-  .xg-demand { stroke: #6EA0FF; stroke-width: 3; }
-  .xg-supply { stroke: #FF8A4C; stroke-width: 3; }
-  .xg-t-d { fill: #6EA0FF; } .xg-t-s { fill: #FF8A4C; }
-  .xg-eq { fill: var(--on); }
-  .xg-price { stroke: rgba(255,255,255,.35); stroke-dasharray: 5 5; }
-  .xg-gap { stroke: #FF8A4C; stroke-width: 8; stroke-linecap: round; opacity: .55; }
-  .xg-gap.short { stroke: #6EA0FF; }
-  .xg-gap-t { fill: var(--on); font-size: 14px; }
-  .xg-pt-d { fill: #6EA0FF; stroke: var(--night-2); stroke-width: 2; }
-  .xg-pt-s { fill: #FF8A4C; stroke: var(--night-2); stroke-width: 2; }
-  .xg-cone { fill: rgba(255,214,102,.14); }
-  .xg-screen { fill: #E9E4DA; }
-  .xg-shadow { fill: #23262C; }
-  .xg-obj { fill: #FF8A4C; }
-  .xg-torch rect { fill: #9AA0AA; }
-  .xg-bulb { fill: #FFD666; }
-  .feats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0 0; padding: 0; list-style: none; }
-  .feats li { display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.03); }
-  .feats b { font-size: 17px; }
-  .feats b::before { content: ''; display: inline-block; width: 8px; height: 8px; margin: 0 8px 2px 0; border-radius: 50%; background: var(--hl); }
-  .feats span { color: var(--on-2); font-size: 15px; }
-  .lite { position: absolute; right: 16px; top: 16px; min-height: 32px; padding: 0 12px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; background: transparent; color: var(--on-2); font-size: 13px; font-weight: 700; }
-  .lite[aria-pressed="true"] { border-color: var(--on-2); color: var(--on); }
-  .hero[data-mode="still"] .lite { display: none; }
-  .amb { position: absolute; inset: 0; pointer-events: none; }
-  .amb i { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--hl); opacity: .35; }
-  .amb i:nth-child(3n) { width: 16px; height: 16px; border-radius: 3px; background: transparent; border: 2px solid #6EA0FF; }
-  .amb i:nth-child(3n+1) { background: #6EA0FF; }
-  .amb i:nth-child(1) { left: 6%; top: 18%; } .amb i:nth-child(2) { left: 42%; top: 8%; } .amb i:nth-child(3) { left: 88%; top: 14%; }
-  .amb i:nth-child(4) { left: 12%; top: 78%; } .amb i:nth-child(5) { left: 52%; top: 90%; } .amb i:nth-child(6) { left: 94%; top: 70%; }
-  .amb i:nth-child(7) { left: 30%; top: 52%; } .amb i:nth-child(8) { left: 70%; top: 4%; } .amb i:nth-child(9) { left: 3%; top: 46%; } .amb i:nth-child(10) { left: 60%; top: 62%; }
-  .hero .btn:focus-visible, .xg-chip:focus-visible, .lite:focus-visible { outline: 3px solid #6EA0FF; outline-offset: 2px; }
-  @media (min-width: 1400px) and (min-height: 820px) {
-    .hero-in { width: min(1400px, 100%); gap: 36px 64px; }
-    .hero h1 { font-size: 104px; }
-    .hero .tag { font-size: 17px; } .hero .def { font-size: 32px; } .hero .origin { font-size: 19px; }
-    .btn { min-height: 60px; padding: 0 26px; font-size: 18px; } .code-link { font-size: 17px; }
-    .xg-chip { min-height: 40px; font-size: 15px; } .xg figcaption, .xg-ctrl output { font-size: 17px; } .xg-ctrl label { font-size: 15px; }
-    .feats li { padding: 20px 22px; } .feats b { font-size: 19px; } .feats span { font-size: 16px; }
+  .hero .btn:focus-visible, .hero a:focus-visible { outline-color: #6EA0FF; }
+
+  /* 덱 크기: 한 화면에 도구 막대까지 보이게. 화면 높이에서 머리 글·여백·도구 막대·설명(약 390px)을 빼고 16:9 */
+  .tour { justify-self: center; width: min(100%, max(640px, calc((100svh - 390px) * 16 / 9))); margin: 0; }
+  .tour-frame { position: relative; container-type: inline-size; border-radius: 16px; overflow: hidden; background: #1B1D21; box-shadow: 0 28px 70px -24px rgba(0,0,0,.85); }
+  .tour-frame iframe { display: block; width: 100%; height: calc(100cqw * 9 / 16 + 80px); border: 0; }
+  .tour-frame iframe[hidden] { display: none; }
+  .tour-poster { position: relative; display: block; color: var(--on); text-decoration: none; }
+  .tour-poster img { display: block; width: 100%; height: auto; }
+  .tour-poster span { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 800; white-space: nowrap; box-shadow: 0 8px 20px -6px rgba(0,0,0,.5); }
+  .tour-frame.is-live .tour-poster { display: none; }
+  .tour figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 10px 2px 0; color: var(--on-2); font-size: 15px; }
+  .tour figcaption a { color: var(--on); font-weight: 700; }
+
+  /* ── 아래 화면 ── */
+  main.wrap { padding-top: 56px; padding-bottom: 72px; }
+  main > section + section { margin-top: 72px; }
+  h2 { margin: 0 0 16px; font-size: clamp(24px, 3vw, 30px); line-height: 1.3; letter-spacing: -.02em; }
+  .note { margin: 14px 0 0; color: var(--mute); font-size: 15px; }
+
+  .join { padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+  .join h2 { margin-bottom: 4px; font-size: 22px; }
+  .join p { margin: 0 0 16px; color: var(--mute); }
+  .field { display: flex; gap: 8px; }
+  .field input { flex: 1; min-width: 0; min-height: 56px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--paper);
+    font: 700 28px var(--mono); letter-spacing: .24em; text-align: center; color: var(--ink); transition: border-color .15s; }
+  .field input:hover { border-color: #BFB7A8; }
+  .field input::placeholder { color: #8B8E94; }
+  #msg { min-height: 1.6em; margin: 12px 0 0; }
+  #msg.is-bad { color: var(--bad); }
+
+  .ba { display: grid; gap: 36px; }
+  .ba figure { margin: 0; }
+  .ba .pair { display: grid; grid-template-columns: 1fr 32px 1fr; gap: 12px; align-items: center; }
+  .ba img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+  .ba .to { width: 32px; height: 32px; color: var(--accent); }
+  .ba small { display: block; margin: 0 0 6px; color: var(--mute); font-size: 13px; font-weight: 700; }
+  .ba figcaption { margin: 12px 0 0; color: var(--mute); font-size: 16px; }
+  .ba figcaption b { color: var(--ink); }
+
+  .lessons { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+  .lessons li { border-bottom: 1px solid var(--line); }
+  .lessons a { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 2px 20px; align-items: baseline; padding: 18px 4px; text-decoration: none; transition: background .15s; }
+  .lessons a:hover { background: rgba(255,255,255,.55); }
+  .lessons small { color: var(--accent-ink); font-size: 14px; font-weight: 800; }
+  .lessons b { font-size: 19px; line-height: 1.4; }
+  .lessons span { grid-column: 2; color: var(--mute); font-size: 15px; }
+  .lessons .i { grid-column: 3; grid-row: 1 / span 2; align-self: center; width: 22px; height: 22px; color: var(--mute); transition: transform .2s var(--ease), color .15s; }
+  .lessons a:hover .i { transform: translateX(4px); color: var(--accent); }
+
+  .how { margin: 0; padding: 0; list-style: none; counter-reset: how; display: grid; gap: 28px; }
+  .how li { counter-increment: how; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 0 16px; }
+  .how li::before { content: counter(how); grid-row: 1 / span 9; width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 800; font-size: 16px; display: grid; place-items: center; }
+  .how b { font-size: 19px; line-height: 1.4; }
+  .how p { margin: 4px 0 0; color: var(--mute); }
+  .prompt { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 12px 0 0; }
+  .prompt code { flex: 1 1 320px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); font: 15px/1.55 var(--mono); color: var(--ink); }
+  .copy { min-height: 48px; padding: 0 18px; font-size: 15px; }
+
+  footer.wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; padding-top: 22px; padding-bottom: 40px; border-top: 1px solid var(--line); color: var(--mute); font-size: 14px; }
+  footer p { margin: 0; }
+
+  @media (max-width: 900px) {
+    .hero-head { grid-template-columns: minmax(0, 1fr); align-items: start; }
+    .cta { justify-content: flex-start; max-width: none; }
+    .code-link { justify-content: flex-start; }
   }
-  @media (min-width: 901px) and (max-height: 800px) { .hero-in { padding-top: 40px; padding-bottom: 28px; } }
-  @media (max-width: 900px) { .hero-in { grid-template-columns: 1fr; padding-top: 64px; } .hero h1 { font-size: clamp(40px, 14vw, 96px); } .feats { grid-template-columns: 1fr; } }
-  @media (max-width: 480px) { .btn { flex: 1 1 100%; justify-content: center; } .xg-board { padding: 10px; } }
-  @media (max-width: 640px) { .ba .pair { grid-template-columns: 1fr; } .ba .to { transform: rotate(90deg); justify-self: center; } }
-  @media (max-width: 480px) { .field { flex-direction: column; } button { width: 100%; } .xg-chip, .lite { width: auto; } }
+  @media (max-width: 699px) {
+    .hero { min-height: 0; }
+    .hero-in { padding-top: 48px; padding-bottom: 40px; }
+    .tour { width: 100%; }
+    .tour .wide-only { display: none; }
+    .btn { flex: 1 1 100%; }
+    .ba .pair { grid-template-columns: 1fr; }
+    .ba .to { transform: rotate(90deg); justify-self: center; }
+    .lessons a { grid-template-columns: minmax(0, 1fr) auto; }
+    .lessons small, .lessons b, .lessons span { grid-column: 1; }
+    .lessons .i { grid-column: 2; grid-row: 1 / span 3; }
+    .join { padding: 22px 18px; }
+  }
+  @media (max-width: 480px) {
+    .field { flex-direction: column; }
+    .field button, .copy { width: 100%; }
+  }
+  @media (min-width: 1400px) and (min-height: 860px) {
+    .hero-in { width: min(1400px, 100%); }
+    .hero h1 { font-size: 96px; } .hero .def { font-size: 28px; } .hero .origin { font-size: 18px; }
+    .btn { min-height: 56px; padding: 0 24px; font-size: 18px; }
+  }
 </style>
 </head>
 <body>
-<header class="hero" data-mode="still" aria-labelledby="hero-h">
-  <div class="amb" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="hero-in wrap">
-    <div class="hero-text">
-      <p class="tag">PPT를 학생이 만지는 수업으로 · <span>옛 이름 class-html</span></p>
-      <h1 id="hero-h" aria-label="Exploragram"><span class="ln" aria-hidden="true"><span class="ch">E</span><span class="ch">x</span><span class="ch">p</span><span class="ch">l</span><span class="ch">o</span><span class="ch">r</span><span class="ch">a</span><span class="ch">g</span><span class="ch">r</span><span class="ch">a</span><span class="ch">m</span></span></h1>
-      <p class="def">학생이 직접 움직이며 원리를 찾아내는 수업 그림</p>
-      <p class="origin"><b>explore + diagram.</b> 익스플로라토리움(Exploratorium)이 과학관을 만지게 했듯, 칠판 위 그림을 학생이 만지게 합니다.</p>
-      <div class="cta">
-        <a class="btn primary" href="lessons/sci-diffusion.html">Exploragram 만져보기</a>
-        <a class="btn" href="live-demo.html">실시간 수업 체험</a>
-        <a class="btn" href="#how-h">내 PPT로 만들기</a>
-        <a class="code-link" href="#join-h">수업 코드 받았나요? →</a>
+<header class="hero" aria-labelledby="hero-h">
+  <div class="hero-in">
+    <div class="hero-head">
+      <div>
+        <h1 id="hero-h"><span class="hl">Explo</span>ragram</h1>
+        <p class="def">학생이 직접 움직이며 원리를 찾아내는 수업 그림</p>
+        <p class="origin"><b>explore + diagram.</b> 익스플로라토리움(Exploratorium)이 과학관을 만지게 했듯, 칠판 위 그림을 학생이 만지게 합니다.</p>
       </div>
+      <nav class="cta" aria-label="바로 가기">
+        <a class="btn primary" href="#how-h">내 PPT로 만들기</a>
+        <a class="btn" href="#lessons-h">예시 수업</a>
+        <a class="btn" href="live-demo.html">실시간 수업 체험</a>
+        <a class="code-link" href="#join-h">수업 코드를 받았나요? <svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </nav>
     </div>
 
-    <figure class="xg">
-      <div class="xg-chips" role="group" aria-label="예시 고르기">
-        <button type="button" class="xg-chip" aria-pressed="true">과학 · 확산</button>
-        <button type="button" class="xg-chip" aria-pressed="false">사회 · 수요와 공급</button>
-        <button type="button" class="xg-chip" aria-pressed="false">초등 · 그림자</button>
+    <figure class="tour">
+      <div class="tour-frame">
+        <iframe id="tour" title="Exploragram 체험 덱: 막대 밀기, 판서, 실시간 수업 영상" data-src="tour.html" allow="fullscreen" hidden></iframe>
+        <a class="tour-poster" href="tour.html"><img src="img/tour-poster.webp" width="1280" height="720" alt="체험 덱 첫 장: 시간 막대를 밀면 잉크 입자가 퍼지는 상자"><span>체험 덱 열기</span></a>
       </div>
-      <div class="xg-board">
-        <svg id="xg-svg" viewBox="0 0 480 300" role="img" aria-labelledby="xg-cap"><title>누르면 이 수업을 엽니다</title></svg>
-        <div class="xg-ppt" hidden aria-hidden="true">
-          <div class="xg-frame"><small>처음</small><svg viewBox="100 10 280 280"></svg></div>
-          <div class="xg-frame"><small>1분 뒤</small><svg viewBox="100 10 280 280"></svg></div>
-          <div class="xg-frame"><small>5분 뒤</small><svg viewBox="100 10 280 280"></svg></div>
-        </div>
-        <div class="xg-ctrl">
-          <label for="xg-range" id="xg-range-label">시간</label>
-          <input id="xg-range" type="range" min="0" max="1000" value="150">
-          <output id="xg-out" for="xg-range"></output>
-        </div>
-        <div id="xg-hand" aria-hidden="true"><svg class="xg-hand-i" width="34" height="40" viewBox="0 0 34 40"><path d="M6 2c2 0 3.5 1.5 3.5 3.5V18l1.6-.5c1.9-.6 3.4.3 3.9 1.6 1.8-.8 3.6 0 4.1 1.5 1.8-.6 3.6.4 4 2 2-.2 3.4 1.2 3.4 3.2v4.4C26.5 36.6 22.6 39 17.6 39h-2.2c-3.6 0-6.4-1.6-8.4-4.6L1.6 26c-1.1-1.7-.6-3.6.9-4.4 1.4-.8 3-.3 4 .9V5.5C2.5 3.5 4 2 6 2Z" fill="#fff" stroke="#1F2328" stroke-width="2" stroke-linejoin="round"/></svg></div>
-      </div>
-      <figcaption id="xg-cap">과학 · 잉크는 어떻게 퍼질까?</figcaption>
+      <figcaption><span>수업 PPT가 이런 파일이 됩니다.<span class="wide-only"> 펜을 골라 직접 써 보세요.</span></span><a class="wide-only" href="tour.html">크게 열기</a></figcaption>
     </figure>
-
-    <ul class="feats">
-      <li><b>전자칠판 판서</b><span>펜을 든 채로 넘기고, 막대와 단추도 그대로 누릅니다.</span></li>
-      <li><b>실시간 상호작용</b><span>학생이 맞춘 값이 선생님 화면에 막대로 모입니다.</span></li>
-      <li><b>학생 디벗에서 코드 하나로</b><span>코드 6자리면 참여합니다. 이름은 받지 않습니다.</span></li>
-    </ul>
-    <button type="button" id="xg-lite" class="lite" aria-pressed="false">가볍게 보기</button>
   </div>
 </header>
 
@@ -221,7 +183,7 @@
       <figure>
         <div class="pair">
           <div><small>원래 PPT</small><img src="img/sci-before.png" width="1280" height="720" loading="lazy" alt="실습 PPT: 잉크 입자 그림 세 장(처음, 1분 뒤, 5분 뒤)"></div>
-          <span class="to" aria-hidden="true">→</span>
+          <svg class="to" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 16h18M17 9l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <div><small>Exploragram</small><img src="img/sci-after.png" width="1280" height="720" loading="lazy" alt="Exploragram: 시간 막대를 2분에 두자 잉크 입자가 9칸 중 6칸으로 퍼진 입자 상자"></div>
         </div>
         <figcaption><b>과학 · 확산</b> — 정지 그림 세 장이 시간 막대가 됩니다. 막대를 밀면 입자가 움직이고, 잉크가 있는 칸 수가 함께 바뀝니다.</figcaption>
@@ -229,50 +191,61 @@
       <figure>
         <div class="pair">
           <div><small>원래 PPT</small><img src="img/soc-before.png" width="1280" height="720" loading="lazy" alt="실습 PPT: 수요 곡선과 공급 곡선, 균형점 E"></div>
-          <span class="to" aria-hidden="true">→</span>
+          <svg class="to" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 16h18M17 9l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <div><small>Exploragram</small><img src="img/soc-after.png" width="1280" height="720" loading="lazy" alt="Exploragram: 가격을 3,500원에 두자 초과 공급 200인분과 가격 하락 화살표가 나타난 그래프"></div>
         </div>
         <figcaption><b>사회 · 수요와 공급</b> — 가격 막대를 3,500원에 두면 초과 공급이 보이고, 「시장에 맡기기」를 누르면 가격이 균형으로 내려갑니다.</figcaption>
       </figure>
     </div>
-    <p class="note">원래 PPT는 연수용으로 직접 만든 실습 PPT입니다. 두 수업은 아래 예시 수업에서 직접 만져 볼 수 있습니다.</p>
+    <p class="note">원래 PPT는 연수용으로 직접 만든 실습 자료입니다.</p>
   </section>
 
   <section aria-labelledby="lessons-h">
-    <h2 id="lessons-h">예시 수업 (선생님 화면)</h2>
+    <h2 id="lessons-h">예시 수업</h2>
     <ul class="lessons">
-      <li><a href="lessons/sci-diffusion.html"><small>과학</small><b>냄새는 어떻게 퍼질까?</b><span>확산과 입자의 운동 · 잉크 입자 상자, 온도와 확산</span></a></li>
-      <li><a href="lessons/soc-supply-demand.html"><small>사회</small><b>떡볶이 값은 누가 정할까?</b><span>수요와 공급 · 표를 그래프로, 시장 가격의 결정</span></a></li>
-      <li><a href="lessons/elem-shadow.html"><small>초등 과학</small><b>그림자는 어떻게 생길까?</b><span>빛과 그림자 · 손전등 거리와 그림자 크기, 물체와 그림자 진하기</span></a></li>
-      <li><a href="lessons/mid-linear.html"><small>중학 수학</small><b>일차함수의 그래프</b><span>기울기와 y절편 · 슬라이더로 움직이는 직선, 배터리 충전 문제</span></a></li>
-      <li><a href="lessons/eth-exploragram.html"><small>윤리</small><b>윤리 익스플로라그램</b><span>이성과 정서의 저울, 조상 마을 시뮬레이터 등 활동 다섯</span></a></li>
+      <li><a href="lessons/sci-diffusion.html"><small>과학</small><b>냄새는 어떻게 퍼질까?</b><span>잉크 입자 상자, 온도와 확산</span><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      <li><a href="lessons/soc-supply-demand.html"><small>사회</small><b>떡볶이 값은 누가 정할까?</b><span>표를 그래프로, 시장 가격의 결정</span><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      <li><a href="lessons/elem-shadow.html"><small>초등 과학</small><b>그림자는 어떻게 생길까?</b><span>손전등 거리와 그림자 크기, 그림자 진하기</span><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      <li><a href="lessons/mid-linear.html"><small>중학 수학</small><b>일차함수의 그래프</b><span>슬라이더로 움직이는 직선, 배터리 충전 문제</span><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+      <li><a href="lessons/eth-exploragram.html"><small>윤리</small><b>윤리 익스플로라그램</b><span>이성과 정서의 저울, 조상 마을 시뮬레이터 등 활동 다섯</span><svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
     </ul>
-    <p class="note">수업을 연 뒤 도구 막대의 「실시간」을 누르면 코드와 QR이 나옵니다.</p>
+    <p class="note">선생님 화면으로 열립니다. 도구 막대의 「실시간」을 누르면 코드와 QR이 나옵니다.</p>
   </section>
 
   <section aria-labelledby="how-h">
-    <h2 id="how-h">선생님: 내 PPT로 만들기</h2>
+    <h2 id="how-h">내 PPT로 만들기</h2>
     <ol class="how">
-      <li><b>AI에게 PPT와 한 줄을 줍니다</b><p>ChatGPT·Gemini·Claude 어느 것이든 됩니다. 수업 PPT를 올리고 아래 글을 붙여 넣으세요.</p>
-        <code id="prompt">https://github.com/N-lifescience/exploragram 지침대로 이 PPT를 수업 HTML로 바꿔줘</code>
-        <button type="button" class="copy" data-copy="prompt">글 복사</button>
-        <p style="margin-top:8px">주소를 못 읽는 AI라면 <a href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/class-html-guide.md">합본 지침 파일</a>을 받아 PPT와 함께 올립니다.</p></li>
-      <li><b>AI의 질문에 답합니다</b><p>교과·차시, 학생이 헷갈리는 지점, 꼭 만지게 하고 싶은 장면을 묻습니다. 설계표를 보여 주면 확인합니다.</p></li>
-      <li><b>받은 파일을 열어 수업합니다</b><p>더블클릭해 크롬에서 엽니다. 툴바에서 펜을 고른 채로 ◀ ▶로 넘기고, 단추와 슬라이더도 그대로 누릅니다. 판서는 장마다, 반마다 남습니다.</p></li>
-      <li><b>고칠 곳은 바로 고칩니다</b><p>툴바 「편집」에서 글·상자·그림을 골라 고치고 「HTML 저장」으로 받습니다. AI에게 다시 부탁하지 않아도 됩니다.</p></li>
-      <li><b>학생과 함께 만지려면 「실시간」</b><p>툴바 「실시간」을 누르면 코드와 QR이 나옵니다. 학생은 이 사이트에 코드를 넣고, 선생님은 「학생 보기」로 학생 값이 모이는 막대를 봅니다.</p></li>
+      <li><b>AI에게 PPT와 한 줄을 줍니다</b><p>ChatGPT, Gemini, Claude 어느 것이든 됩니다. 수업 PPT를 올리고 아래 글을 붙여 넣으세요.</p>
+        <div class="prompt"><code id="prompt">https://github.com/N-lifescience/exploragram 지침대로 이 PPT를 수업 HTML로 바꿔줘</code><button type="button" class="copy" data-copy="prompt">글 복사</button></div>
+        <p>주소를 못 읽는 AI라면 <a href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/class-html-guide.md">합본 지침 파일</a>을 받아 PPT와 함께 올립니다.</p></li>
+      <li><b>AI의 질문에 답합니다</b><p>학생이 헷갈리는 지점과 꼭 만지게 하고 싶은 장면을 묻습니다. 설계표를 보여 주면 확인합니다.</p></li>
+      <li><b>받은 파일을 열어 수업합니다</b><p>더블클릭해 크롬에서 엽니다. 고칠 곳은 도구 막대의 「편집」으로 바로 고치고 학생과 함께하려면 「실시간」을 누릅니다.</p></li>
     </ol>
-    <p class="note">교과서·출판사 그림이 들어간 수업 파일은 수업용으로만 쓰고 인터넷에 올리지 마세요.</p>
+    <p class="note">교과서나 출판사 그림이 들어간 수업 파일은 수업용으로만 쓰고 인터넷에 올리지 마세요.</p>
   </section>
 </main>
 
 <footer class="wrap">
-  저장 안 함 · 이름 안 받음 — 학생 값은 수업 중 선생님 화면에만 있다가 창을 닫으면 사라집니다.
-  · <a href="https://github.com/N-lifescience/exploragram">GitHub</a> (MIT)
+  <p>학생 값은 저장하지 않고 이름도 받지 않습니다. 수업 중 선생님 화면에만 있다가 창을 닫으면 사라집니다.</p>
+  <p><a href="https://github.com/N-lifescience/exploragram">GitHub</a> (MIT) · 옛 이름 class-html</p>
 </footer>
 
 <script src="live-config.js"></script>
-<script src="hero.js"></script>
+<script>
+// 체험 덱은 넓은 화면에서만 바로 띄운다. 좁은 화면은 첫 장 그림을 누르면 덱이 전체 화면으로 열린다(엔진 무대가 16:9라 글자가 너무 작아진다).
+(function () {
+  const frame = document.getElementById('tour');
+  const wide = matchMedia('(min-width: 700px)');
+  const load = () => {
+    if (!wide.matches || frame.src) return;
+    frame.src = frame.dataset.src;
+    frame.hidden = false;
+    frame.parentElement.classList.add('is-live');
+  };
+  load();
+  wide.addEventListener('change', load);
+}());
+</script>
 <script>
 // 코드로 교사 상태를 한 번 들은 뒤, 사이트의 예시 수업이면 그 수업으로 보낸다(학생 역할로).
 (function () {
