@@ -20,6 +20,7 @@
     </figure>
   </div>
   <figure class="plot" id="inv" style="width:400px" data-x="-1, 1" data-y="-5, 5" data-height="240"><i data-line="1 / x"></i></figure>
+  <figure class="plot" id="asy" style="width:400px" data-x="-4, 4" data-y="-5, 5" data-height="240"><i data-line="2 / (x - 0.013) + 1"></i></figure>
   <figure class="plot" id="bad" data-x="3, 1"><i data-line="x +"></i></figure>
 </section>
 <section class="slide" id="p2">
@@ -59,6 +60,10 @@ test('곡선은 200칸, 값이 없는 곳에서 끊는다', () => {
   eq((d.match(/L/g) || []).length, 200);
   const inv = it('inv').layer.querySelector('path').getAttribute('d');
   eq((inv.match(/M/g) || []).length, 2);
+});
+test('점근선을 건너는 곳에서는 세로선을 긋지 않는다(분수함수)', () => {
+  const d = it('asy').layer.querySelector('path').getAttribute('d');
+  eq((d.match(/M/g) || []).length, 2, '점근선 양쪽 두 갈래');
 });
 test('범례, 점선, 색 지정', () => {
   const items = Array.from(it('pl').legend.children);

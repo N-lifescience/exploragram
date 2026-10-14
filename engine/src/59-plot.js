@@ -189,13 +189,19 @@ const Plot = {
     const lo = dom ? Math.max(item.x[0], dom[0]) : item.x[0];
     const hi = dom ? Math.min(item.x[1], dom[1]) : item.x[1];
     if (!(hi >= lo)) return pts;
+    // 점근선(k / (x − p), tan x)을 건너는 곳에서는 선을 끊는다. 화면 위아래 밖으로 반대쪽까지 뛰면 이어 긋지 않는다.
+    const span = item.y[1] - item.y[0];
+    const far = (y) => (y > item.y[1] + span ? 1 : y < item.y[0] - span ? -1 : 0);
+    let prev = NaN;
     for (let i = 0; i <= N; i++) {
       const x = lo + ((hi - lo) * i) / N;
       s.x = x;
       let y;
       try { y = Number(fn(s)); } catch (err) { y = NaN; }
+      if (Number.isFinite(y) && Number.isFinite(prev) && far(y) && far(prev) === -far(y) && seg.length) { pts.push(seg); seg = []; }
       if (Number.isFinite(y)) seg.push([this.sx(item, x), clamp(this.sy(item, y), -10 * item.h, 11 * item.h)]);
       else if (seg.length) { pts.push(seg); seg = []; }
+      prev = y;
     }
     if (seg.length) pts.push(seg);
     return pts;
