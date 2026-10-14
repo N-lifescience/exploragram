@@ -252,6 +252,19 @@ const Audit = {
             }
           } finally { el.value = keep; Calc.update(item); }
         }
+        // 그래프 위 끌 수 있는 점: 범위의 네 귀퉁이(눈금에 붙인 자리)로 하나씩 옮겨 잰다(값 글자가 길어지거나 숨은 글이 나오는 경우)
+        for (const d of item.drags.filter((x) => x.range)) {
+          const keep = [d.x, d.y];
+          const name = `점 ${d.label || d.names.join(', ')}`;
+          try {
+            for (const [cx, cy, where] of [[0, 0, '왼쪽 아래'], [1, 1, '오른쪽 위'], [0, 1, '왼쪽 위'], [1, 0, '오른쪽 아래']]) {
+              d.x = Plot.snap(d.range[0][cx], d.snap[0], d.range[0]);
+              d.y = Plot.snap(d.range[1][cy], d.snap[1], d.range[1]);
+              Calc.update(item);
+              measure(slide, i, `${name}을(를) ${where} 끝 (${Expr.format(d.x)}, ${Expr.format(d.y)})로 옮겼을 때`);
+            }
+          } finally { [d.x, d.y] = keep; Calc.update(item); }
+        }
         const groups = new Map();
         for (const b of item.sets) groups.set(b.dataset.set, (groups.get(b.dataset.set) || []).concat(b));
         for (const group of groups.values()) {
@@ -336,7 +349,7 @@ const Audit = {
       }
     }
     // 활동 = 입력에 따라 화면이 달라지는 부품. 글만 차례로 여는 .reveal·.switch는 그림·도식·계산이 함께 있을 때만 센다.
-    const ACT = '.map-reveal, .ch-yearline, .sort, .labeling, .quiz, .short, .ch-order, .calc, .plot, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
+    const ACT = '.map-reveal, .ch-yearline, .sort, .labeling, .quiz, .short, .ch-order, .calc, .plot, .ch-plot-drag, .particles, input[type="range"]:not(.ch-stops input), [data-activity]';
     const visual = (st) => st.el.matches('[data-name]') || !!st.el.closest('.calc')
       || !!st.el.querySelector('.veil, img, svg, figure, canvas');
     // 단추만 있고 그림·수치·입력이 하나도 없는 장의 data-activity는 '누르면 글만 바뀌는 것'이다. 알리고, 활동 장으로 세지 않는다.

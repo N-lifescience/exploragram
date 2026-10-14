@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko" data-deck="test-plot-drag">
+<head>
+<meta charset="utf-8">
+<title>plot drag</title>
+<link rel="stylesheet" href="../../engine/class-html.css">
+<script defer src="../../engine/class-html.js"></script>
+<script src="harness.js"></script>
+<script src="pointer.js"></script>
+</head>
+<body>
+<section class="slide" id="g1"><h2>무게중심</h2>
+  <div class="calc" id="cen" style="display:grid;grid-template-columns:640px 1fr;gap:28px;align-items:start" data-let="gx = (ax + bx + cx) / 3; gy = (ay + by + cy) / 3; mx = (bx + cx) / 2; my = (by + cy) / 2; r = sqrt((gx - ax) ^ 2 + (gy - ay) ^ 2) / sqrt((mx - gx) ^ 2 + (my - gy) ^ 2)">
+    <figure class="plot" id="tri" style="width:640px" data-x="-5, 5" data-y="-5, 5" data-xstep="1" data-ystep="1" data-height="400">
+      <i data-path="ax, ay; bx, by; cx, cy" data-close data-fill data-label="삼각형"></i>
+      <i data-path="ax, ay; mx, my" data-dash></i>
+      <i data-point="gx, gy" data-label="G"></i>
+      <i data-drag="ax, ay" data-value="-3, -2" data-label="A" data-snap="1"></i>
+      <i data-drag="bx, by" data-value="4, -1" data-label="B" data-snap="1" data-color="#2563EB"></i>
+      <i data-drag="cx, cy" data-value="1, 4" data-label="C" data-snap="1"></i>
+    </figure>
+    <div>
+    <p>G(<output id="gx" data-expr="gx" data-digits="2"></output>, <output id="gy" data-expr="gy" data-digits="2"></output>)</p>
+    <p>AG : GM = <output id="ratio" data-expr="r" data-digits="2"></output> : 1</p>
+    </div>
+  </div>
+</section>
+<section class="slide" id="l1"><h2>두 점을 지나는 직선</h2>
+  <div class="calc" id="ln" data-let="dx = qx - px; m = dx == 0 ? 0 : (qy - py) / dx; k = py - m * px">
+    <figure class="plot" id="lp" style="width:560px" data-x="-4, 4" data-y="-4, 4" data-height="340">
+      <i data-line="m * x + k" data-show="dx != 0"></i>
+      <i data-vline="px" data-show="dx == 0"></i>
+      <i data-drag="px, py" data-value="-2, -1" data-label="P" data-snap="0.5"></i>
+      <i data-drag="qx, qy" data-value="2, 3" data-label="Q"></i>
+    </figure>
+    <p id="eqn" data-expr="dx == 0 ? 'x = ' + px : 'y = ' + fix(m, 2) + 'x + ' + fix(k, 2)"></p>
+  </div>
+</section>
+<section class="slide" id="fz"><h2>줄여 보인 장에서 점 끌기</h2>
+  <div class="calc"><figure class="plot" id="fp" style="width:520px" data-x="0, 10" data-y="0, 10" data-height="300"><i data-drag="fx, fy" data-value="2, 2" data-label="F"></i></figure></div>
+  <div style="height:420px;background:#EEE">넘치게 하는 상자</div>
+</section>
+<section class="slide" id="bad"><h2>잘못 쓴 점</h2>
+  <div class="calc" data-const="k = 2" data-let="z = 1">
+    <input type="range" name="v" min="0" max="1" value="0" aria-label="v">
+    <figure class="plot" id="bp" style="width:400px" data-x="0, 5" data-y="0, 5" data-height="240">
+      <i data-drag="a x, ay" data-value="1, 1"></i>
+      <i data-drag="k, ky" data-value="1, 1"></i>
+      <i data-drag="z, zy" data-value="1, 1"></i>
+      <i data-drag="vx, v" data-value="1, 1"></i>
+      <i data-drag="x, y" data-value="1, 1"></i>
+      <i data-drag="nx, ny" data-label="N"></i>
+      <i data-drag="ox, oy" data-value="9, 1" data-label="O"></i>
+      <i data-drag="sx, sy" data-value="1, 1" data-snap="-1" data-label="S"></i>
+      <i data-drag="tx, ty" data-value="1, 1" data-snap="9" data-label="T"></i>
+    </figure>
+  </div>
+  <figure class="plot" id="np" style="width:300px" data-x="0, 1" data-y="0, 1" data-height="200"><i data-drag="ux, uy" data-value="0, 0"></i></figure>
+</section>
+<section class="slide" id="ov"><h2>끝에서만 넘치는 장</h2>
+  <div class="calc" id="ovc"><figure class="plot" id="op" style="width:400px" data-x="0, 5" data-y="0, 5" data-height="240"><i data-drag="wx, wy" data-value="1, 1" data-label="W" data-snap="1"></i></figure>
+  <div id="tall" data-show="wx == 5 && wy == 5" style="height:500px;background:#EEE">오른쪽 위 끝에서만 나오는 긴 상자</div></div>
+</section>
+<pre id="results" data-summary="pending"></pre>
+<script>
+const I = () => ClassHTML._internal;
+const $ = (id) => document.getElementById(id);
+const it = (id) => I().Plot.list.find((p) => p.fig.id === id);
+const grip = (id, label) => it(id).drags.find((g) => g.d.label === label);
+const scope = (id) => I().Calc.of($(id)).scope;
+const near = (a, b, tol, msg) => assert(Math.abs(a - b) <= tol, `${msg || ''} ${a} vs ${b}`);
+const o = (x, y) => ({ clientX: x, clientY: y });
+// 그래프 값 (x, y)의 화면 좌표
+const at = (item, x, y) => {
+  const r = item.svg.getBoundingClientRect();
+  const k = r.width / item.w;
+  return [r.left + I().Plot.sx(item, x) * k, r.top + I().Plot.sy(item, y) * k];
+};
+const center = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+// 손잡이 가운데를 눌러 화면 좌표 to까지 여섯 번에 나눠 끈다
+const pull = (g, to, opts) => {
+  const from = center(g.el);
+  ptr('pointerdown', g.el, 0, 0, Object.assign(o(...from), opts));
+  for (let i = 1; i <= 6; i++) ptr('pointermove', g.el, 0, 0, Object.assign(o(from[0] + ((to[0] - from[0]) * i) / 6, from[1] + ((to[1] - from[1]) * i) / 6), opts));
+  ptr('pointerup', g.el, 0, 0, Object.assign(o(...to), opts));
+};
+const text = (id) => $(id).textContent.replace(/\u2060/g, '');
+const key = (el, k) => {
+  const e = new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true });
+  el.dispatchEvent(e);
+  return e;
+};
+
+test('처음 자리는 data-value(변수의 초깃값)에서 시작하고, 계산 상자가 무게중심을 계산한다', () => {
+  ClassHTML.go(0);
+  const s = scope('cen');
+  eq([s.ax, s.ay, s.bx, s.by, s.cx, s.cy], [-3, -2, 4, -1, 1, 4]);
+  eq([text('gx'), text('gy')], ['0.67', '0.33']);
+  eq(text('ratio'), '2.00');
+  const item = it('tri');
+  const a = grip('tri', 'A');
+  near(parseFloat(a.el.style.left), I().Plot.sx(item, -3), 0.1, 'left');
+  near(parseFloat(a.el.style.top), I().Plot.sy(item, -2), 0.1, 'top');
+  eq(a.el.getAttribute('aria-label'), '점 A (-3, -2)');
+  eq(it('tri').errors.length, 0);
+  eq(I().Calc.of($('cen')).errors.length, 0);
+});
+test('누르는 자리는 56px 이상, 점 이름은 20px 이상, 손잡이는 펜을 들어도 조작되는 요소', () => {
+  const a = grip('tri', 'A');
+  const r = a.el.getBoundingClientRect();
+  const k = I().Stage.scaleAt(a.el);
+  assert(r.width / k >= 55.9 && r.height / k >= 55.9, `grip ${r.width / k}`);
+  assert(parseFloat(getComputedStyle(a.label).fontSize) >= 20, getComputedStyle(a.label).fontSize);
+  assert(a.el.hasAttribute('data-no-ink') && a.el.tabIndex === 0, 'no-ink, focusable');
+  eq(a.label.textContent, 'A');
+});
+test('선분과 다각형(data-path): 삼각형은 닫고 옅게 칠하며, 중선은 점선', () => {
+  const paths = it('tri').layer.querySelectorAll('path');
+  eq(paths.length, 2);
+  const tri = paths[0].getAttribute('d');
+  eq((tri.match(/L/g) || []).length, 2);
+  assert(tri.endsWith('Z') && paths[0].classList.contains('is-fill'), tri);
+  assert(paths[1].classList.contains('is-dash') && !paths[1].getAttribute('d').endsWith('Z'), 'median dashed');
+  eq(Array.from(it('tri').legend.children).map((s) => s.textContent), ['삼각형']);
+});
+test('합성 포인터로 끌면 눈금에 붙고, 무게중심이 다시 계산되며 2:1은 그대로다', () => {
+  const item = it('tri');
+  const a = grip('tri', 'A');
+  pull(a, at(item, -3.7, 3.3));
+  const s = scope('cen');
+  eq([s.ax, s.ay], [-4, 3]);
+  eq([text('gx'), text('gy')], ['0.33', '2.00']);
+  eq(text('ratio'), '2.00');
+  near(parseFloat(a.el.style.left), I().Plot.sx(item, -4), 0.1, 'grip follows');
+  assert(!a.el.classList.contains('is-drag'), 'drag state cleared');
+  const g = item.marks.querySelector('circle');
+  near(Number(g.getAttribute('cx')), I().Plot.sx(item, 1 / 3), 0.2, 'G point');
+  assert(item.layer.querySelector('path').getAttribute('d').startsWith(`M${Math.round(I().Plot.sx(item, -4) * 10) / 10} `), 'triangle redrawn');
+});
+test('그래프 범위 밖으로 끌어도 범위 끝에 멈춘다', () => {
+  const item = it('tri');
+  const b = grip('tri', 'B');
+  const r = item.svg.getBoundingClientRect();
+  pull(b, [r.right + 300, r.top - 200]);
+  eq([scope('cen').bx, scope('cen').by], [5, 5]);
+  pull(b, [r.left - 300, r.bottom + 200]);
+  eq([scope('cen').bx, scope('cen').by], [-5, -5]);
+  const hr = b.el.getBoundingClientRect();
+  assert(hr.left >= r.left - 1 && hr.bottom <= r.bottom + 1, 'grip stays inside the graph');
+});
+test('톡 누르기만 하면 자리가 바뀌지 않는다', () => {
+  const c = grip('tri', 'C');
+  const p = center(c.el);
+  ptr('pointerdown', c.el, 0, 0, o(...p));
+  ptr('pointermove', c.el, 0, 0, o(p[0] + 3, p[1] + 2));
+  ptr('pointerup', c.el, 0, 0, o(p[0] + 3, p[1] + 2));
+  eq([scope('cen').cx, scope('cen').cy], [1, 4]);
+});
+test('화살표 키로 눈금 한 칸씩 옮기고, 장은 넘어가지 않는다', () => {
+  const c = grip('tri', 'C');
+  c.el.focus();
+  const e = key(c.el, 'ArrowRight');
+  assert(e.defaultPrevented, 'prevented');
+  eq(I().Nav.state.slide, 0);
+  eq([scope('cen').cx, scope('cen').cy], [2, 4]);
+  key(c.el, 'ArrowUp');
+  key(c.el, 'ArrowUp');
+  eq([scope('cen').cx, scope('cen').cy], [2, 5], '위쪽 끝에서 멈춘다');
+  key(c.el, 'ArrowDown');
+  key(c.el, 'ArrowLeft');
+  eq([scope('cen').cx, scope('cen').cy], [1, 4]);
+  eq(c.el.getAttribute('aria-label'), '점 C (1, 4)');
+  c.el.blur();
+});
+test('펜을 든 채로 끌어도 판서 없이 점이 옮겨진다', () => {
+  I().Tools.set('pen');
+  const before = I().Ink.page.length;
+  pull(grip('tri', 'A'), at(it('tri'), -3, -2), { pointerType: 'pen' });
+  eq([scope('cen').ax, scope('cen').ay], [-3, -2]);
+  eq(I().Ink.page.length, before, 'no ink');
+  I().Tools.set('hand');
+});
+test('그래프 끝에서는 점 이름을 안쪽으로 돌린다', () => {
+  const c = grip('tri', 'C');
+  pull(c, at(it('tri'), 5, 5));
+  assert(c.el.classList.contains('is-left') && c.el.classList.contains('is-low'), c.el.className);
+  const lr = c.label.getBoundingClientRect();
+  const sr = it('tri').svg.getBoundingClientRect();
+  assert(lr.right <= sr.right && lr.top >= sr.top, 'label inside');
+  pull(c, at(it('tri'), 1, 4));
+  assert(!c.el.classList.contains('is-left') && !c.el.classList.contains('is-low'), c.el.className);
+});
+test('눈금 없는 점은 범위의 20분의 1씩, 세로 직선이 되면 세로선으로 바꿔 그린다', () => {
+  ClassHTML.go(1);
+  const q = grip('lp', 'Q');
+  eq(text('eqn'), 'y = 1.00x + 1.00');
+  key(q.el, 'ArrowLeft');
+  eq(scope('ln').qx, 1.5);
+  for (let i = 0; i < 7; i++) key(q.el, 'ArrowLeft');
+  eq(scope('ln').qx, -2);
+  eq(text('eqn'), 'x = -2');
+  eq(it('lp').layer.querySelectorAll('path').length, 0, '기울어진 선은 숨는다');
+  assert(it('lp').marks.querySelector('line.ch-plot-vline'), '세로선');
+  const p = grip('lp', 'P');
+  pull(p, at(it('lp'), -1.2, -0.8));
+  eq([scope('ln').px, scope('ln').py], [-1, -1], 'data-snap 0.5');
+  assert(!it('lp').marks.querySelector('line.ch-plot-vline'), '세로선이 사라진다');
+  pull(q, at(it('lp'), 1.37, 2.61));
+  near(scope('ln').qx, 1.37, 0.03, 'free x');
+  near(scope('ln').qy, 2.61, 0.03, 'free y');
+});
+test('줄여 보인 장(Fit)에서도 점이 손가락을 따라온다', async () => {
+  ClassHTML.go(2);
+  await wait(50);
+  const k = parseFloat($('fz').style.zoom) || 1;
+  assert(k < 1, `zoom ${k}`);
+  const f = grip('fp', 'F');
+  const a = center(f.el);
+  ptr('pointerdown', f.el, 0, 0, o(...a));
+  ptr('pointermove', f.el, 0, 0, o(a[0] + 100, a[1] - 60));
+  const b = center(f.el);
+  ptr('pointerup', f.el, 0, 0, o(a[0] + 100, a[1] - 60));
+  assert(Math.abs((b[0] - a[0]) - 100) < 3 && Math.abs((b[1] - a[1]) + 60) < 3, `moved ${b[0] - a[0]}, ${b[1] - a[1]}`);
+});
+test('편집 모드에서도 점을 끌어 상태를 바꿀 수 있고, 저장할 원본에는 손잡이가 없다', () => {
+  ClassHTML.go(0);
+  I().Editor.toggle(true);
+  pull(grip('tri', 'A'), at(it('tri'), 0, 0));
+  eq([scope('cen').ax, scope('cen').ay], [0, 0]);
+  I().Editor.toggle(false);
+  assert(!I().Source.model().querySelector('.ch-plot-drag, .ch-plot-area'), 'source clean');
+  pull(grip('tri', 'A'), at(it('tri'), -3, -2));
+});
+test('자동 점검: 잘못 쓴 변수 이름·범위·눈금은 part 오류로 알린다', () => {
+  const report = ClassHTML.audit();
+  const msgs = report.errors.filter((e) => e.code === 'part' && e.slide === 3).map((e) => e.msg);
+  const has = (re, what) => assert(msgs.some((m) => re.test(m)), `${what}: ${msgs.join(' | ')}`);
+  has(/data-drag="a x, ay"/, '이름 꼴');
+  has(/k은\(는\) data-const에서도/, 'const와 겹침');
+  has(/z은\(는\) data-let에서도/, 'let과 겹침');
+  has(/v은\(는\) 입력에서도/, '입력과 겹침');
+  has(/x는 곡선의 가로 변수/, 'x');
+  has(/점 N: data-value/, '처음 자리 없음');
+  has(/점 O: 처음 자리 \(9, 1\)가 그래프 범위/, '범위 밖');
+  has(/점 S: data-snap="-1"/, '눈금 꼴');
+  has(/점 T: data-snap 9이\(가\) 그래프 가로 범위/, '눈금이 범위보다 큼');
+  has(/계산 상자\(\.calc\) 안의 그래프/, '계산 상자 밖');
+  eq(report.errors.filter((e) => e.slide === 0 || e.slide === 1).length, 0, JSON.stringify(report.errors.filter((e) => e.slide < 2)));
+  // 범위 밖 처음 자리는 범위 끝으로 옮겨 보인다
+  eq([scope('bp').ox, scope('bp').oy], [5, 1]);
+});
+test('자동 점검: 점을 범위 끝으로 옮겨 넘침을 재고, 점이 있는 장을 활동 장으로 센다', () => {
+  const report = ClassHTML.audit();
+  const over = report.errors.filter((e) => e.slide === 4 && e.code === 'slide-overflow');
+  assert(over.length === 1 && /점 W을\(를\) 오른쪽 위 끝 \(5, 5\)로 옮겼을 때/.test(over[0].msg), JSON.stringify(over));
+  eq([scope('ovc').wx, scope('ovc').wy], [1, 1], '점검 뒤 제자리');
+  assert($('tall').classList.contains('ch-hide'), '긴 상자는 다시 숨는다');
+  eq(report.info.activityPages, [1, 2, 3, 4, 5]);
+});
+</script>
+</body>
+</html>

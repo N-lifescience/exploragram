@@ -40,7 +40,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 - 답이나 결론은 `class="step"`으로 숨긴다. → 키를 누르면 차례로 열린다.
 - 익스플로라그램 스크립트는 `</body>` 앞 `<script>` 하나에 `document.addEventListener('DOMContentLoaded', () => { … })`로 쓴다. 학생 입력을 `innerHTML`로 넣지 않는다.
 - 넘친 장은 엔진이 조금 줄여서 다 보이게 한다(많이 넘쳐도 0.75배까지만). 수업에서 내용이 잘리지 않게 하는 안전망이다. 점검은 줄이기 전 크기로 재서 계속 오류로 알린다. 넘친 장은 나눠서 고친다.
-- 엔진 부품으로는 퀴즈, 분류 카드, 라벨 붙이기, 순서 배열, 연표, 지도 단계 공개, 입자 상자, 계산 상자와 그래프가 있다(`references/components.md`). 딱 맞으면 쓴다. 익스플로라그램은 부품에 개념을 맞추지 말고 개념에 맞춰 직접 짠다. 코드를 실행해 화면을 확인할 수 없는 환경이면 스크립트 대신 계산 상자와 CSS 변수로 익스플로라그램을 만든다(`references/exploragram.md`의 '스크립트 없이').
+- 엔진 부품으로는 퀴즈, 분류 카드, 라벨 붙이기, 순서 배열, 연표, 지도 단계 공개, 입자 상자, 계산 상자와 그래프(끌어 옮기는 점 포함)가 있다(`references/components.md`). 딱 맞으면 쓴다. 익스플로라그램은 부품에 개념을 맞추지 말고 개념에 맞춰 직접 짠다. 코드를 실행해 화면을 확인할 수 없는 환경이면 스크립트 대신 계산 상자와 CSS 변수로 익스플로라그램을 만든다(`references/exploragram.md`의 '스크립트 없이').
 
 ### 절차
 
@@ -137,6 +137,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 - **과학**: 식으로 그림이 바뀌는 모식도(흡수력 = 삼투압 − 팽압, 옴의 법칙 회로, 렌즈 상), 변인 슬라이더와 그래프 위 지금 값 표시, 입자 상자(확산·삼투·기체), 시간 막대(세포 분열 단계, 판 이동).
 - **수학**: 계수 슬라이더에 따라 그래프와 식이 함께 바뀌는 것, 시행 횟수를 늘리면 상대도수가 확률에 다가가는 시뮬레이션, 도형 변형과 넓이 식.
   - 분수함수의 계수 막대와 점근선, 나눈 개수 막대를 늘리면 직사각형 넓이의 합이 정적분 값에 다가가는 것, 꼭짓점 좌표를 바꿔도 그대로인 무게중심의 비.
+  - 점을 직접 끌어 옮기는 장면(직선의 방정식, 내분점, 무게중심)은 그래프 위 끌 수 있는 점(`components.md` 9-1절)으로 만든다. 아래에 무게중심 예시가 있다.
   - 풀이가 여럿이면 비교 전환(`.switch`)으로 풀이를 하나씩 연다. 수식은 `$…$`로 써서 교과서처럼 보이게 한다(`components.md`의 수식).
 - **사회**:
   - 지리: 출산율·사망률로 인구 피라미드를 바꾼다.
@@ -147,6 +148,43 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 - **영어·제2외국어**: 시제 타임라인 막대(사건 시점과 말하는 시점), 두 문장을 관계사로 합치는 전환.
 - **정보**: 정렬·탐색을 한 단계씩 추적하며 비교 횟수를 세는 것, 비트를 켜고 끄면 십진수가 바뀌는 것, 가중치 막대를 밀면 예측 직선과 오차 막대, 평균 제곱 오차가 함께 바뀌는 것.
 - **기술·가정, 예체능**: 영양·전력 계산기와 그림, 템포·박자 막대와 악보 표시.
+
+#### 꼭짓점을 끌어 옮기는 무게중심(수학 예시)
+
+바꾸는 것, 변하는 것, 변하지 않는 것을 한 장에 함께 보여 준다.
+
+- 바꾸는 것: 꼭짓점 A, B, C의 자리. 학생이 끌어 옮긴다.
+- 변하는 것: 무게중심 G의 좌표, 선분 AG와 GM의 길이.
+- 변하지 않는 것: AG : GM = 2 : 1. G는 중선 AM을 2 : 1로 나눈다.
+
+```html
+<section class="slide" id="centroid" data-sec="2. 무게중심" data-title="무게중심 익스플로라그램">
+  <h2>꼭짓점을 옮겨도 그대로인 것은?</h2>
+  <div class="calc" style="display:grid;grid-template-columns:600px 1fr;gap:32px;align-items:start"
+       data-let="gx = (ax + bx + cx) / 3; gy = (ay + by + cy) / 3; mx = (bx + cx) / 2; my = (by + cy) / 2; ag = sqrt((gx - ax) ^ 2 + (gy - ay) ^ 2); gm = sqrt((mx - gx) ^ 2 + (my - gy) ^ 2); flat = abs((bx - ax) * (cy - ay) - (by - ay) * (cx - ax)) < 0.001">
+    <figure class="plot" data-x="-5, 5" data-y="-5, 5" data-xstep="1" data-ystep="1" data-height="420" aria-label="삼각형 ABC와 중선 AM, 무게중심 G">
+      <i data-path="ax, ay; bx, by; cx, cy" data-close data-fill data-color="#0F766E"></i>
+      <i data-path="ax, ay; mx, my" data-dash data-color="#2563EB"></i>
+      <i data-point="mx, my" data-label="M"></i>
+      <i data-point="gx, gy" data-label="G" data-color="#2563EB"></i>
+      <i data-drag="ax, ay" data-value="-3, -2" data-label="A" data-snap="1"></i>
+      <i data-drag="bx, by" data-value="4, -1" data-label="B" data-snap="1"></i>
+      <i data-drag="cx, cy" data-value="1, 4" data-label="C" data-snap="1"></i>
+    </figure>
+    <div>
+      <p>꼭짓점 A, B, C를 끌어 보자.</p>
+      <p>G(<output data-expr="gx" data-digits="2"></output>, <output data-expr="gy" data-digits="2"></output>)</p>
+      <p>AG <output data-expr="ag" data-digits="2"></output>, GM <output data-expr="gm" data-digits="2"></output></p>
+      <p class="step"><b>AG : GM = <output data-expr="gm == 0 ? '?' : ag / gm" data-digits="2"></output> : 1</b></p>
+      <p data-show="flat">세 점이 한 직선 위에 있다. 삼각형이 아니다.</p>
+    </div>
+  </div>
+</section>
+```
+
+- G의 좌표와 두 길이는 끌 때마다 바뀌지만 비는 2.00 : 1에 머문다. 학생이 무엇이 그대로인지 먼저 말하게 한 뒤 →로 비를 연다(`.step`).
+- 세 점이 한 직선 위에 오는 경계도 끌어서 확인한다. 이때 삼각형이 아니라는 문장이 나온다.
+- 내분점은 같은 틀로 만든다. 점 A, B를 끌고 `px = (n * ax + m * bx) / (m + n)`으로 계산한 점을 `data-point`로 찍는다. 비 m : n은 슬라이더 두 개로 바꾼다.
 
 ### 엔진에 붙이는 뼈대
 
@@ -619,11 +657,47 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 |---|---|
 | 눈금 간격 정하기, 천 단위 쉼표 | 그래프에 `data-ystep="500"`·`data-xstep`, `data-comma`(4,000). 눈금 글자가 길면 왼쪽 여백이 저절로 늘어 세로축 이름과 겹치지 않는다 |
 | 선을 일부 구간만 | 선에 `data-x="10, 60"`(식도 된다: `data-x="min(a, b), max(a, b)"`) |
-| 조건이 맞을 때만 선·점 | `data-show="qd != qs"`. 거짓이면 선과 범례가 함께 숨는다 |
+| 조건이 맞을 때만 선·점 | `data-show="qd != qs"`. 거짓이면 선과 범례가 함께 숨는다. 세로 표시선(`data-vline`)과 선분(`data-path`)에도 쓴다 |
 | 측정값(표의 점 여러 개) | `<i data-points="10, 360; 20, 260; 40, 160" data-label="측정값"></i>` 점으로 찍히고 범례에 동그라미 |
 | 범례 | `data-label`이 있는 선·측정값이 그래프 위에 범례로 나온다. 움직이는 점의 이름은 점 옆에 |
 
 예: 가격 슬라이더 `p`에 따라 초과량 구간만 굵게 보이기 `<i data-line="p" data-x="min(qd, qs), max(qd, qs)" data-show="qd != qs" data-label="초과량"></i>`.
+
+#### 9-1. 끌 수 있는 점 `data-drag`
+
+학생이 그래프 위의 점을 직접 끌어 옮긴다. 점의 자리가 계산 상자 변수가 되어 `data-let`, 선, 점, 값(`data-expr`)이 함께 다시 계산된다. 아래는 두 점을 지나는 직선이다.
+
+```html
+<div class="calc" style="display:grid;grid-template-columns:560px 1fr;gap:28px;align-items:start" data-let="m = (by - ay) / (bx - ax); k = ay - m * ax">
+  <figure class="plot" data-x="-5, 5" data-y="-5, 5" data-xstep="1" data-ystep="1" data-height="360" aria-label="두 점 A, B를 지나는 직선">
+    <i data-line="m * x + k" data-show="ax != bx"></i>
+    <i data-vline="ax" data-show="ax == bx && ay != by"></i>
+    <i data-drag="ax, ay" data-value="-2, -1" data-label="A" data-snap="1"></i>
+    <i data-drag="bx, by" data-value="2, 3" data-label="B" data-snap="1" data-color="#2563EB"></i>
+  </figure>
+  <div>
+    <p>A(<output data-expr="ax"></output>, <output data-expr="ay"></output>), B(<output data-expr="bx"></output>, <output data-expr="by"></output>)</p>
+    <p data-show="ax != bx">기울기 <output data-expr="m" data-digits="2"></output>, y절편 <output data-expr="k" data-digits="2"></output></p>
+    <p data-show="ax == bx && ay != by">x = <output data-expr="ax"></output>인 세로선이다. 기울기가 없다.</p>
+    <p data-show="ax == bx && ay == by">두 점이 겹쳤다. 직선이 하나로 정해지지 않는다.</p>
+  </div>
+</div>
+```
+
+| 하고 싶은 것 | 쓰는 법 |
+|---|---|
+| 끌 수 있는 점 | `.calc` 안 그래프에 `<i data-drag="ax, ay" data-value="-2, -1" data-label="A">`. `data-drag`는 가로와 세로 변수 이름, `data-value`는 처음 자리다 |
+| 눈금에 붙이기 | `data-snap="1"`(가로와 세로 간격이 다르면 `"1, 0.5"`). 그래프의 `data-xstep`, `data-ystep`과 같게 두면 격자점에 붙는다. 빼면 아무 자리에나 놓인다 |
+| 점 색 | `data-color="#2563EB"`. 빼면 강조색이다 |
+| 계산된 점(무게중심, 내분점) | 움직이지 않는 점 `data-point="gx, gy"`로 찍고 좌표는 `data-let`에서 계산한다 |
+| 선분, 다각형 | `<i data-path="ax, ay; bx, by; cx, cy" data-close data-fill>`. 점을 차례로 잇는다. `data-close`면 처음 점으로 돌아와 닫고 `data-fill`이면 옅게 칠한다. `data-dash`, `data-color`, `data-label`도 쓸 수 있다 |
+| 세로선으로 바꿔 그리기 | 두 점의 가로 값이 같으면 기울기가 없다. `<i data-vline="ax" data-show="ax == bx">`로 그린다 |
+
+- 점은 그래프 범위(`data-x`, `data-y`) 밖으로 나가지 않는다. 펜을 든 채로도 끌린다. 누르는 자리는 지름 56px이고 점 이름은 24px다.
+- 키보드로는 Tab으로 점을 고른 뒤 화살표 키를 누른다. 눈금이 있으면 한 칸씩, 없으면 범위의 20분의 1씩 움직인다.
+- 변수 이름은 점마다 두 개다. `x`는 곡선의 가로 변수라서 쓰지 않는다. `data-const`, `data-let`, 슬라이더 같은 입력과 이름이 겹치지 않게 한다.
+- 끌 수 있는 점이 있으면 그래프 위쪽과 오른쪽 여백이 30px로 늘어난다. 점이 범위 끝에 가도 누르는 자리가 그래프 안에 들어온다.
+- 점검(D)은 잘못 쓴 이름, 범위 밖의 처음 자리, 잘못 쓴 `data-snap`을 오류로 알린다. 점을 범위의 네 귀퉁이로 하나씩 옮기면서 넘침도 잰다. 좌표를 보여 주는 글은 음수나 소수로 길어져도 한 줄에 들어가게 칸을 넉넉히 잡는다.
 
 ### 10. 그림 자리 `img[data-ppt]`
 

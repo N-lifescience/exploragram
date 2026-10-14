@@ -1,4 +1,4 @@
-// 계산 상자: 입력(슬라이더·숫자·고르기·단추)이 바뀌면 식을 다시 계산해 글자·보이기·클래스·모양·SVG 속성을 바꾼다.
+// 계산 상자: 입력(슬라이더·숫자·고르기·단추·그래프 위 끌 수 있는 점)이 바뀌면 식을 다시 계산해 글자·보이기·클래스·모양·SVG 속성을 바꾼다.
 // 작성 모양: <div class="calc" data-const="k = 8.7" data-let="o = k / v; s = o - t">
 //   <input type="range" name="v" …> <output data-expr="s" data-digits="1" data-unit="기압"></output>
 //   <p data-show="v < 1">…</p> <p data-class="is-ok: s > 0"> <div class="bar" data-value="s" data-max="10"></div>
@@ -46,6 +46,14 @@ const Calc = {
       item.inputs = qsa('input[name], select[name], textarea[name]', box).filter((el) => own(el) && !el.closest('.ch-stops'));
       // 단계 막대(.reveal 등)에 data-name이 있으면 지금 칸 번호를 그 이름의 변수로 쓴다
       item.steppers = qsa('.ch-stepper[data-name]', box).filter(own);
+      // 그래프 위 끌 수 있는 점(<i data-drag="ax, ay" data-value="1, 4">)은 자리가 변수 둘이 된다. 범위·모양·끌기는 그래프(59-plot)가 맡는다.
+      const taken = new Map();
+      for (const name of Object.keys(item.consts)) taken.set(name, 'data-const');
+      for (const { name } of item.lets) taken.set(name, 'data-let');
+      for (const el of item.inputs) taken.set(el.getAttribute('name'), '입력');
+      for (const b of sets) taken.set(b.dataset.set, '단추');
+      for (const el of item.steppers) taken.set(el.dataset.name, '단계 막대');
+      item.drags = qsa('figure.plot > [data-drag]', box).filter(own).map((el) => this.drag(item, el, fail, taken)).filter(Boolean);
       box.addEventListener('ch-stepper', (e) => { if (item.steppers.includes(e.target)) this.update(item); });
       item.sets = sets;
       box.addEventListener('input', (e) => { if (own(e.target)) this.update(item); });
@@ -57,6 +65,40 @@ const Calc = {
       this.list.push(item);
       this.update(item);
     }
+  },
+
+  // 끌 수 있는 점 하나: data-drag(변수 이름 둘), data-value(처음 자리), data-snap(붙을 눈금 간격). 잘못 쓰면 null.
+  drag(item, el, fail, taken) {
+    const fig = el.parentElement;
+    const label = (el.dataset.label || '').trim();
+    const bad = (msg) => fail(fig, `끌 수 있는 점${label ? ` ${label}` : ''}: ${msg}`);
+    const names = String(el.dataset.drag).split(',').map((s) => s.trim());
+    if (names.length !== 2 || !names.every((n) => /^[\p{L}_][\p{L}\p{N}_]*$/u.test(n))) {
+      bad(`data-drag="${el.dataset.drag}": 가로와 세로 변수 이름 두 개를 'ax, ay' 꼴로 써 주세요`);
+      return null;
+    }
+    if (names[0] === names[1]) { bad(`data-drag: 가로와 세로 변수 이름이 같아요(${names[0]})`); return null; }
+    for (const n of names) {
+      if (n === 'x') { bad('data-drag: x는 곡선의 가로 변수라 점의 변수로 쓸 수 없어요. ax처럼 다른 이름을 쓰세요'); return null; }
+      if (EXPR_BAD.has(n) || n in EXPR_CONSTS || EXPR_FUNCS[n]) { bad(`data-drag: ${n}은(는) 이름으로 쓸 수 없어요`); return null; }
+      if (taken.has(n)) { bad(`data-drag: ${n}은(는) ${taken.get(n)}에서도 쓰는 이름이에요`); return null; }
+    }
+    for (const n of names) taken.set(n, '다른 끌 수 있는 점');
+    const d = { el, fig, names, label, color: el.dataset.color || '', x: NaN, y: NaN, snap: [0, 0], range: null };
+    const at = String(el.dataset.value || '').trim() ? Plot.split(el.dataset.value).map((s) => Expr.compile(s)) : [];
+    let ok = at.length === 2 && at.every((c) => c.ok);
+    if (ok) {
+      try { [d.x, d.y] = at.map((c) => Number(c.fn(item.consts))); } catch (err) { ok = false; }
+      ok = ok && Number.isFinite(d.x) && Number.isFinite(d.y);
+    }
+    if (!ok) { d.x = NaN; d.y = NaN; bad("data-value: 처음 자리를 'x, y' 꼴의 수로 써 주세요(예: data-value=\"1, 4\")"); }
+    const snap = String(el.dataset.snap || '').trim();
+    if (snap) {
+      const s = snap.split(',').map((v) => (v.trim() === '' ? NaN : Number(v)));
+      if (s.length <= 2 && s.every((v) => Number.isFinite(v) && v >= 0)) d.snap = [s[0], s.length === 2 ? s[1] : s[0]];
+      else bad(`data-snap="${snap}": 0보다 큰 수로 써 주세요(가로와 세로가 다르면 '1, 0.5')`);
+    }
+    return d;
   },
 
   // 'a: 식; b: 식' → [[a, 식]]. 따옴표 안의 ;는 나누지 않고, 이름 뒤 첫 :에서 자른다(식 안의 ? :는 그대로).
@@ -125,6 +167,7 @@ const Calc = {
     }
     for (const b of item.sets) if (b.getAttribute('aria-pressed') === 'true') scope[b.dataset.set] = num(b.dataset.value);
     for (const el of item.steppers) scope[el.dataset.name] = Number(el.dataset.pos || 0);
+    for (const d of item.drags) { scope[d.names[0]] = d.x; scope[d.names[1]] = d.y; }
     return scope;
   },
 

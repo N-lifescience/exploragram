@@ -233,11 +233,47 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 |---|---|
 | 눈금 간격 정하기, 천 단위 쉼표 | 그래프에 `data-ystep="500"`·`data-xstep`, `data-comma`(4,000). 눈금 글자가 길면 왼쪽 여백이 저절로 늘어 세로축 이름과 겹치지 않는다 |
 | 선을 일부 구간만 | 선에 `data-x="10, 60"`(식도 된다: `data-x="min(a, b), max(a, b)"`) |
-| 조건이 맞을 때만 선·점 | `data-show="qd != qs"`. 거짓이면 선과 범례가 함께 숨는다 |
+| 조건이 맞을 때만 선·점 | `data-show="qd != qs"`. 거짓이면 선과 범례가 함께 숨는다. 세로 표시선(`data-vline`)과 선분(`data-path`)에도 쓴다 |
 | 측정값(표의 점 여러 개) | `<i data-points="10, 360; 20, 260; 40, 160" data-label="측정값"></i>` 점으로 찍히고 범례에 동그라미 |
 | 범례 | `data-label`이 있는 선·측정값이 그래프 위에 범례로 나온다. 움직이는 점의 이름은 점 옆에 |
 
 예: 가격 슬라이더 `p`에 따라 초과량 구간만 굵게 보이기 `<i data-line="p" data-x="min(qd, qs), max(qd, qs)" data-show="qd != qs" data-label="초과량"></i>`.
+
+### 9-1. 끌 수 있는 점 `data-drag`
+
+학생이 그래프 위의 점을 직접 끌어 옮긴다. 점의 자리가 계산 상자 변수가 되어 `data-let`, 선, 점, 값(`data-expr`)이 함께 다시 계산된다. 아래는 두 점을 지나는 직선이다.
+
+```html
+<div class="calc" style="display:grid;grid-template-columns:560px 1fr;gap:28px;align-items:start" data-let="m = (by - ay) / (bx - ax); k = ay - m * ax">
+  <figure class="plot" data-x="-5, 5" data-y="-5, 5" data-xstep="1" data-ystep="1" data-height="360" aria-label="두 점 A, B를 지나는 직선">
+    <i data-line="m * x + k" data-show="ax != bx"></i>
+    <i data-vline="ax" data-show="ax == bx && ay != by"></i>
+    <i data-drag="ax, ay" data-value="-2, -1" data-label="A" data-snap="1"></i>
+    <i data-drag="bx, by" data-value="2, 3" data-label="B" data-snap="1" data-color="#2563EB"></i>
+  </figure>
+  <div>
+    <p>A(<output data-expr="ax"></output>, <output data-expr="ay"></output>), B(<output data-expr="bx"></output>, <output data-expr="by"></output>)</p>
+    <p data-show="ax != bx">기울기 <output data-expr="m" data-digits="2"></output>, y절편 <output data-expr="k" data-digits="2"></output></p>
+    <p data-show="ax == bx && ay != by">x = <output data-expr="ax"></output>인 세로선이다. 기울기가 없다.</p>
+    <p data-show="ax == bx && ay == by">두 점이 겹쳤다. 직선이 하나로 정해지지 않는다.</p>
+  </div>
+</div>
+```
+
+| 하고 싶은 것 | 쓰는 법 |
+|---|---|
+| 끌 수 있는 점 | `.calc` 안 그래프에 `<i data-drag="ax, ay" data-value="-2, -1" data-label="A">`. `data-drag`는 가로와 세로 변수 이름, `data-value`는 처음 자리다 |
+| 눈금에 붙이기 | `data-snap="1"`(가로와 세로 간격이 다르면 `"1, 0.5"`). 그래프의 `data-xstep`, `data-ystep`과 같게 두면 격자점에 붙는다. 빼면 아무 자리에나 놓인다 |
+| 점 색 | `data-color="#2563EB"`. 빼면 강조색이다 |
+| 계산된 점(무게중심, 내분점) | 움직이지 않는 점 `data-point="gx, gy"`로 찍고 좌표는 `data-let`에서 계산한다 |
+| 선분, 다각형 | `<i data-path="ax, ay; bx, by; cx, cy" data-close data-fill>`. 점을 차례로 잇는다. `data-close`면 처음 점으로 돌아와 닫고 `data-fill`이면 옅게 칠한다. `data-dash`, `data-color`, `data-label`도 쓸 수 있다 |
+| 세로선으로 바꿔 그리기 | 두 점의 가로 값이 같으면 기울기가 없다. `<i data-vline="ax" data-show="ax == bx">`로 그린다 |
+
+- 점은 그래프 범위(`data-x`, `data-y`) 밖으로 나가지 않는다. 펜을 든 채로도 끌린다. 누르는 자리는 지름 56px이고 점 이름은 24px다.
+- 키보드로는 Tab으로 점을 고른 뒤 화살표 키를 누른다. 눈금이 있으면 한 칸씩, 없으면 범위의 20분의 1씩 움직인다.
+- 변수 이름은 점마다 두 개다. `x`는 곡선의 가로 변수라서 쓰지 않는다. `data-const`, `data-let`, 슬라이더 같은 입력과 이름이 겹치지 않게 한다.
+- 끌 수 있는 점이 있으면 그래프 위쪽과 오른쪽 여백이 30px로 늘어난다. 점이 범위 끝에 가도 누르는 자리가 그래프 안에 들어온다.
+- 점검(D)은 잘못 쓴 이름, 범위 밖의 처음 자리, 잘못 쓴 `data-snap`을 오류로 알린다. 점을 범위의 네 귀퉁이로 하나씩 옮기면서 넘침도 잰다. 좌표를 보여 주는 글은 음수나 소수로 길어져도 한 줄에 들어가게 칸을 넉넉히 잡는다.
 
 ## 10. 그림 자리 `img[data-ppt]`
 

@@ -16,3 +16,14 @@
 .ch-plot-legend > span.is-dash::before { border-top-style: dashed; }
 .ch-plot-legend > span.is-dot::before { width: 14px; height: 14px; margin: 0 10px 0 6px; border: 0; border-radius: 50%; background: var(--c); }
 .ch-plot-legend > span[hidden] { display: none; }
+.ch-plot-line.is-fill { fill-opacity: .12; }
+/* 끌 수 있는 점: 그림(SVG) 위에 겹친 56px 손잡이. 옅은 원이 누르는 자리, 가운데 점이 지금 자리다. */
+.ch-plot-area { position: relative; }
+.ch-plot-drag { position: absolute; z-index: 1; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: color-mix(in srgb, var(--c, var(--accent)) 16%, transparent); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
+.ch-plot-drag::before { content: ""; position: absolute; inset: 15px; box-sizing: border-box; border: 4px solid var(--ch-paper); border-radius: 50%; background: var(--c, var(--accent)); box-shadow: 0 1px 4px rgba(0, 0, 0, .35); transition: transform .12s var(--ch-ease-out); }
+.ch-plot-drag:hover::before, .ch-plot-drag.is-drag::before { transform: scale(1.18); }
+.ch-plot-drag.is-drag { z-index: 2; cursor: grabbing; }
+.ch-plot-drag:focus-visible { box-shadow: 0 0 0 3px var(--ch-paper), 0 0 0 6px var(--c, var(--accent)); }
+.ch-plot-dlabel { position: absolute; left: 44px; bottom: 36px; font-size: 24px; font-weight: 800; line-height: 1; color: var(--ch-ink); white-space: nowrap; pointer-events: none; text-shadow: 0 0 3px var(--ch-paper), 0 0 3px var(--ch-paper), 0 0 3px var(--ch-paper); }
+.ch-plot-drag.is-left .ch-plot-dlabel { left: auto; right: 44px; }
+.ch-plot-drag.is-low .ch-plot-dlabel { bottom: auto; top: 44px; }

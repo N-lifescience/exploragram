@@ -2,10 +2,10 @@
 // 시작할 때(원본 보관 전) 슬라이드의 모든 요소에 data-eid 번호를 붙인다. 고칠 때는 화면 요소와
 // 원본 문서(Source.model())의 같은 번호 요소를 함께 고친다. 저장은 원본 문서만 쓰므로
 // 툴바·어절 감싸기·계산값 같은 실행 흔적이 섞이지 않는다. 번호는 저장할 때 지운다(PptFill.serialize).
-// 슬라이더·입력칸·단추는 편집 중에도 작동한다. 상태를 바꿔 숨은 글(data-only, data-show)도 고칠 수 있다.
+// 슬라이더·입력칸·단추·끌 수 있는 점은 편집 중에도 작동한다. 상태를 바꿔 숨은 글(data-only, data-show)도 고칠 수 있다.
 const EDIT_ISLAND = 'input, select, textarea, button, output, svg, img, video, iframe, canvas, .blank, [data-expr]';
 const EDIT_NOTEXT = 'img, svg, input, select, textarea, button, output, video, iframe, canvas, br, hr, section.slide';
-const EDIT_LIVE = 'input, select, textarea';
+const EDIT_LIVE = 'input, select, textarea, .ch-plot-drag';   // 그래프 위 끌 수 있는 점도 슬라이더처럼 편집 중에 움직인다
 const EDIT_KIND = {
   h1: '제목', h2: '제목', h3: '제목', h4: '제목', h5: '제목', h6: '제목', p: '문단', li: '목록 줄', ul: '목록', ol: '목록',
   table: '표', tr: '표 줄', td: '표 칸', th: '표 칸', img: '그림', svg: '그림(SVG)', figure: '그림 상자', figcaption: '그림 설명',

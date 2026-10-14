@@ -31,6 +31,7 @@
 - **과학**: 식으로 그림이 바뀌는 모식도(흡수력 = 삼투압 − 팽압, 옴의 법칙 회로, 렌즈 상), 변인 슬라이더와 그래프 위 지금 값 표시, 입자 상자(확산·삼투·기체), 시간 막대(세포 분열 단계, 판 이동).
 - **수학**: 계수 슬라이더에 따라 그래프와 식이 함께 바뀌는 것, 시행 횟수를 늘리면 상대도수가 확률에 다가가는 시뮬레이션, 도형 변형과 넓이 식.
   - 분수함수의 계수 막대와 점근선, 나눈 개수 막대를 늘리면 직사각형 넓이의 합이 정적분 값에 다가가는 것, 꼭짓점 좌표를 바꿔도 그대로인 무게중심의 비.
+  - 점을 직접 끌어 옮기는 장면(직선의 방정식, 내분점, 무게중심)은 그래프 위 끌 수 있는 점(`components.md` 9-1절)으로 만든다. 아래에 무게중심 예시가 있다.
   - 풀이가 여럿이면 비교 전환(`.switch`)으로 풀이를 하나씩 연다. 수식은 `$…$`로 써서 교과서처럼 보이게 한다(`components.md`의 수식).
 - **사회**:
   - 지리: 출산율·사망률로 인구 피라미드를 바꾼다.
@@ -41,6 +42,43 @@
 - **영어·제2외국어**: 시제 타임라인 막대(사건 시점과 말하는 시점), 두 문장을 관계사로 합치는 전환.
 - **정보**: 정렬·탐색을 한 단계씩 추적하며 비교 횟수를 세는 것, 비트를 켜고 끄면 십진수가 바뀌는 것, 가중치 막대를 밀면 예측 직선과 오차 막대, 평균 제곱 오차가 함께 바뀌는 것.
 - **기술·가정, 예체능**: 영양·전력 계산기와 그림, 템포·박자 막대와 악보 표시.
+
+### 꼭짓점을 끌어 옮기는 무게중심(수학 예시)
+
+바꾸는 것, 변하는 것, 변하지 않는 것을 한 장에 함께 보여 준다.
+
+- 바꾸는 것: 꼭짓점 A, B, C의 자리. 학생이 끌어 옮긴다.
+- 변하는 것: 무게중심 G의 좌표, 선분 AG와 GM의 길이.
+- 변하지 않는 것: AG : GM = 2 : 1. G는 중선 AM을 2 : 1로 나눈다.
+
+```html
+<section class="slide" id="centroid" data-sec="2. 무게중심" data-title="무게중심 익스플로라그램">
+  <h2>꼭짓점을 옮겨도 그대로인 것은?</h2>
+  <div class="calc" style="display:grid;grid-template-columns:600px 1fr;gap:32px;align-items:start"
+       data-let="gx = (ax + bx + cx) / 3; gy = (ay + by + cy) / 3; mx = (bx + cx) / 2; my = (by + cy) / 2; ag = sqrt((gx - ax) ^ 2 + (gy - ay) ^ 2); gm = sqrt((mx - gx) ^ 2 + (my - gy) ^ 2); flat = abs((bx - ax) * (cy - ay) - (by - ay) * (cx - ax)) < 0.001">
+    <figure class="plot" data-x="-5, 5" data-y="-5, 5" data-xstep="1" data-ystep="1" data-height="420" aria-label="삼각형 ABC와 중선 AM, 무게중심 G">
+      <i data-path="ax, ay; bx, by; cx, cy" data-close data-fill data-color="#0F766E"></i>
+      <i data-path="ax, ay; mx, my" data-dash data-color="#2563EB"></i>
+      <i data-point="mx, my" data-label="M"></i>
+      <i data-point="gx, gy" data-label="G" data-color="#2563EB"></i>
+      <i data-drag="ax, ay" data-value="-3, -2" data-label="A" data-snap="1"></i>
+      <i data-drag="bx, by" data-value="4, -1" data-label="B" data-snap="1"></i>
+      <i data-drag="cx, cy" data-value="1, 4" data-label="C" data-snap="1"></i>
+    </figure>
+    <div>
+      <p>꼭짓점 A, B, C를 끌어 보자.</p>
+      <p>G(<output data-expr="gx" data-digits="2"></output>, <output data-expr="gy" data-digits="2"></output>)</p>
+      <p>AG <output data-expr="ag" data-digits="2"></output>, GM <output data-expr="gm" data-digits="2"></output></p>
+      <p class="step"><b>AG : GM = <output data-expr="gm == 0 ? '?' : ag / gm" data-digits="2"></output> : 1</b></p>
+      <p data-show="flat">세 점이 한 직선 위에 있다. 삼각형이 아니다.</p>
+    </div>
+  </div>
+</section>
+```
+
+- G의 좌표와 두 길이는 끌 때마다 바뀌지만 비는 2.00 : 1에 머문다. 학생이 무엇이 그대로인지 먼저 말하게 한 뒤 →로 비를 연다(`.step`).
+- 세 점이 한 직선 위에 오는 경계도 끌어서 확인한다. 이때 삼각형이 아니라는 문장이 나온다.
+- 내분점은 같은 틀로 만든다. 점 A, B를 끌고 `px = (n * ax + m * bx) / (m + n)`으로 계산한 점을 `data-point`로 찍는다. 비 m : n은 슬라이더 두 개로 바꾼다.
 
 ## 엔진에 붙이는 뼈대
 

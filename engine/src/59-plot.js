@@ -2,9 +2,11 @@
 // 작성 모양: <figure class="plot" data-x="0.85, 1.35" data-y="0, 11" data-xlabel="부피" data-ylabel="압력(기압)">
 //   <i data-line="8.7 / x" data-label="삼투압"></i> <i data-vline="v"></i> <i data-point="v, s" data-label="지금"></i></figure>
 // 눈금: data-xstep·data-ystep(간격), data-comma(천 단위 쉼표). 선: data-x="10, 60"(그릴 범위), data-show="식"(참일 때만).
-// 측정값: <i data-points="10, 360; 20, 260" data-label="측정값"></i>
+// 측정값: <i data-points="10, 360; 20, 260" data-label="측정값"></i>  선분·다각형: <i data-path="ax, ay; bx, by; cx, cy" data-close></i>
+// 끌 수 있는 점: <i data-drag="ax, ay" data-value="1, 4" data-label="A" data-snap="1"></i> (계산 상자 안에서만. 점 자리가 변수 ax, ay가 된다)
 const PLOT_COLORS = ['var(--accent)', '#2563EB', '#2E9E6A', '#7A4FBF', '#C8352B', '#B8860B'];
 const PLOT_PAD = { l: 76, r: 18, t: 18, b: 64 };
+const PLOT_GRIP = 56;   // 끌 수 있는 점의 누르는 자리(무대 px). 그래프 위·오른쪽 여백을 그 반 넘게 둔다
 
 // 눈금 글자 폭 어림(20px 글꼴): 숫자 11.5px, 쉼표·점 6px, 나머지 20px
 function tickWidth(text) {
@@ -38,7 +40,7 @@ const Plot = {
   init() {
     this.list = [];
     qsa('figure.plot', Stage.deck).forEach((fig, n) => {
-      const item = { fig, n, errors: [], lines: [], vlines: [], points: [], sets: [], svg: null, legend: null, w: 0, h: 0, pad: PLOT_PAD, calc: Calc.of(fig) };
+      const item = { fig, n, errors: [], lines: [], vlines: [], points: [], sets: [], paths: [], drags: [], svg: null, area: null, legend: null, w: 0, h: 0, pad: PLOT_PAD, calc: Calc.of(fig) };
       const fail = (msg) => item.errors.push({ el: fig, msg });
       const range = (src, name) => {
         const parts = String(src || '').trim() ? this.split(src).map((s) => Expr.compile(s.trim())) : [];
@@ -54,7 +56,7 @@ const Plot = {
       item.step = { x: Number(fig.dataset.xstep) || 0, y: Number(fig.dataset.ystep) || 0 };
       item.comma = fig.hasAttribute('data-comma');
       let color = 0;
-      for (const el of qsa(':scope > [data-line], :scope > [data-vline], :scope > [data-point], :scope > [data-points]', fig)) {
+      for (const el of qsa(':scope > [data-line], :scope > [data-vline], :scope > [data-point], :scope > [data-points], :scope > [data-path]', fig)) {
         el.hidden = true;
         const c = (src, label) => {
           const r = Expr.compile(src);
@@ -80,9 +82,18 @@ const Plot = {
           });
           if (pts.length && pts.every(([fx, fy]) => fx && fy)) item.sets.push({ pts, show, label: el.dataset.label || '', color: el.dataset.color || PLOT_COLORS[color++ % PLOT_COLORS.length] });
           else if (!pts.length) fail("data-points: 'x, y; x, y' 꼴로 써 주세요");
+        } else if (el.dataset.path != null) {
+          // 점을 차례로 잇는 선분(data-close면 처음 점으로 닫아 다각형, data-fill이면 옅게 칠한다)
+          const pts = String(el.dataset.path).split(';').map((pair) => pair.trim()).filter(Boolean).map((pair) => {
+            const [xs, ys] = this.split(pair);
+            return [c(xs, 'data-path x'), c(ys, 'data-path y')];
+          });
+          if (pts.length >= 2 && pts.every(([fx, fy]) => fx && fy)) {
+            item.paths.push({ pts, show, close: el.hasAttribute('data-close'), fill: el.hasAttribute('data-fill'), label: el.dataset.label || '', dash: el.hasAttribute('data-dash'), color: el.dataset.color || PLOT_COLORS[color++ % PLOT_COLORS.length] });
+          } else if (pts.length < 2) fail("data-path: 'x, y; x, y' 꼴로 점을 두 개 이상 써 주세요");
         } else if (el.dataset.vline != null) {
           const fn = c(el.dataset.vline, 'data-vline');
-          if (fn) item.vlines.push({ fn, label: el.dataset.label || '' });
+          if (fn) item.vlines.push({ fn, show, label: el.dataset.label || '' });
         } else {
           const [xs, ys] = this.split(el.dataset.point);
           const fx = c(xs, 'data-point x');
@@ -90,7 +101,14 @@ const Plot = {
           if (fx && fy) item.points.push({ fx, fy, show, label: el.dataset.label || '', color: el.dataset.color || 'var(--ch-ink)' });
         }
       }
-      const keyed = [...item.lines, ...item.sets].filter((l) => l.label);
+      // 끌 수 있는 점: 계산 상자(58-calc)가 이름과 처음 자리를 읽어 두었다. 여기서는 범위를 맞추고 손잡이를 단다.
+      for (const el of qsa(':scope > [data-drag]', fig)) {
+        el.hidden = true;
+        if (!item.calc) { fail('끌 수 있는 점(data-drag)은 계산 상자(.calc) 안의 그래프에 두세요'); continue; }
+        const d = item.calc.drags.find((x) => x.el === el);
+        if (d) item.drags.push(this.grip(item, d, fail));   // 없으면 이름을 잘못 쓴 점이다(계산 상자 오류에 있다)
+      }
+      const keyed = [...item.lines, ...item.sets, ...item.paths].filter((l) => l.label);
       if (keyed.length) {
         for (const l of keyed) {
           l.key = h('span', { class: l.pts ? 'is-dot' : l.dash ? 'is-dash' : '', style: `--c:${l.color}`, text: l.label });
@@ -99,9 +117,12 @@ const Plot = {
         fig.prepend(item.legend);
       }
       item.svg = svgEl('svg', { class: 'ch-plot-svg', role: 'img', 'aria-label': fig.getAttribute('aria-label') || fig.dataset.ylabel || '그래프' });
-      fig.append(item.svg);
+      // 점 손잡이는 그림과 같은 좌표(무대 px)로 겹쳐 놓는다
+      if (item.drags.length) item.area = h('div', { class: 'ch-plot-area' }, item.svg, ...item.drags.map((g) => g.el));
+      fig.append(item.area || item.svg);
       if (item.calc) item.calc.listeners.push(() => this.draw(item));
       this.list.push(item);
+      if (item.drags.length) Calc.update(item.calc);   // 범위에 맞춘 처음 자리로 다시 계산한다
       this.layout(item);
     });
     on('show', (slide) => { for (const item of this.list) if (slide.contains(item.fig)) this.layout(item); });
@@ -151,6 +172,8 @@ const Plot = {
     const yTicks = niceTicks(item.y[0], item.y[1], Math.max(2, Math.floor((h - PLOT_PAD.t - PLOT_PAD.b) / 70)), item.step.y);
     const widest = Math.max(0, ...yTicks.map((v) => tickWidth(this.tick(item, v))));
     item.pad = Object.assign({}, PLOT_PAD, { l: Math.max(PLOT_PAD.l, Math.ceil(widest + (item.fig.dataset.ylabel ? 50 : 20))) });
+    // 끌 수 있는 점이 범위 끝에 가도 누르는 자리가 그래프 밖으로 나가지 않게
+    if (item.drags.length) Object.assign(item.pad, { r: Math.max(PLOT_PAD.r, PLOT_GRIP / 2 + 2), t: Math.max(PLOT_PAD.t, PLOT_GRIP / 2 + 2) });
     const x0 = item.pad.l;
     const x1 = w - item.pad.r;
     const y0 = h - item.pad.b;
@@ -213,7 +236,7 @@ const Plot = {
     const r = (v) => Math.round(v * 10) / 10;
     const val = (fn) => { try { return Number(fn(scope)); } catch (err) { return NaN; } };
     const shown = (l) => { if (!l.show) return true; try { return !!l.show(scope); } catch (err) { return false; } };
-    for (const l of [...item.lines, ...item.sets]) {
+    for (const l of [...item.lines, ...item.sets, ...item.paths]) {
       l.on = shown(l);
       if (l.key) l.key.hidden = !l.on;
     }
@@ -222,9 +245,16 @@ const Plot = {
       if (dom && !dom.every(Number.isFinite)) return svgEl('path', { class: 'ch-plot-line', d: '' });
       const d = this.sample(item, l.fn, scope, dom).map((seg) => `M${seg.map(([x, y]) => `${r(x)} ${r(y)}`).join('L')}`).join('');
       return svgEl('path', { class: `ch-plot-line${l.dash ? ' is-dash' : ''}`, d, style: `stroke:${l.color}` });
+    }), ...item.paths.filter((l) => l.on).map((l) => {
+      const xy = l.pts.map(([fx, fy]) => [val(fx), val(fy)]);
+      // 값이 없는 점이 하나라도 있으면 긋지 않는다(어긋난 도형을 보이지 않게). 범위 밖은 그림 테두리에서 잘린다
+      const d = xy.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y))
+        ? `M${xy.map(([x, y]) => `${r(this.sx(item, x))} ${r(clamp(this.sy(item, y), -10 * item.h, 11 * item.h))}`).join('L')}${l.close ? 'Z' : ''}` : '';
+      return svgEl('path', { class: `ch-plot-line${l.dash ? ' is-dash' : ''}${l.fill ? ' is-fill' : ''}`, d, style: `stroke:${l.color}${l.fill ? `;fill:${l.color}` : ''}` });
     }));
     const marks = [];
     for (const v of item.vlines) {
+      if (!shown(v)) continue;
       const x = val(v.fn);
       if (!Number.isFinite(x) || x < item.x[0] || x > item.x[1]) continue;
       const px = r(this.sx(item, x));
@@ -249,5 +279,115 @@ const Plot = {
       if (p.label) marks.push(svgEl('text', { class: 'ch-plot-plabel', x: px + 12, y: py - 12 }, p.label));
     }
     item.marks.replaceChildren(...marks);
+    for (const g of item.drags) this.place(item, g);
+  },
+
+  // ---- 끌 수 있는 점 ----
+  // 화면 px → 그래프 값
+  vx(item, px) { return item.x[0] + ((px - item.pad.l) / (item.w - item.pad.l - item.pad.r)) * (item.x[1] - item.x[0]); },
+  vy(item, py) { return item.y[0] + ((item.h - item.pad.b - py) / (item.h - item.pad.t - item.pad.b)) * (item.y[1] - item.y[0]); },
+
+  // 범위 [lo, hi] 안에서 step의 배수(눈금)에 붙인다. step이 0이면 범위만 지킨다.
+  snap(v, step, [lo, hi]) {
+    const free = clamp(Number.isFinite(v) ? v : (lo + hi) / 2, lo, hi);
+    if (!(step > 0)) return free;
+    let out = Math.round(free / step) * step;
+    if (out > hi + 1e-9) out -= step;
+    else if (out < lo - 1e-9) out += step;
+    if (out < lo - 1e-9 || out > hi + 1e-9) return free;   // 범위가 눈금 한 칸보다 좁다
+    return exprRound(out, 10);   // 0.1 × 3 = 0.30000000000000004 같은 이진수 오차를 지운다
+  },
+
+  // 화살표 키 한 번에 움직이는 거리: 눈금 간격, 없으면 범위의 약 20분의 1(1·2·5 간격)
+  keyStep(step, [lo, hi]) {
+    if (step > 0) return step;
+    const raw = (hi - lo) / 20;
+    const p = 10 ** Math.floor(Math.log10(raw));
+    return [1, 2, 5, 10].map((m) => m * p).find((s) => s >= raw * 0.999);
+  },
+
+  grip(item, d, fail) {
+    const who = `끌 수 있는 점${d.label ? ` ${d.label}` : ''}`;
+    const span = (r) => `${Expr.format(r[0])}~${Expr.format(r[1])}`;
+    d.range = [item.x, item.y];
+    d.snap.forEach((s, k) => {
+      if (s > d.range[k][1] - d.range[k][0]) fail(`${who}: data-snap ${Expr.format(s)}이(가) 그래프 ${k ? '세로' : '가로'} 범위(${span(d.range[k])})보다 커요`);
+    });
+    const inside = (v, [lo, hi]) => v >= lo && v <= hi;
+    if (Number.isFinite(d.x) && Number.isFinite(d.y) && !(inside(d.x, item.x) && inside(d.y, item.y))) {
+      fail(`${who}: 처음 자리 (${Expr.format(d.x)}, ${Expr.format(d.y)})가 그래프 범위(가로 ${span(item.x)}, 세로 ${span(item.y)}) 밖이에요`);
+    }
+    // 처음 자리는 data-value 그대로 둔다(범위 밖이거나 없을 때만 고친다). 눈금에는 처음 움직일 때 붙는다
+    if (!(Number.isFinite(d.x) && inside(d.x, item.x))) d.x = this.snap(d.x, d.snap[0], item.x);
+    if (!(Number.isFinite(d.y) && inside(d.y, item.y))) d.y = this.snap(d.y, d.snap[1], item.y);
+    const label = d.label ? h('b', { class: 'ch-plot-dlabel', 'data-no-keep': '', 'aria-hidden': 'true', text: d.label }) : null;
+    const el = h('span', { class: 'ch-plot-drag', 'data-no-ink': '', tabindex: '0', role: 'button', 'aria-roledescription': '끌어 옮기는 점',
+      style: d.color ? `--c:${d.color}` : null }, label);
+    const g = { d, el, label };
+    this.bindGrip(item, g);
+    return g;
+  },
+
+  // 점을 (x, y)로 옮긴다(눈금에 붙이고 범위 안으로). 자리가 바뀌면 계산 상자가 다시 계산하고 그래프를 다시 그린다.
+  // 값은 바로 끝값으로 쓴다(손가락을 따라오는 점과 수가 어긋나지 않게).
+  moveTo(item, g, x, y) {
+    const d = g.d;
+    const nx = this.snap(x, d.snap[0], item.x);
+    const ny = this.snap(y, d.snap[1], item.y);
+    if (nx === d.x && ny === d.y) return false;
+    d.x = nx;
+    d.y = ny;
+    Calc.update(item.calc);
+    return true;
+  },
+
+  place(item, g) {
+    const px = this.sx(item, g.d.x);
+    const py = this.sy(item, g.d.y);
+    g.el.style.left = `${Math.round(px * 10) / 10}px`;
+    g.el.style.top = `${Math.round(py * 10) / 10}px`;
+    g.el.setAttribute('aria-label', `${g.d.label ? `점 ${g.d.label}` : '점'} (${Expr.format(g.d.x)}, ${Expr.format(g.d.y)})`);
+    // 이름은 점의 오른쪽 위에 둔다. 그래프 오른쪽 끝이나 위쪽 끝에서는 안쪽으로 돌린다
+    const wide = g.label ? tickWidth(g.d.label) * 1.25 + PLOT_GRIP / 2 + 16 : 0;
+    g.el.classList.toggle('is-left', px + wide > item.w);
+    g.el.classList.toggle('is-low', py < item.pad.t + 16);
+  },
+
+  // 끌기: 펜을 든 채로도 끌린다(data-no-ink). 줄여 보인 장(Fit)에서도 손가락을 따라오게 화면 거리를 장 안의 px로 바꾼다.
+  bindGrip(item, g) {
+    const el = g.el;
+    let p = null;
+    el.addEventListener('pointerdown', (e) => {
+      if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      e.preventDefault();
+      p = { id: e.pointerId, x: e.clientX, y: e.clientY, px: this.sx(item, g.d.x), py: this.sy(item, g.d.y), moved: false };
+      try { el.setPointerCapture(e.pointerId); } catch (err) { /* 합성 이벤트 */ }
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!p || e.pointerId !== p.id) return;
+      const k = Stage.scaleAt(item.fig);
+      const dx = (e.clientX - p.x) / k;
+      const dy = (e.clientY - p.y) / k;
+      if (!p.moved && Math.hypot(dx, dy) < DRAG_PX) return;   // 톡 누르기만 해서는 자리가 바뀌지 않게
+      p.moved = true;
+      el.classList.add('is-drag');
+      this.moveTo(item, g, this.vx(item, p.px + dx), this.vy(item, p.py + dy));
+    });
+    const end = (e) => {
+      if (!p || e.pointerId !== p.id) return;
+      p = null;
+      el.classList.remove('is-drag');
+    };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    // 화살표 키: 눈금 한 칸씩. 위쪽 화살표는 세로 값이 커진다. 장 넘기기로 가지 않게 막는다
+    el.addEventListener('keydown', (e) => {
+      const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+      if (!dir || e.altKey || e.ctrlKey || e.metaKey) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const d = g.d;
+      this.moveTo(item, g, d.x + dir[0] * this.keyStep(d.snap[0], item.x), d.y + dir[1] * this.keyStep(d.snap[1], item.y));
+    });
   },
 };
