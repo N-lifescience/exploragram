@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko" data-deck="test-motion">
+<head>
+<meta charset="utf-8">
+<title>motion</title>
+<link rel="stylesheet" href="../../engine/class-html.css">
+<script defer src="../../engine/class-html.js"></script>
+<script src="harness.js"></script>
+<script src="pointer.js"></script>
+</head>
+<body>
+<section class="slide" id="m1">
+  <div class="calc" id="tw" data-let="h = n * 10; ang = n * 15">
+    <input type="range" name="n" id="n" min="0" max="12" step="1" value="0">
+    <output id="nOut" data-expr="n" data-unit="개"></output>
+    <output id="hOut" data-expr="h / 4" data-digits="1"></output>
+    <output id="offOut" data-expr="n" data-tween="off"></output>
+    <output id="slowOut" data-expr="n" data-tween="1.5"></output>
+    <div class="bar" id="bar" data-value="n" data-max="12"></div>
+    <svg viewBox="0 0 300 200" width="300"><rect id="r" x="0" y="0" width="10" height="10" data-attr="height: h; fill: n > 6 ? '#ff0000' : '#00ff00'"/><line id="ln" x1="0" y1="0" x2="10" y2="0" data-attr="transform: 'rotate(' + ang + ' 100 100)'"/></svg>
+    <div id="sty" data-style="--w: n * 2; width: n * 5"></div>
+  </div>
+  <div class="calc" id="pl" data-let="y = t * 2">
+    <input type="range" name="t" id="t" min="0" max="10" step="1" value="0" data-play="1">
+    <output id="yOut" data-expr="y"></output>
+  </div>
+</section>
+<section class="slide" id="m2">
+  <div class="calc" id="away"><input type="range" name="a" id="a" min="0" max="10" value="0"><output id="aOut" data-expr="a"></output></div>
+  <input type="range" id="hp" min="0" max="5" step="1" value="0" data-play="1" data-loop>
+  <span id="hpOut">0</span>
+</section>
+<section class="slide" id="m3">
+  <input type="range" id="hs" min="0" max="10" value="0">
+  <svg viewBox="0 0 300 40" width="300"><g id="dots"></g></svg>
+</section>
+<pre id="results" data-summary="pending"></pre>
+<script>
+const I = () => ClassHTML._internal;
+const $ = (id) => document.getElementById(id);
+const txt = (id) => $(id).textContent.replace(/⁠/g, '');
+const set = (id, v, type = 'input') => { $(id).value = String(v); $(id).dispatchEvent(new Event(type, { bubbles: true })); };
+const user = () => { I().Calc.userAt = performance.now(); };   // 사람이 막 손댄 것처럼(시험은 isTrusted 이벤트를 만들 수 없다)
+const num = (id) => Number(txt(id).replace(/[^\d.-]/g, ''));
+const angle = () => Number(/rotate\(([\d.-]+)/.exec($('ln').getAttribute('transform'))[1]);
+const item = (id) => I().Calc.list.find((x) => x.box.id === id);
+for (let k = 0; k < 14; k++) {   // 직접 그린 입자
+  const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  c.setAttribute('cx', 10 + k * 20); c.setAttribute('cy', 20); c.setAttribute('r', 6);
+  $('dots').append(c);
+}
+let hpCount = 0;
+$('hp').addEventListener('input', () => { hpCount += 1; $('hpOut').textContent = $('hp').value; });
+
+test('사람이 손대지 않은 변경(시험·도구·스크립트)은 바로 끝값을 쓴다', () => {
+  set('n', 12);
+  eq(txt('nOut'), '12개');
+  eq($('r').getAttribute('height'), '120');
+  set('n', 0);
+  eq(txt('nOut'), '0개');
+  eq($('bar').style.getPropertyValue('--f'), '0');
+});
+
+test('사람이 밀면 수·막대·속성·스타일이 0.6초 동안 끝값으로 흘러간다', async () => {
+  user();
+  set('n', 12);
+  eq(txt('nOut'), '0개', '바로 바뀌지 않는다');
+  eq(txt('offOut'), '12', 'data-tween="off"는 바로');
+  eq($('r').getAttribute('fill'), '#ff0000', '#색은 글자째 바로');
+  await wait(200);
+  const n = num('nOut');
+  assert(n > 0 && n < 12 && Number.isInteger(n), `세는 중인 정수: ${txt('nOut')}`);
+  const f = Number($('bar').style.getPropertyValue('--f'));
+  assert(f > 0 && f < 1, `막대 중간: ${f}`);
+  const hgt = Number($('r').getAttribute('height'));
+  assert(hgt > 0 && hgt < 120, `높이 중간: ${hgt}`);
+  const a = angle();
+  assert(a > 0 && a < 180, `회전 중간: ${a}`);
+  assert(/^\d+(\.\d)?$/.test(txt('hOut')), `소수 한 자리: ${txt('hOut')}`);
+  await wait(650);
+  eq(txt('nOut'), '12개');
+  eq(txt('hOut'), '30.0');
+  eq($('r').getAttribute('height'), '120');
+  eq($('ln').getAttribute('transform'), 'rotate(180 100 100)');
+  eq($('bar').style.getPropertyValue('--f'), '1');
+  eq($('sty').style.width, '60px');
+  eq($('sty').style.getPropertyValue('--w'), '24');
+  assert(item('tw').jobs.some((j) => j.b.el.id === 'slowOut'), 'data-tween="1.5"는 아직 가는 중');
+  await wait(800);
+  eq(txt('slowOut'), '12');
+});
+
+test('손을 뗄 때(change) 같은 끝값이면 흐름을 다시 시작하지 않는다', async () => {
+  user();
+  set('n', 6);
+  const job = item('tw').jobs.find((j) => j.key === 'text');
+  assert(job, '흘러가는 일감');
+  user();
+  set('n', 6, 'change');
+  assert(item('tw').jobs.find((j) => j.key === 'text') === job, '같은 일감 그대로');
+  await wait(1700);
+  eq(txt('nOut'), '6개');
+});
+
+test('⚙ 움직임 끄기면 사람이 밀어도 바로 끝값', () => {
+  document.documentElement.classList.add('ch-motion-off');
+  try {
+    user();
+    set('n', 0);
+    eq(txt('nOut'), '0개');
+    eq($('r').getAttribute('height'), '0');
+  } finally { document.documentElement.classList.remove('ch-motion-off'); }
+});
+
+test('점검은 흘러가는 중인 그림을 끝값으로 놓고 잰다', () => {
+  user();
+  set('n', 12);
+  eq(txt('nOut'), '0개');
+  ClassHTML.audit();
+  eq(txt('nOut'), '12개');
+  eq($('r').getAttribute('height'), '120');
+  eq(item('tw').jobs.length, 0);
+});
+
+test('보고 있지 않은 장의 계산 상자는 바로 끝값', () => {
+  user();
+  set('a', 5);
+  eq(txt('aOut'), '5');
+});
+
+test('data-play: 슬라이더 위에 「재생」·「처음으로」를 달고, 누르면 최댓값까지 간 뒤 멈춘다', async () => {
+  const bar = $('t').previousElementSibling;
+  assert(bar && bar.classList.contains('ch-play'), '재생 줄');
+  const run = bar.querySelector('.ch-play-run');
+  eq(run.textContent, '▶ 재생');
+  run.click();
+  eq(run.textContent, '❚❚ 멈춤');
+  await wait(450);
+  const v = Number($('t').value);
+  assert(v > 0 && v < 10, `가는 중: ${v}`);
+  assert(num('yOut') > 0, '계산 상자가 따라 계산');
+  await wait(1100);
+  eq($('t').value, '10');
+  eq(txt('yOut'), '20');
+  eq(run.textContent, '▶ 재생');
+  bar.querySelector('.ch-reset').click();
+  eq($('t').value, '0');
+  eq(txt('yOut'), '0');
+});
+
+test('끝에서 누르면 처음부터, 슬라이더를 잡으면 멈춘다', async () => {
+  const run = $('t').previousElementSibling.querySelector('.ch-play-run');
+  set('t', 10);
+  run.click();
+  await wait(300);
+  const v = Number($('t').value);
+  assert(v > 0 && v < 10, `처음부터 다시: ${v}`);
+  $('t').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  eq(run.textContent, '▶ 재생');
+  const keep = $('t').value;
+  await wait(250);
+  eq($('t').value, keep, '멈춘 자리 그대로');
+});
+
+test('직접 짠 슬라이더도 재생하고(data-loop는 되풀이), 장을 넘기면 멈춘다', async () => {
+  ClassHTML.go(1);
+  await wait(50);
+  const run = $('hp').previousElementSibling.querySelector('.ch-play-run');
+  run.click();
+  await wait(1400);
+  eq(run.textContent, '❚❚ 멈춤', '되풀이라 계속 간다');
+  assert(hpCount >= 5, `직접 짠 처리기가 input을 받는다: ${hpCount}`);
+  ClassHTML.go(0);
+  await wait(50);
+  eq(run.textContent, '▶ 재생');
+});
+
+test('점검: 움직임 없는 직접 짠 익스플로라그램(static-model)과 손으로 그린 입자(use-part)를 알린다', () => {
+  const report = ClassHTML.audit();
+  const sm = report.warnings.find((w) => w.code === 'static-model');
+  assert(sm, 'static-model');
+  assert(/\(3쪽\)/.test(sm.msg) && /data-play/.test(sm.msg), sm.msg);
+  const up = report.warnings.find((w) => w.code === 'use-part');
+  assert(up && up.page === 3 && /14개/.test(up.msg) && /figure\.particles/.test(up.msg), up && up.msg);
+  assert(!report.errors.some((e) => e.code === 'static-model' || e.code === 'use-part'), '경고일 뿐 오류는 아니다');
+  assert(I().Audit.prompt(report).includes('엔진 부품(계산 상자, 입자 상자, 그래프)을 먼저'), 'AI에게 보낼 말');
+});
+
+test('수업 스크립트에 움직임이 있으면 둘 다 알리지 않고, 파일 안에 넣은 엔진 코드는 세지 않는다', () => {
+  const add = (code) => { const s = document.createElement('script'); s.textContent = code; document.body.append(s); return s; };
+  const rafWord = 'requestAnimation' + 'Frame';
+  const mine = add(`window.__motionProbe = typeof ${rafWord};`);
+  try {
+    const r = ClassHTML.audit();
+    assert(!r.warnings.some((w) => w.code === 'static-model'), '수업 스크립트에 움직임');
+    assert(!r.warnings.some((w) => w.code === 'use-part'), 'use-part도 알리지 않는다');
+  } finally { mine.remove(); }
+  const engine = add(`/*! class-html engine v9.9.9 */ window.__engineProbe = typeof ${rafWord};`);
+  try {
+    assert(ClassHTML.audit().warnings.some((w) => w.code === 'static-model'), '엔진 코드는 빼고 본다');
+  } finally { engine.remove(); }
+});
+</script>
+</body>
+</html>

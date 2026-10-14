@@ -93,6 +93,9 @@ body[data-theme="ppt"] section.slide#cover::before { display: none; }
 .dx-ticks span { position: absolute; top: 0; left: calc(22px + (100% - 44px) * var(--f)); transform: translateX(-50%); white-space: nowrap; }
 .dx-ticks span:first-child { transform: none; left: 0; }
 .dx-ticks span:last-child { transform: none; left: auto; right: 0; }
+#ik-svg circle { transition: cx .25s linear, cy .25s linear; }   /* 재생할 때 입자가 칸 사이를 미끄러지게 */
+#ink-model .dx { grid-template-columns: auto 390px; }   /* 「재생」 줄이 들어갈 자리: 범례를 가로로 */
+#ink-model .dx-legend { flex-direction: row; flex-wrap: wrap; gap: 4px 20px; }
 section.slide input.dx-range { -webkit-appearance: none; appearance: none; width: 100%; height: 56px; margin: 0; background: transparent; cursor: pointer; }
 section.slide input.dx-range::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; background: #D7DEE6; }
 section.slide input.dx-range::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 44px; margin-top: -16px; border-radius: 50%; background: var(--teal); border: 5px solid #fff; box-shadow: 0 1px 6px rgba(0,0,0,.45); }
@@ -198,7 +201,7 @@ section.slide button.md-b[aria-pressed="true"] { background: var(--teal); border
   <div class="dx" data-ai="잉크 입자 상자: 무작위 걸음 모의실험(씨앗 고정)">
     <div class="dx-ctrl">
       <p class="dx-lab">잉크를 떨어뜨린 뒤 <b id="ik-t-out">시작</b></p>
-      <input class="dx-range" type="range" autocomplete="off" id="ik-t" min="0" max="31" value="0" aria-label="잉크를 떨어뜨린 뒤 지난 시간">
+      <input class="dx-range" type="range" autocomplete="off" id="ik-t" min="0" max="31" value="0" data-play="8" aria-label="잉크를 떨어뜨린 뒤 지난 시간">
       <div class="dx-ticks"><span>시작</span><span style="--f:0.2258">1분</span><span style="--f:0.6129">3분</span><span>5분</span></div>
       <div class="dx-box">
         잉크 입자가 있는 칸 <span class="dx-model">(모형)</span>
@@ -208,7 +211,7 @@ section.slide button.md-b[aria-pressed="true"] { background: var(--teal); border
       <div class="dx-legend">
         <span><i class="dot" style="background:var(--ink-dot)"></i>잉크 입자 36개</span>
         <span><i class="dot" style="background:var(--water-dot)"></i>물 입자 90개</span>
-        <span><i class="dot" style="background:#1E5FA8;box-shadow:0 0 0 4px var(--yellow)"></i>물 입자 하나가<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1분 동안 지나온 길</span>
+        <span><i class="dot" style="background:#1E5FA8;box-shadow:0 0 0 4px var(--yellow)"></i>물 입자 하나가 1분 동안 지나온 길</span>
       </div>
     </div>
     <div class="dx-view">
@@ -399,10 +402,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullAt = counts.findIndex((c) => c.size === 9);
 
     const cells = [...Array(9)].map((_, c) => mk('rect', { x: (c % 3) * W / 3, y: Math.floor(c / 3) * H / 3, width: W / 3, height: H / 3, fill: '#E0464E', 'fill-opacity': 0 }, $('#ik-cells')));
-    const dots = ps.map((_, i) => i < NI
-      ? mk('circle', { r: R, fill: '#E0464E' }, $('#ik-ink'))
-      : mk('circle', { r: R, fill: '#9DC8F5' }, $('#ik-water')));
+    // 처음 자리(0초)에 놓아 둔다. 그래야 가림막이 열릴 때 입자가 구석에서 날아오지 않는다.
+    const at = (p) => ({ cx: p[0].toFixed(1), cy: p[1].toFixed(1) });
+    const dots = frames[0].map((p, i) => i < NI
+      ? mk('circle', { r: R, fill: '#E0464E', ...at(p) }, $('#ik-ink'))
+      : mk('circle', { r: R, fill: '#9DC8F5', ...at(p) }, $('#ik-water')));
     dots[me].setAttribute('visibility', 'hidden');
+    for (const [k, v] of Object.entries(at(frames[0][me]))) $('#ik-me').setAttribute(k, v);
     const bars = [...$('#ik-bar').children];
     const clock = (t) => t < 60 ? t + '초' : Math.floor(t / 60) + '분' + (t % 60 ? ' ' + (t % 60) + '초' : '');
 

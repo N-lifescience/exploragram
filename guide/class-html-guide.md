@@ -4,7 +4,7 @@
 > **AI에게**: 이 파일 하나가 Exploragram(옛 이름 class-html) 지침 전체다. 선생님이 수업 PPT를 주면 이 지침대로 수업용 HTML을 만든다.
 > **반드시**: `<head>`에 아래 엔진 css·js 두 줄을 넣는다(지금 환경에서 안 열려도 그대로 둔다). 넘기기·툴바를 직접 짜지 않고, PPT 장을 통째로 그림으로 넣지 않는다(1절 기준 8·9).
 > 본문의 `references/…`는 이 파일의 해당 절을, `scripts/…`는 저장소 https://github.com/N-lifescience/exploragram 의 `skills/class-html/scripts/`를 가리킨다.
-> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css`·`.js` (v1.5.0)
+> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css`·`.js` (v1.6.0)
 > 레퍼런스 완성본(`references/examples/`): https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/elem-shadow.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/eth-exploragram.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/mid-linear.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/sci-diffusion.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/soc-supply-demand.html
 
 ## 차례
@@ -23,7 +23,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 
 **만들기 전에 교과에 맞는 레퍼런스 하나를 연다.** `references/examples/`에 있다. 모양을 베끼지 말고 수준을 가져온다.
 
-- 과학·수학·정보: `sci-diffusion.html`. 연수 실습 PPT로 만든 12장짜리 완성본이다. 원본의 머리 띠·배지를 다시 그렸다. 익스플로라그램은 셋이다: 시간 막대로 퍼지는 입자, 온도에 따라 바뀌는 입자 길과 그래프, 매질 단추.
+- 과학·수학·정보: `sci-diffusion.html`. 연수 실습 PPT로 만든 12장짜리 완성본이다. 원본의 머리 띠·배지를 다시 그렸다. 익스플로라그램은 셋이다: 「재생」을 누르면 시간이 흐르며 퍼지는 입자, 온도에 따라 바뀌는 입자 길과 그래프, 매질 단추.
 - 사회: `soc-supply-demand.html`. 역시 12장짜리 완성본이다. 익스플로라그램은 가격 막대로 움직이는 수요·공급 그래프, 사건 단추로 옮겨 가는 곡선이다.
 - 윤리·국어처럼 계산이 없는 교과: `eth-exploragram.html`. 익스플로라그램 다섯 장이다: 이성과 정서의 저울, 리벳 실험 시간 막대, 공감 게이지, 마을 시뮬레이터, 혈연 선택 부등호.
 - 초등학교: `elem-shadow.html`. 초등 과학 '빛과 그림자' 9장이다. 낱말을 쉽게 쓰고, 익스플로라그램은 손전등과 인형 사이 거리로 그림자 크기가 바뀌는 모형(옆에서 본 빛줄기와 벽의 그림자를 함께), 물체를 골라 그림자 진하기가 바뀌는 모형이다.
@@ -40,7 +40,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 - 답이나 결론은 `class="step"`으로 숨긴다. → 키를 누르면 차례로 열린다.
 - 익스플로라그램 스크립트는 `</body>` 앞 `<script>` 하나에 `document.addEventListener('DOMContentLoaded', () => { … })`로 쓴다. 학생 입력을 `innerHTML`로 넣지 않는다.
 - 넘친 장은 엔진이 조금 줄여서 다 보이게 한다(많이 넘쳐도 0.75배까지만). 수업에서 내용이 잘리지 않게 하는 안전망이다. 점검은 줄이기 전 크기로 재서 계속 오류로 알린다. 넘친 장은 나눠서 고친다.
-- 엔진 부품으로는 퀴즈, 분류 카드, 라벨 붙이기, 순서 배열, 연표, 지도 단계 공개, 입자 상자, 계산 상자와 그래프(끌어 옮기는 점 포함)가 있다(`references/components.md`). 딱 맞으면 쓴다. 익스플로라그램은 부품에 개념을 맞추지 말고 개념에 맞춰 직접 짠다. 코드를 실행해 화면을 확인할 수 없는 환경이면 스크립트 대신 계산 상자와 CSS 변수로 익스플로라그램을 만든다(`references/exploragram.md`의 '스크립트 없이').
+- 엔진 부품으로는 퀴즈, 분류 카드, 라벨 붙이기, 순서 배열, 연표, 지도 단계 공개, 입자 상자, 계산 상자와 그래프(끌어 옮기는 점 포함), 재생 단추가 있다(`references/components.md`). **익스플로라그램은 부품을 먼저 찾고 맞는 부품이 없을 때만 직접 짠다.** 계산 상자로 그린 그림은 손잡이를 움직이면 엔진이 0.6초 동안 움직여 보여 준다. 시간이 흐르는 현상은 슬라이더에 `data-play`를 붙이면 엔진이 시간을 흘려 준다. 부품으로 그릴 수 없는 그림만 SVG로 직접 그리고 값 계산은 계산 상자에 맡긴다(`references/exploragram.md`의 '엔진에 붙이는 뼈대').
 
 ### 절차
 
@@ -52,10 +52,10 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 2. **인터뷰.** 아래를 한 번에 묻는다. 짐작한 답에 (추천)을 붙이고, "알아서"라고 하면 추천대로 간다. 물을 수 없는 환경이면 추천대로 만들고, 정한 답을 전달 때 함께 알린다.
    ① 교과·학년·차시
    ② 학생이 가장 헷갈려 하는 지점(PPT에서 후보 3개를 뽑아 보여 준다)
-   ③ 꼭 만지게 하고 싶은 장면. "PPT로 수업할 때 아쉬웠던 장면이 있나요?"를 함께 묻는다.
+   ③ 꼭 만지게 하고 싶은 장면. "PPT로 수업할 때 아쉬웠던 장면이 있나요?"를 함께 묻는다. 부품 이름 대신 장면으로 묻는다. 헷갈리는 지점마다 AI가 장면 두세 개를 골라 (추천)을 붙여 보여 준다. 예: 입자가 막을 오가는 모습, 시간이 흐르며 물 높이와 그래프가 변하는 실험, 값을 바꾸면 따라 움직이는 그림과 막대, 단계마다 열리는 그림이나 지도, 끌어 옮기면 바뀌는 도형. 장면과 부품의 짝은 `references/exploragram.md`의 '장면 메뉴'에 있다.
    ④ 지킬 것: 시험 범위, 그대로 둘 문장, 뺄 장
    ⑤ 넣을 영상이나 사이트 주소, 글이 많은 그림(표, 원문 분석)의 원문 파일. 영상 주소는 선생님이 준 것만 쓴다. 원문을 받으면 그림 속 글을 짐작해 읽지 않고 원문으로 다시 친다.
-3. **설계 확인.** 표를 채팅에 보여 주고 "이대로 만들까요?"라고 묻는다. 표의 칸은 '개념 | 헷갈리는 지점 | 익스플로라그램: 무엇을 만지면 무엇이 계산되어 바뀌나'다. 설계표는 HTML에 넣지 않는다. 물을 수 없는 환경이면 설계표를 전달 메모에 붙이고 진행한다.
+3. **설계 확인.** 표를 채팅에 보여 주고 "이대로 만들까요?"라고 묻는다. 표의 칸은 '개념 | 헷갈리는 지점 | 익스플로라그램: 무엇을 만지면 무엇이 계산되어 바뀌나 | 쓸 부품 | 움직이는 것'이다. '움직이는 것'에는 값이 바뀔 때 화면에서 움직이는 것을 적는다(예: 물 입자가 막을 오간다, 빨대 속 물이 차오른다). 설계표에 적은 부품과 움직임은 하나도 빼지 않고 만든다. 설계표는 HTML에 넣지 않는다. 물을 수 없는 환경이면 설계표를 전달 메모에 붙이고 진행한다.
 4. **쓰기.** 아래 '기준'을 따른다.
 5. **점검**
    - 코드를 실행할 수 있으면 `node scripts/states.mjs 수업.html 폴더 [states.json]`을 돌린다(Node 22 이상, 크롬이나 엣지). 엔진 자동 점검 결과(넘침·잘림·작은 글자·부품 실수)와 스크립트 예외를 적어 준다. errors가 0이 될 때까지 고친다.
@@ -75,9 +75,10 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 1. **익스플로라그램.** 헷갈리는 지점마다 중심 장 하나는 익스플로라그램으로 만든다(한 차시에 보통 2~4개). 손잡이(슬라이더·단추)는 보통 1~2개, 많아도 3개다(저절로 움직이는 단추는 따로). 손잡이가 그림과 수치·식·그래프를 함께 바꾸고, 결과에 따라 문장이 달라진다. 누르면 글이 나타나기만 하는 장, 퀴즈, 분류 카드는 익스플로라그램이 아니다. 이런 장은 익스플로라그램 뒤의 확인용으로 쓴다. 한 장에 익스플로라그램 하나.
    - 단추를 눌렀을 때 바뀌는 것이 글뿐이면 익스플로라그램이 아니다. 고른 값으로 자리, 길이, 개수, 비율, 판정 가운데 하나를 계산해 그림과 함께 바꾼다.
    - 글만 바뀌는 장에는 `data-activity`를 붙이지 않는다. 붙이면 점검이 `text-only`로 알리고 활동 장으로 세지 않는다.
+   - 값이 바뀌면 그림이 끝값으로 건너뛰지 않고 움직여야 한다. 계산 상자와 입자 상자는 엔진이 움직인다. 직접 짠 그림은 바뀌는 SVG 요소에 CSS `transition`을 준다. 확산, 삼투, 반응, 운동처럼 시간이 흐르며 일어나는 현상은 시간을 손잡이로 삼고 `data-play`를 붙인다.
 2. **0단계에서 시작.** 직접 짠 익스플로라그램은 첫 조작 전까지 결과를 가림막으로 가린다. 단계·시간·연도를 여는 슬라이더는 첫 칸이 '시작'이다. 연표·지도·비교 전환도 아무것도 공개되지 않은 상태에서 시작하고, 첫 조작이 1단계를 연다.
    - 조건을 비교하는 슬라이더(사람 수, 정서 세기처럼 기준값이 있어야 비교되는 것)는 기준값에서 시작해도 된다. 그때도 결과는 다른 첫 조작(상황 고르기 등) 전까지 가린다. 점검의 `not-veiled` 경고는 남아도 된다.
-   - 엔진 계산 상자(`.calc`)는 기준값을 보여 주며 시작해도 된다. 엔진이 첫 상태를 점검하고 초점도 풀어 주기 때문이다. 계산 상자로도 0단계 가림이 필요하면 단계 막대를 변수로 쓴다(`exploragram.md`의 '스크립트 없이').
+   - 엔진 계산 상자(`.calc`)는 기준값을 보여 주며 시작해도 된다. 엔진이 첫 상태를 점검하고 초점도 풀어 주기 때문이다. 계산 상자로도 0단계 가림이 필요하면 단계 막대를 변수로 쓴다(`exploragram.md`의 '엔진에 붙이는 뼈대').
 3. **원본 PPT의 얼굴.** 색만 옮기지 않는다. 머리 띠, 배지, 번호 상자, 쪽 표시, 빨강·파랑 핵심어 같은 원본 모양을 이 수업의 CSS로 다시 그린다. 방법은 `references/design.md`에 있다.
 4. **사실은 그대로, 문장은 새로.**
    - 사실·정의·정답·자료 출처는 PPT 그대로 둔다. 문장은 윤문한다(`references/korean.md`). AI 말투를 쓰지 않고, 줄은 의미 단위로 바꾸고, 맞춤법을 지킨다.
@@ -116,6 +117,8 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 
 누르면 글이 열리기만 하는 것, 퀴즈, 분류 카드는 익스플로라그램이 아니다.
 
+여기에 **움직임**을 더한다. 값이 바뀌면 그림이 끝값으로 건너뛰지 않고 흘러가야 학생 눈이 변화를 따라간다. 계산 상자와 입자 상자는 엔진이 움직인다. 시간이 흐르며 일어나는 현상은 슬라이더에 `data-play`를 붙여 엔진이 시간을 흘리게 한다.
+
 단추를 누르면 설명 글이나 카드 목록만 바뀌는 것도 아니다. 고른 값으로 무엇인가를 계산해야 한다. 자리, 길이, 개수, 비율, 판정 가운데 하나가 값에 따라 달라지고 그림이 그것을 보여 준다.
 
 **몇 개?** 한 차시(PPT 10~25장)에 보통 2~4개. 헷갈리는 지점마다 하나씩이고, 법칙 둘을 한 익스플로라그램으로 묶어도 된다.
@@ -130,11 +133,12 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
    - 교과서 식이 있으면 그 식을 쓴다.
    - 식이 없는 교과(윤리·사회·국어)는 개념을 지키는 단순한 모형을 만든다. 저울의 무게, 세대마다 바뀌는 비율, 부등호 같은 것이다.
    - 모형 수치는 `data-ai="모형 수치"`로 표시하고, 화면에도 '모형'이라고 적는다.
-5. 극단값을 확인한다. 최솟값·최댓값·경계값에서 그림과 문장이 말이 되는지 본다. 0으로 나누면 '?'를 보인다.
+5. 움직임과 부품을 정한다. 아래 '장면 메뉴'에서 장면을 고르고 그 장면의 부품을 쓴다. 시간이 흐르며 일어나는 현상(확산, 삼투, 반응 속도, 운동)이면 시간을 손잡이로 삼고 `data-play`로 재생한다.
+6. 극단값을 확인한다. 최솟값·최댓값·경계값에서 그림과 문장이 말이 되는지 본다. 0으로 나누면 '?'를 보인다.
 
 ### 교과별 아이디어
 
-- **과학**: 식으로 그림이 바뀌는 모식도(흡수력 = 삼투압 − 팽압, 옴의 법칙 회로, 렌즈 상), 변인 슬라이더와 그래프 위 지금 값 표시, 입자 상자(확산·삼투·기체), 시간 막대(세포 분열 단계, 판 이동).
+- **과학**: 식으로 그림이 바뀌는 모식도(흡수력 = 삼투압 − 팽압, 옴의 법칙 회로, 렌즈 상), 변인 슬라이더와 그래프 위 지금 값 표시, 입자 상자(확산·삼투·기체), 시간 막대(세포 분열 단계, 판 이동), 재생으로 시간이 흐르는 실험(빨대 속 물 높이, 반응 속도 그래프).
 - **수학**: 계수 슬라이더에 따라 그래프와 식이 함께 바뀌는 것, 시행 횟수를 늘리면 상대도수가 확률에 다가가는 시뮬레이션, 도형 변형과 넓이 식.
   - 분수함수의 계수 막대와 점근선, 나눈 개수 막대를 늘리면 직사각형 넓이의 합이 정적분 값에 다가가는 것, 꼭짓점 좌표를 바꿔도 그대로인 무게중심의 비.
   - 점을 직접 끌어 옮기는 장면(직선의 방정식, 내분점, 무게중심)은 그래프 위 끌 수 있는 점(`components.md` 9-1절)으로 만든다. 아래에 무게중심 예시가 있다.
@@ -186,15 +190,108 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 - 세 점이 한 직선 위에 오는 경계도 끌어서 확인한다. 이때 삼각형이 아니라는 문장이 나온다.
 - 내분점은 같은 틀로 만든다. 점 A, B를 끌고 `px = (n * ax + m * bx) / (m + n)`으로 계산한 점을 `data-point`로 찍는다. 비 m : n은 슬라이더 두 개로 바꾼다.
 
+### 장면 메뉴
+
+부품 이름 대신 장면으로 고른다. 인터뷰 ③에서 선생님께 보여 주는 목록이다. 설계표의 '쓸 부품'과 '움직이는 것' 칸도 여기서 채운다.
+
+| 장면 | 쓸 부품 | 움직이는 것 |
+|---|---|---|
+| 입자가 막을 오가며 퍼지거나 모인다(확산, 삼투, 기체) | 입자 상자 `figure.particles`(`components.md` 13절) | 입자가 저절로 움직이고 양쪽 개수가 바뀐다 |
+| 시간이 흐르며 물 높이, 온도, 개체 수가 변하는 실험 | 계산 상자, 재생 `data-play`(16절), 그래프 `figure.plot` | 시간 막대가 저절로 가고 그림과 곡선이 따라 그려진다 |
+| 값을 바꾸면 그림의 크기와 자리, 막대, 수치가 함께 바뀐다 | 계산 상자 `.calc`의 `data-attr`, `data-style`, `.bar`(8절) | 그림과 수가 0.6초 동안 끝값으로 간다 |
+| 계수를 바꾸면 곡선과 지금 값이 바뀌는 그래프 | 계산 상자와 그래프(9절) | 곡선과 점을 다시 그린다 |
+| 점을 끌어 옮기면 바뀌는 도형과 직선 | 그래프의 끌 수 있는 점 `data-drag`(9-1절) | 학생이 끄는 대로 점과 도형이 움직인다 |
+| 세대나 단계마다 비율이 바뀌는 시뮬레이션 | 계산 상자의 `data-let` 연쇄와 재생 | 세대 막대가 저절로 가고 막대와 꺾은선이 바뀐다 |
+| 단계마다 하나씩 열리는 그림, 지도, 연표 | 단계 막대 `.reveal`, `figure.map-reveal`, `ol.yearline`(1, 3, 4절) | 단계마다 그림이 열린다 |
+
+맞는 장면이 없을 때만 그림을 직접 짠다(아래 '직접 짜야 할 때'). 그때도 값 계산을 계산 상자에 맡기면 움직임이 저절로 붙는다.
+
 ### 엔진에 붙이는 뼈대
 
 그림·그래프는 왼쪽, 손잡이(슬라이더·단추)와 수치는 오른쪽 칸에 둔다. 교사 대부분이 오른손잡이라 판 앞에서 오른쪽 손잡이를 밀어도 몸이 그림을 가리지 않고, 학생은 왼쪽에서 오른쪽으로 읽으며 그림을 먼저 본다.
 
-아래 뼈대는 상대 부피 0.85~1.30을 다루는 모형이다. 슬라이더는 '시작'(가림)에서 시작하고, 첫 조작에서 익스플로라그램이 열린다. 코드는 세 곳으로 나눠 넣는다. CSS는 `<head>`의 `<style>`에, 장은 본문에, 스크립트는 `</body>` 바로 앞에 둔다. 익스플로라그램이 쓸 수 있는 높이는 제목 아래 약 470px(ppt 테마, `data-sec`이 있는 장)이다.
+뼈대는 둘이고 둘 다 스크립트가 없다. 코드를 실행해 화면을 확인할 수 없는 환경(채팅 AI)에서도 안전하다. 익스플로라그램이 쓸 수 있는 높이는 제목 아래 약 470px(ppt 테마, `data-sec`이 있는 장)이다.
+
+#### 값을 바꾸는 익스플로라그램: 계산 상자
+
+상대 부피 0.85~1.30을 다루는 흡수력 모형이다. 단계 막대가 손잡이와 0단계 가림을 맡고 계산 상자가 수를 셈한다. 세포 크기와 흡수력 막대는 SVG 속성(`data-attr`)으로 바꾼다. 손잡이를 밀면 엔진이 세포와 막대를 0.6초 동안 움직인다.
+
+```html
+<section class="slide" id="absorb" data-sec="2. 삼투" data-title="흡수력 익스플로라그램">
+  <h2>세포가 부풀면 물을 더 빨아들일까?</h2>
+  <div class="calc" data-ai="흡수력 익스플로라그램" data-let="v = 0.80 + k * 0.05; t = v <= 1 ? 0 : 6.4 * ((v - 1) / 0.35) ^ 1.6; o = 8.7 / v; s = o - t">
+    <div class="reveal" data-name="k" data-stops="시작|0.85|0.90|0.95|1.00|1.05|1.10|1.15|1.20|1.25|1.30" style="display:grid;grid-template-columns:1fr 400px;gap:28px">
+      <div class="veil">
+        <svg viewBox="0 0 600 320" aria-label="세포 그림과 흡수력 막대">
+          <ellipse cx="200" cy="160" rx="120" ry="90" fill="#DFF0ED" stroke="#0F766E" stroke-width="6" data-attr="rx: 120 * v; ry: 90 * v"/>
+          <rect x="430" width="70" fill="#9A6B06" data-attr="y: 280 - s * 24; height: s * 24"/>
+          <text x="465" y="312" font-size="26" text-anchor="middle">흡수력</text>
+        </svg>
+      </div>
+      <div>
+        <div class="ch-stops"></div>
+        <div data-at="1">
+          <p>세포 부피 <output data-expr="v" data-digits="2"></output>배</p>
+          <p data-ai="모형 수치">흡수력 <output data-expr="s" data-digits="1"></output> = 삼투압 <output data-expr="o" data-digits="1"></output> − 팽압 <output data-expr="t" data-digits="1"></output> (모형)</p>
+          <p data-show="t == 0">팽압이 0이다. 흡수력이 가장 크다.</p>
+          <p data-show="t > 0">부풀수록 팽압이 커져 흡수력이 준다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+- `k`는 지금 칸 번호다(시작 = 0). `.veil`과 `data-at="1"`이 0단계에서 결과를 가린다. 빈 `<div class="ch-stops">`를 두면 단계 막대가 그 자리에 생긴다.
+- SVG 속성은 `data-attr="rx: 120 * v"`, CSS는 `data-style="--s: v"`로 바꾼다. 수만 다른 글자 값(`'rotate(' + a + ' 100 100)'`, 꺾은선 `points`)도 흘러간다.
+- 세대마다 바뀌는 시뮬레이션은 `data-let`에 `p1 = …; p2 = f(p1); …`처럼 풀어 쓰고, 꺾은선 점은 글자를 이어 붙여 만든다.
+- 문법은 `components.md` 8절(계산 상자)과 1절(단계 막대)에 있다.
+
+#### 시간이 흐르는 익스플로라그램: 재생
+
+반투막 튜브를 꽂은 빨대 속 물 높이 모형이다. 시간 슬라이더에 `data-play="8"`을 붙이면 엔진이 그 위에 「▶ 재생」과 「처음으로」를 달고 8초 동안 시간을 흘린다. 그래프 선은 `data-x="0, max(t, 0.01)"`라서 시간을 따라 그려진다.
+
+```html
+<section class="slide" id="tube" data-sec="2. 삼투" data-title="빨대 속 물 높이">
+  <h2>시간이 지나면 빨대 속 물은 얼마나 올라갈까?</h2>
+  <div class="calc" data-ai="빨대 삼투 실험 모형" data-let="top = 8 * c; h = top * (1 - exp(-t / 3))" style="display:grid;grid-template-columns:160px 1fr 380px;gap:24px;align-items:start">
+    <svg viewBox="0 0 160 330" width="160" aria-label="증류수 비커에 담근 반투막 튜브와 빨대">
+      <rect x="10" y="170" width="140" height="150" fill="#D3EBF7"/>
+      <rect x="72" y="10" width="16" height="200" fill="#FFFFFF" stroke="#8C99A5" stroke-width="2"/>
+      <rect x="74" width="12" fill="#3F8FB0" data-attr="y: 150 - h * 16; height: 60 + h * 16"/>
+      <ellipse cx="80" cy="258" rx="34" ry="52" fill="#3F8FB0" stroke="#2A5F78" stroke-width="3"/>
+    </svg>
+    <figure class="plot" data-x="0, 10" data-y="0, 9" data-xstep="2" data-ystep="2" data-height="330" data-xlabel="시간(분)" data-ylabel="올라간 높이(칸)">
+      <i data-line="top * (1 - exp(-x / 3))" data-x="0, max(t, 0.01)"></i>
+      <i data-point="t, h"></i>
+    </figure>
+    <div style="text-wrap: balance">
+      <p style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">튜브 속 설탕물
+        <button data-set="c" data-value="0.5" aria-pressed="true">0.5 M</button>
+        <button data-set="c" data-value="1">1 M</button></p>
+      <p>시간 <output data-expr="t" data-unit="분"></output></p>
+      <input type="range" name="t" min="0" max="10" step="0.5" value="0" data-play="8" aria-label="시간">
+      <p data-ai="모형 수치">올라간 높이 <output data-expr="h" data-digits="1" data-unit="칸"></output> (모형)</p>
+      <p data-show="t == 0">「재생」을 누르고 빨대 속 물을 지켜보자.</p>
+      <p data-show="t > 0 && t < 10">물이 튜브 안으로 들어와 빨대 속 물이 오른다.</p>
+      <div data-show="t == 10"><p>처음에는 빨리 오르다가 점점 느려진다.</p><p>농도를 바꿔 다시 재생해 보자.</p></div>
+    </div>
+  </div>
+</section>
+```
+
+- 단추로 튜브 속 농도를 바꾸면 끝 높이(`top`)가 달라진다. 시간을 다시 흘려 두 농도를 견준다.
+- 시작(`t = 0`)에는 물이 오르지 않았고 그래프도 비어 있다. 결과를 미리 보여 주지 않는다.
+- `h`처럼 모형으로 만든 수에는 '(모형)'을 붙인다. 실험값이 있으면 `data-points`로 함께 찍는다.
+- 재생 문법은 `components.md` 16절에 있다.
+
+### 직접 짜야 할 때
+
+부품과 계산 상자로 그릴 수 없는 그림만 직접 짠다. 세포 모양이 찌그러지는 것처럼 그림의 모양이 통째로 바뀌는 경우다. 아래 예시는 직접 짤 때의 틀을 보이려고 위 흡수력 모형을 스크립트로 다시 짠 것이다. 슬라이더는 '시작'(가림)에서 시작하고, 첫 조작에서 익스플로라그램이 열린다. 코드는 세 곳으로 나눠 넣는다. CSS는 `<head>`의 `<style>`에, 장은 본문에, 스크립트는 `</body>` 바로 앞에 둔다.
 
 ```html
 <!-- 장 -->
-<section class="slide" id="absorb" data-sec="2. 삼투" data-title="흡수력 익스플로라그램">
+<section class="slide" id="absorb-js" data-sec="2. 삼투" data-title="흡수력 익스플로라그램(스크립트)">
   <h2>세포가 부풀면 물을 더 빨아들일까?</h2>
   <div class="dh" data-ai="흡수력 익스플로라그램" data-activity>
     <div class="dh-view">
@@ -225,6 +322,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 .dh button { min-height: 56px; font-size: 24px; }
 .dh-lab, .dh-out { font-size: 26px; }
 .dh-calc { font-size: 22px; }
+#ab-cell, #ab-bar { transition: rx .4s, ry .4s, y .4s, height .4s; }   /* 값이 바뀌면 0.4초 동안 움직인다 */
 ```
 
 ```html
@@ -255,6 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 ```
 
+- **직접 짠 그림도 움직인다.** 바뀌는 SVG 요소에 CSS `transition`을 준다(위 `#ab-cell`, `#ab-bar`). 크롬, 엣지, 웨일에서는 `rx`, `cx`, `height`, `y` 같은 SVG 속성도 흘러간다. ⚙ 「움직임 끄기」를 누르면 엔진이 transition을 끈다.
+- 시간 막대면 슬라이더에 `data-play`를 붙인다. 엔진이 「재생」 단추를 달고 값을 바꿀 때마다 `input` 이벤트를 보내 직접 짠 처리기가 그대로 그린다.
 - 화면 글은 `textContent`로 바꾸는 것이 기본이다. 굵게·색 같은 꾸밈이 필요하면 코드에 적어 둔 글만 `innerHTML`로 넣는다. 학생이 입력한 글은 절대 `innerHTML`로 넣지 않는다.
 - **슬라이더는 손을 떼면(`change`) `blur()`로 초점을 푼다.** 엔진은 초점이 입력란에 있으면 키를 무시하므로, 풀지 않으면 슬라이더를 만진 뒤 → 키와 리모컨이 장을 넘기지 않고 슬라이더 값을 바꾼다. 엔진 계산 상자는 이미 그렇게 한다.
 - 슬라이더에 `autocomplete="off"`를 붙인다. 새로고침 때 브라우저가 값을 되살려 가림막이 열린 채 시작하는 것을 막는다.
@@ -267,36 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
 - 장이 보일 때 움직임을 시작해야 하면 `ClassHTML.onShow((slide, i) => …)`를, 넘길 때 멈춰야 하면 `ClassHTML.onHide`를 쓴다. 장을 넘겨도 직접 짠 익스플로라그램의 상태는 그대로 남는다. 다시 들어올 때 처음으로 돌리려면 `onShow`에서 값을 0으로 되돌린다.
 - 익스플로라그램이 여럿이면 장마다 `draw…` 함수를 하나씩 두고, id 앞머리(`ab-`, `vg-`)로 서로 섞이지 않게 한다.
 - SVG 화살촉(`marker`)은 그 SVG 안에 id를 따로 두고 `marker-end` 속성으로 건다. 다른 장의 SVG에 있는 marker를 가리키면 보이지 않는다.
-
-### 스크립트 없이: 계산 상자로 만드는 익스플로라그램
-
-코드를 실행해 확인할 수 없는 환경(채팅 AI)이라면 이 방법이 더 안전하다. 엔진 계산 상자(`.calc`)가 수를 셈하고, 단계 막대(`.reveal data-name`)가 손잡이와 0단계 가림을 맡는다. 그림은 CSS 변수로 움직인다.
-
-```html
-<div class="calc" data-ai="모형 수치" data-let="v = 0.80 + k * 0.05; t = v <= 1 ? 0 : 6.4 * ((v - 1) / 0.35) ^ 1.6; s = 8.7 / v - t">
-  <div class="reveal" data-name="k" data-stops="시작|0.85|0.90|0.95|1.00|1.05|1.10|1.15|1.20|1.25|1.30" style="display: grid; grid-template-columns: 1fr 400px; gap: 28px">
-    <div class="veil">
-      <svg viewBox="0 0 400 300" width="400"><ellipse class="cell" cx="200" cy="150" rx="120" ry="90" data-style="--s: v"/></svg>
-    </div>
-    <div data-at="1">
-      <p>세포 부피 <output data-expr="v" data-digits="2"></output>배</p>
-      <p>흡수력 <output data-expr="s" data-digits="1"></output> (모형)</p>
-      <div class="bar" data-value="s" data-max="10.5"></div>
-      <p data-show="t == 0">팽압이 0이다. 흡수력이 가장 크다.</p>
-      <p data-show="t > 0">부풀수록 팽압이 커져 흡수력이 준다.</p>
-    </div>
-  </div>
-</div>
-```
-
-```css
-.cell { transform-box: fill-box; transform-origin: center; transform: scale(var(--s, 1)); transition: transform .3s; fill: #DFF0ED; stroke: #0F766E; stroke-width: 6; }
-```
-
-- `k`는 지금 칸 번호다(시작 = 0). `.veil`과 `data-at="1"`이 0단계에서 결과를 가린다.
-- `data-style="--s: v"`로 CSS 변수를 넘기고, CSS가 `scale()`·`translate()`·색을 바꾼다. 위치 보간은 `translate(calc((var(--x0) + (var(--x1) - var(--x0)) * var(--t)) * 1px), 0)`처럼 쓴다.
-- SVG 속성은 `data-attr="width: 216 * v; points: pts"`로 바꾼다. 세대마다 바뀌는 시뮬레이션은 `data-let`에 `p1 = …; p2 = f(p1); …`처럼 풀어 쓰고, 꺾은선 점은 글자를 이어 붙여 만든다.
-- 문법은 `components.md` 8절(계산 상자)과 1절(단계 막대)에 있다.
 
 ### 상태를 찍어 확인하기
 
@@ -319,6 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
 - [ ] 첫 조작 전에는 결과가 가려져 있는가.
 - [ ] 익스플로라그램 안 글자(SVG 포함)가 20px 이상인가. 손잡이와 단추가 56px 이상인가.
 - [ ] 모형 수치에 `data-ai="모형 수치"`를 붙이고 화면에 '모형'이라고 적었는가.
+- [ ] 값이 바뀌면 그림이 움직이는가(계산 상자, 입자 상자, `data-play`, 직접 짠 그림의 `transition`).
+- [ ] 설계표에 적은 부품과 움직임을 모두 만들었는가.
 - [ ] 단추를 눌렀을 때 글만 바뀌는 장에 `data-activity`를 붙이지 않았는가.
 - [ ] 장에 '원본 PPT', '익스플로라그램 ①' 같은 만드는 쪽 말이 없는가.
 
@@ -424,7 +496,7 @@ Ctrl+P로 장마다 한 쪽씩 인쇄된다. 엔진이 단계를 모두 펼치�
 
 ## 4. 부품 사전
 
-엔진이 동작을 붙인다. 수업 HTML에는 구조와 `data-*` 속성만 쓴다. 퀴즈·분류 같은 확인 활동과 단계 공개는 부품으로 쓴다. 익스플로라그램(Exploragram)은 개념에 맞춰 직접 짜도 된다(`exploragram.md`, 이 문서 12절).
+엔진이 동작을 붙인다. 수업 HTML에는 구조와 `data-*` 속성만 쓴다. 퀴즈·분류 같은 확인 활동과 단계 공개는 부품으로 쓴다. 익스플로라그램(Exploragram)도 부품(계산 상자, 그래프, 입자 상자, 재생)으로 먼저 만들고 맞는 부품이 없을 때만 직접 짠다(`exploragram.md`, 이 문서 12절).
 
 `data-why`·`data-hint`·`data-stops` 같은 속성 값은 글자만 된다(태그 없음). 위첨자·아래첨자는 유니코드로 쓴다(Na⁺, H₂O, x²).
 
@@ -639,6 +711,9 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 - 식이 틀리면 그 자리에 '?'가 나오고 점검(D)에 오류로 뜬다. 근거 없는 수치를 지어내지 않는다. 단위를 쓴다.
 - 계산 상자의 슬라이더는 중간값에서 시작해도 된다(단계를 여는 막대가 아니다). 엔진이 손을 뗄 때 초점을 풀어 주므로 → 키가 그대로 장을 넘긴다. 0단계 가림이 필요하면 위의 `.reveal data-name`을 쓴다.
 - 입자·점이 많은 모식도는 `data-attr`로 점마다 식을 쓰지 말고 입자 상자 `figure.particles`(13절)를 쓰거나, 그림 몇 장을 단계 막대로 바꾼다.
+- **움직임**: 사람이 손잡이를 움직이면 수(`data-expr`), 막대(`.bar`), `data-attr`, `data-style` 값이 0.6초 동안 끝값으로 흘러간다. 끝값이 정수면 정수로 세어 간다. 수만 다른 글자 값(`'rotate(' + a + ' 100 100)'`, 꺾은선 `points`)도 흐르고 `#` 색과 글자 결과는 바로 바뀐다. 그래프 곡선과 입자 상자는 흐르지 않고 다시 그린다.
+- 바로 바뀌게 하려면 그 요소나 상자에 `data-tween="off"`를, 더 천천히 움직이려면 `data-tween="1.5"`(초)를 붙인다. 파일 전체는 `<html data-tween="off">`로 끈다. 자동 점검, `states.mjs`, 수업 스크립트가 값을 바꾸면 바로 끝값이 되고 ⚙ 「움직임 끄기」도 따른다.
+- 시간을 엔진이 흘리게 하려면 슬라이더에 `data-play`를 붙인다(16절).
 
 ### 9. 그래프 `figure.plot`
 
@@ -754,6 +829,7 @@ document.addEventListener('DOMContentLoaded', () => {
 - `</body>` 바로 앞에 둔다. `ClassHTML.onShow/onHide/go/next/prev/audit`를 쓴다. `ClassHTML.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
 - 설계 방법과 뼈대 코드는 `exploragram.md`. 조작한 상태를 찍어 확인할 때는 `scripts/states.mjs`.
 - 펜을 든 채로 쓰는 규칙: 누르는 요소는 `button`·`a`·`label` 또는 `data-tap`, 끄는 요소(슬라이더가 아닌 것)는 `data-no-ink`.
+- 값이 바뀌면 그림이 건너뛰지 않게 바뀌는 SVG 요소에 CSS `transition`을 준다(`exploragram.md`의 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).
 
 ### 13. 입자 상자 `figure.particles`
 
@@ -815,6 +891,31 @@ document.addEventListener('DOMContentLoaded', () => {
 - `data-qr`을 붙이면 학생이 자기 기기로 찍을 QR이 붙는다(영상 카드와 링크 카드 모두). 그 장을 처음 열 때 그리며 인터넷이 없으면 주소가 글로 나온다.
 - 영상 카드와 링크 카드는 활동 장으로 세지 않는다.
 
+### 16. 재생 `data-play` — 시간을 엔진이 흘려 준다
+
+```html
+<div class="calc" data-let="top = 8 * c; h = top * (1 - exp(-t / 3))" style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start">
+  <figure class="plot" data-x="0, 10" data-y="0, 9" data-xstep="2" data-ystep="2" data-height="300" data-xlabel="시간(분)" data-ylabel="높이(칸)">
+    <i data-line="top * (1 - exp(-x / 3))" data-x="0, max(t, 0.01)"></i>
+    <i data-point="t, h"></i>
+  </figure>
+  <div>
+    <button data-set="c" data-value="0.5" aria-pressed="true">0.5 M</button>
+    <button data-set="c" data-value="1">1 M</button>
+    <p>시간 <output data-expr="t" data-unit="분"></output></p>
+    <input type="range" name="t" min="0" max="10" step="0.5" value="0" data-play="8" aria-label="시간">
+    <p>높이 <output data-expr="h" data-digits="1" data-unit="칸"></output> (모형)</p>
+  </div>
+</div>
+```
+
+- 슬라이더에 `data-play="8"`을 붙이면 엔진이 슬라이더 바로 위에 「▶ 재생」과 「처음으로」 단추를 단다. 숫자는 최솟값에서 최댓값까지 가는 초이고 비우면 6초다. 끝에 닿으면 멈춘다. `data-loop`를 붙이면 처음부터 되풀이한다.
+- 계산 상자 안이면 값이 바뀔 때마다 다시 계산한다. 칸이 성기면 다음 칸까지 걸리는 시간 동안 그림을 흘려 보낸다. 그래프 선에 `data-x="0, max(t, 0.01)"`을 주면 곡선이 시간을 따라 그려진다.
+- 직접 짠 그림의 슬라이더에도 붙인다. 엔진이 값을 바꿀 때마다 `input` 이벤트를 보내므로 직접 짠 처리기가 그대로 그린다.
+- 끝에 있을 때 「▶ 재생」을 누르면 처음부터 다시 간다. 슬라이더를 손으로 잡거나 장을 넘기면 멈춘다. ⚙ 「움직임 끄기」를 켜도 재생은 된다.
+- 재생할 슬라이더는 최솟값('시작'이나 0)에서 시작한다. 「재생」 줄만큼(약 64px) 높이가 늘어나니 점검(D)으로 넘침을 확인한다.
+- 단계 막대(`.reveal`)가 만드는 막대에는 붙이지 않는다. 단계를 차례로 보여 주려면 `→` 키로 넘긴다.
+
 ### 점검 코드(D 키, `?audit`, ⚙ 설정의 「자동 점검」)
 
 | 코드 | 뜻 | 고치는 법 |
@@ -830,6 +931,8 @@ document.addEventListener('DOMContentLoaded', () => {
 | `quiz-spot` | 문제 3개 이상의 정답이 모두 같은 번호 | 정답 자리를 섞는다 |
 | `long-deck` | 40장을 넘음 | 차시별로 파일을 나눈다 |
 | `slide-shown` | 보고 있지 않은 장이 화면에 남음 | 장에 준 `display`를 지운다 |
+| `static-model` | 직접 짠 익스플로라그램이 있는데 수업 스크립트와 CSS에 움직임이 하나도 없음(경고) | 그림을 계산 상자로 옮긴다. 직접 짠 그림이면 바뀌는 SVG 요소에 `transition`을 주고 시간 막대에는 `data-play`를 붙인다 |
+| `use-part` | 움직임이 없는 파일에서 손잡이가 있는 장에 직접 그린 점이 12개 이상(경고) | 입자가 막을 오가는 그림이면 입자 상자(13절)로 바꾼다. 농도를 점으로 나타낸 정지 그림이면 그대로 두어도 된다 |
 | `empty-image`, `no-alt`, `dup-id` | 빈 그림 자리, 그림 설명 없음, 중복 id | |
 
 - 오류가 있으면 선생님이 파일을 처음 열 때 툴바에 「점검 N」 단추가 뜬다. 점검 창의 「AI에게 보낼 말 복사」는 목록을 수정 요청 글로 복사한다. 변환 과정을 설명하는 덱처럼 알림이 필요 없으면 `<html data-audit="off">`로 끈다.

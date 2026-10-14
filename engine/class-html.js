@@ -1,7 +1,7 @@
-/*! class-html engine v1.5.0 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.6.0 | MIT | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '1.5.0';
+const VERSION = '1.6.0';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
 // 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 ClassHTML.
@@ -2253,6 +2253,8 @@ const Audit = {
       '- 글자를 20px 아래로 줄이지 말고 넘치는 장은 둘로 나눠 주세요.',
       '- <head>의 엔진 css·js 두 줄과 장마다 붙인 id는 그대로 두세요.',
       '- 수업 내용(사실, 정답, 순서)은 그대로 두고 위 항목만 고쳐 주세요.',
+      ...(report.warnings.some((x) => x.code === 'static-model' || x.code === 'use-part')
+        ? ['- 익스플로라그램은 엔진 부품(계산 상자, 입자 상자, 그래프)을 먼저 쓰고 맞는 부품이 없을 때만 직접 짜 주세요.'] : []),
     ].join('\n');
   },
 
@@ -2294,6 +2296,7 @@ const Audit = {
     };
     const err = add(errors, 'error');
     const warn = add(warnings, 'warn');
+    Calc.settle();   // 흘러가는 중인 그림은 끝값으로 놓고 잰다
     const ids = new Map();
     for (const el of qsa('[id]')) ids.set(el.id, (ids.get(el.id) || 0) + 1);
     for (const [id, count] of ids) if (count > 1) err(null, 'dup-id', `id "${id}"가 ${count}번 쓰였어요`);
@@ -2563,6 +2566,7 @@ const Audit = {
       if (!shown) s.classList.remove('ch-measure');
     }
     this.checkWriting(warn);
+    this.checkMotion(warn);
     const imgs = qsa('img[data-ppt]', Stage.deck);
     return { activities, activityPages, placeholders: imgs.length, emptyPlaceholders: imgs.filter((x) => !x.getAttribute('src')).length };
   },
@@ -2576,6 +2580,30 @@ const Audit = {
     [/엔진\s?(?:툴바|기능)|이\s?HTML은|HTML을\s?열/, '파일 사용 안내가'],
     [/수업\s?전(?:에)?\s?교사가|교사가\s?수업\s?전/, '선생님께 하는 말이'],
   ],
+
+  // 직접 짠 익스플로라그램(엔진 부품 밖의 슬라이더·고르기가 있는 장)을 본다. 2026-10 연수의 ChatGPT판 삼투 수업은
+  // 엔진에 입자 상자가 있는데도 입자를 손으로 그렸고, 슬라이더를 밀면 그림이 한 번에 바뀌기만 했다.
+  // 수업 스크립트·CSS에 움직임이 조금이라도 있으면 둘 다 알리지 않는다(소음을 줄인다). 경고라 툴바 「점검 N」에는 세지 않는다.
+  checkMotion(warn) {
+    const ENGINE = '.calc, .ch-stops, .ch-yearline, .ch-stepper, .particles, .plot, .poll';
+    const hand = [];
+    Stage.slides.forEach((s, i) => {
+      const own = qsa('input[type="range"], select', s).filter((x) => !x.closest(ENGINE));
+      if (own.length && !own.some((x) => x.hasAttribute('data-play'))) hand.push([s, i]);
+    });
+    if (!hand.length) return;
+    const mine = (el) => !/class-html engine v\d/.test(el.textContent.slice(0, 400));   // --offline으로 넣은 엔진은 뺀다
+    const js = qsa('script:not([src])').filter(mine).map((el) => el.textContent).join('\n');
+    const css = qsa('style').filter(mine).map((el) => el.textContent).join('\n');
+    if (/requestAnimationFrame|\.animate\(|setInterval/.test(js) || /transition|@keyframes|animation\s*:/.test(css)) return;
+    warn(hand[0][1], 'static-model', `직접 짠 익스플로라그램(${hand.map(([, i]) => i + 1).join(', ')}쪽)은 손잡이를 움직이면 그림이 한 번에 바뀌어요. 그림을 계산 상자(.calc)의 data-attr, data-style, data-value로 바꾸면 엔진이 0.6초 동안 움직여 보여 줘요. 시간이 흐르는 실험이면 슬라이더에 data-play를 붙이세요`);
+    // 움직이지 않는 점 그림이 많으면 입자 상자를 권한다(농도를 점으로 나타낸 정지 그림일 수도 있어 경고로만)
+    for (const [s, i] of hand) {
+      if (s.querySelector('.particles')) continue;
+      const dots = qsa('svg circle', s).filter((c) => !c.closest('.plot')).length;
+      if (dots >= 12) warn(i, 'use-part', `입자 ${dots}개를 직접 그렸어요. 입자가 막을 오가며 움직이는 모습은 입자 상자(figure.particles)로 만드세요`);
+    }
+  },
 
   checkWriting(warn) {
     const flat = (t) => String(t || '').replace(/⁠/g, '').replace(/\s+/g, ' ');
@@ -2667,6 +2695,7 @@ const Parts = {
     Calc.init();
     Plot.init();
     Particles.init();
+    Play.init();     // 계산 상자 뒤: 재생이 보내는 input을 계산 상자가 받는다
     PptFill.init();
     Timer.init();
     Picker.init();
@@ -3849,16 +3878,29 @@ const Order = {
 //   <p data-show="v < 1">…</p> <p data-class="is-ok: s > 0"> <div class="bar" data-value="s" data-max="10"></div>
 //   <button data-set="sex" data-value="여">여</button> <rect data-attr="width: 200 * v"/> </div>
 // 식은 50-expr.js(eval 없음). 식 오류는 그 자리에 '?'를 쓰고 자동 점검에 알린다.
+// 움직임: 사람이 손잡이를 움직이면 수·막대·SVG 속성·스타일 값이 0.6초 동안 끝값으로 흘러간다.
+//   점검·도구·수업 스크립트가 값을 바꿀 때, ⚙ 움직임 끄기, 보고 있지 않은 장에서는 바로 끝값을 쓴다.
+//   data-tween="off"(그 요소나 상자에서 끄기), data-tween="1.5"(초), <html data-tween="off">(파일 전체).
 const CALC_BIND = '[data-expr], [data-show], [data-class], [data-style], [data-attr], .bar[data-value]';
 const CALC_UNITLESS = /^(opacity|z-index|flex|flex-grow|flex-shrink|order|font-weight|line-height|scale)$/;
+const CALC_TWEEN_MS = 600;
+const CALC_NUM = /-?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/gi;
 
 const Calc = {
   list: [],
+  userAt: -1e9,    // 사람이 마지막으로 누르거나 민 때(performance.now)
+  hooked: false,
 
   init() {
     this.list = [];
+    if (!this.hooked) {
+      this.hooked = true;
+      for (const t of ['pointerdown', 'pointerup', 'click', 'keydown', 'input', 'change']) {
+        document.addEventListener(t, (e) => { if (e.isTrusted) this.userAt = performance.now(); }, true);
+      }
+    }
     for (const box of qsa('.calc', Stage.deck)) {
-      const item = { box, consts: {}, lets: [], binds: [], errors: [], listeners: [], scope: {} };
+      const item = { box, consts: {}, lets: [], binds: [], errors: [], listeners: [], scope: {}, jobs: [], raf: 0 };
       const own = (el) => el.closest('.calc') === box;
       const fail = (el, msg) => item.errors.push({ el, msg });
       const consts = Expr.lets(box.dataset.const || '');
@@ -3884,7 +3926,7 @@ const Calc = {
           b.addEventListener('click', () => {
             for (const x of group) x.setAttribute('aria-pressed', String(x === b));
             if (b.blur) b.blur();
-            this.update(item);
+            this.update(item, { user: true });
           });
         }
       }
@@ -3899,12 +3941,17 @@ const Calc = {
       for (const b of sets) taken.set(b.dataset.set, '단추');
       for (const el of item.steppers) taken.set(el.dataset.name, '단계 막대');
       item.drags = qsa('figure.plot > [data-drag]', box).filter(own).map((el) => this.drag(item, el, fail, taken)).filter(Boolean);
-      box.addEventListener('ch-stepper', (e) => { if (item.steppers.includes(e.target)) this.update(item); });
+      box.addEventListener('ch-stepper', (e) => {
+        if (!item.steppers.includes(e.target)) return;
+        const src = e.detail && e.detail.src;
+        this.update(item, { user: src === 'input' || src === 'nav' });   // 장에 들어올 때 되돌리는 것('enter')은 바로
+      });
       item.sets = sets;
-      box.addEventListener('input', (e) => { if (own(e.target)) this.update(item); });
+      // 재생(72-play.js)이 보낸 input에는 chPlay(한 칸에 걸리는 ms)가 붙어 있다
+      box.addEventListener('input', (e) => { if (own(e.target)) this.update(item, { user: true, ms: e.chPlay }); });
       box.addEventListener('change', (e) => {
         if (!own(e.target)) return;
-        this.update(item);
+        this.update(item, { user: true, ms: e.chPlay });
         if (e.target.type === 'range') e.target.blur();   // 손을 떼면 Space·→가 다시 넘기기로
       });
       this.list.push(item);
@@ -3973,7 +4020,7 @@ const Calc = {
   },
 
   bind(item, el, fail) {
-    const b = { el, expr: null, show: null, cls: [], style: [], attr: [], bar: null, max: null, warned: false };
+    const b = { el, expr: null, show: null, cls: [], style: [], attr: [], bar: null, max: null, warned: false, now: {} };
     const ds = el.dataset;
     if (ds.expr != null) b.expr = this.compileOne(ds.expr, el, fail, 'data-expr') || 'bad';
     if (ds.show != null) b.show = this.compileOne(ds.show, el, fail, 'data-show') || 'bad';
@@ -4016,7 +4063,8 @@ const Calc = {
     return scope;
   },
 
-  update(item) {
+  // opt.user: 사람의 조작으로 불렸을 수 있음(바로 앞에 isTrusted 이벤트가 있었는지로 가린다), opt.ms: 재생이 정한 시간
+  update(item, opt = {}) {
     const scope = this.read(item);
     for (const { name, fn } of item.lets) {
       try { scope[name] = fn(scope); } catch (err) { scope[name] = NaN; this.runtime(item, item.box, `data-let ${name}: ${err.message}`); }
@@ -4025,38 +4073,126 @@ const Calc = {
     const val = (b, fn) => {
       try { return fn(scope); } catch (err) { this.runtime(item, b.el, err.message); return NaN; }
     };
+    const base = this.base(item, opt);
+    const now = performance.now();
+    const next = [];
+    // 값 하나(글자·스타일·속성·막대)를 끝값 to로 보낸다. 흘려 보낼 수 있으면 일감으로 남기고, 아니면 바로 쓴다.
+    const put = (b, key, to, write, dec) => {
+      const ms = base && this.dur(b.el, base, opt);
+      const from = b.now[key];
+      const lerp = ms && from !== undefined && from !== to ? this.lerp(from, to) : null;
+      if (lerp) {
+        const old = item.jobs.find((j) => j.b === b && j.key === key);
+        next.push(old && old.to === to ? old : { b, key, to, write, lerp, dec, t0: now, ms });   // 같은 끝값으로 가는 중이면 그대로
+        return;
+      }
+      write(to, false, dec);
+      b.now[key] = to;
+    };
     for (const b of item.binds) {
       const el = b.el;
       if (b.expr) {
         // 한글 단위(초·원·인분·년)는 숫자에 붙이고, 기호 단위(℃·mL·%)는 띄운다
         const u = (el.dataset.unit || '').trim();
-        const unit = u ? (/^[가-힣]/.test(u) ? u : `\u00A0${u}`) : '';   // 띄울 때는 줄이 갈리지 않는 공백
+        const unit = u ? (/^[가-힣]/.test(u) ? u : ` ${u}`) : '';   // 띄울 때는 줄이 갈리지 않는 공백
         const digits = el.dataset.digits != null && el.dataset.digits !== '' ? Number(el.dataset.digits) : undefined;
+        const fixed = Number.isInteger(digits) ? digits : undefined;
         const v = b.expr === 'bad' ? NaN : val(b, b.expr);
-        const raw = Expr.format(v, Number.isInteger(digits) ? digits : undefined);
-        const text = el.hasAttribute('data-comma') && typeof v === 'number' ? groupDigits(raw) : raw;
-        el.textContent = text === '?' ? '?' : text + unit;
+        const write = (x, mid, dec) => {
+          // 흘러가는 중에는 끝값의 소수 자리에 맞춰 반올림한다(12개로 가는 중이면 7개, 8개…)
+          const shown = mid && fixed === undefined && typeof x === 'number' ? exprRound(x, dec) : x;
+          const raw = Expr.format(shown, fixed);
+          const text = el.hasAttribute('data-comma') && typeof shown === 'number' ? groupDigits(raw) : raw;
+          el.textContent = text === '?' ? '?' : text + unit;
+        };
+        const raw = Expr.format(v, fixed);
+        const dec = /×10/.test(raw) ? -1 : (raw.split('.')[1] || '').length;
+        // 글자 결과와 ×10ⁿ 꼴은 흘리지 않는다
+        if (typeof v !== 'number' || dec < 0) { write(v); b.now.text = typeof v === 'number' ? undefined : v; } else put(b, 'text', v, write, dec);
       }
       if (b.show) el.classList.toggle('ch-hide', b.show === 'bad' || !val(b, b.show));
       for (const [name, fn] of b.cls) el.classList.toggle(name, !!val(b, fn));
       for (const [name, fn] of b.style) {
-        const v = val(b, fn);
-        const ok = typeof v === 'string' || Number.isFinite(v);
-        el.style.setProperty(name, !ok ? '' : typeof v === 'number' && !name.startsWith('--') && !CALC_UNITLESS.test(name) ? `${v}px` : String(v));
+        put(b, `style:${name}`, val(b, fn), (v) => {
+          const ok = typeof v === 'string' || Number.isFinite(v);
+          el.style.setProperty(name, !ok ? '' : typeof v === 'number' && !name.startsWith('--') && !CALC_UNITLESS.test(name) ? `${v}px` : String(v));
+        });
       }
       for (const [name, fn] of b.attr) {
-        const v = val(b, fn);
-        if (typeof v === 'number') { if (Number.isFinite(v)) el.setAttribute(name, String(Math.round(v * 1000) / 1000)); }
-        else el.setAttribute(name, String(v));
+        put(b, `attr:${name}`, val(b, fn), (v) => {
+          if (typeof v === 'number') { if (Number.isFinite(v)) el.setAttribute(name, String(Math.round(v * 1000) / 1000)); }
+          else el.setAttribute(name, String(v));
+        });
       }
       if (b.bar && b.max) {
         const v = Number(val(b, b.bar));
         const max = Number(val(b, b.max));
-        el.style.setProperty('--f', String(Number.isFinite(v) && max > 0 ? clamp(v / max, 0, 1) : 0));
+        put(b, 'bar', Number.isFinite(v) && max > 0 ? clamp(v / max, 0, 1) : 0, (f) => el.style.setProperty('--f', String(f)));
       }
     }
+    item.jobs = next;
+    cancelAnimationFrame(item.raf);
+    if (next.length) this.play(item);
     for (const fn of item.listeners) {
       try { fn(scope); } catch (err) { console.error('[class-html] calc', err); }
+    }
+  },
+
+  // 흘려 보낼 기본 시간(ms). 0이면 바로 끝값.
+  base(item, opt) {
+    const root = document.documentElement;
+    if (root.classList.contains('ch-motion-off') || root.classList.contains('ch-auditing') || root.dataset.tween === 'off') return 0;
+    const slide = item.box.closest('section.slide');
+    if (!slide || !slide.classList.contains('is-active')) return 0;
+    if (opt.ms != null) return opt.ms > 34 ? Math.min(opt.ms, CALC_TWEEN_MS) : 0;   // 재생: 한 칸 시간 안에 닿게(아주 짧으면 바로)
+    return opt.user && performance.now() - this.userAt < 250 ? CALC_TWEEN_MS : 0;
+  },
+
+  // 요소나 상자의 data-tween: off면 0, 초를 주면 그 시간(재생 중에는 재생 시간을 따른다)
+  dur(el, base, opt) {
+    const host = el.closest('[data-tween]');
+    if (!host) return base;
+    const v = String(host.dataset.tween).trim();
+    if (v === 'off' || v === '0') return 0;
+    const s = Number(v);
+    return Number.isFinite(s) && s > 0 && opt.ms == null ? Math.min(s, 5) * 1000 : base;
+  },
+
+  // from → to 사이 값을 주는 함수. 수끼리, 또는 수만 다른 글자끼리('rotate(30 100 100)', 'M0 0 L100 50')만 흘린다.
+  lerp(from, to) {
+    if (typeof from === 'number' && typeof to === 'number') {
+      return Number.isFinite(from) && Number.isFinite(to) ? (e) => from + (to - from) * e : null;
+    }
+    if (typeof from !== 'string' || typeof to !== 'string' || /#[0-9a-f]{3,8}\b/i.test(from + to)) return null;   // #색은 글자째 바꾼다
+    const a = from.match(CALC_NUM);
+    const b = to.match(CALC_NUM);
+    if (!a || !b || a.length !== b.length || from.replace(CALC_NUM, '#') !== to.replace(CALC_NUM, '#')) return null;
+    const parts = to.split(CALC_NUM);
+    const x = a.map(Number);
+    const y = b.map(Number);
+    return (e) => parts.reduce((out, p, i) => out + p + (i < y.length ? String(Math.round((x[i] + (y[i] - x[i]) * e) * 1000) / 1000) : ''), '');
+  },
+
+  play(item) {
+    const tick = (t) => {
+      item.jobs = item.jobs.filter((j) => {
+        const u = clamp((t - j.t0) / j.ms, 0, 1);
+        const v = u >= 1 ? j.to : j.lerp(1 - (1 - u) ** 3);   // ease-out
+        j.write(v, u < 1, j.dec);
+        j.b.now[j.key] = v;
+        return u < 1;
+      });
+      if (item.jobs.length) item.raf = requestAnimationFrame(tick);
+    };
+    item.raf = requestAnimationFrame(tick);
+  },
+
+  // 흘러가는 중인 값을 모두 끝값으로(점검 전, 시험)
+  settle() {
+    for (const item of this.list) {
+      cancelAnimationFrame(item.raf);
+      for (const j of item.jobs) { j.write(j.to, false, j.dec); j.b.now[j.key] = j.to; }
+      item.jobs = [];
     }
   },
 
@@ -7472,6 +7608,88 @@ const Media = {
   },
 };
 
+/* ---- 72-play.js ---- */
+// 재생: 슬라이더에 data-play를 붙이면 엔진이 시간을 흘려 준다(최솟값 → 최댓값). 계산 상자 안이든 직접 짠 그림이든 같다.
+// 작성 모양: <input type="range" name="t" min="0" max="10" step="0.1" value="0" data-play="6">  (6초 동안, 비우면 6초)
+//   data-loop: 끝에 닿으면 처음부터 다시. 「▶ 재생」·「처음으로」 단추는 엔진이 슬라이더 바로 위에 단다.
+// 값이 바뀔 때마다 input 이벤트를 보낸다(e.chPlay = 한 칸에 걸리는 ms, 계산 상자는 그 시간 안에 그림을 옮긴다).
+// 손으로 밀면 멈추고, 장을 넘기면 멈춘다. 움직임 끄기여도 재생은 된다(선생님이 누른 것이므로).
+const PLAY_SEC = 6;
+
+const Play = {
+  list: [],
+
+  init() {
+    this.list = [];
+    for (const el of qsa('input[type="range"][data-play]', Stage.deck)) {
+      if (el.closest('.ch-stops')) continue;   // 단계 막대의 슬라이더는 단계 막대가 다룬다
+      const sec = Number(el.dataset.play);
+      const run = h('button', { type: 'button', class: 'ch-play-run', text: '▶ 재생' });
+      const back = h('button', { type: 'button', class: 'ch-reset', text: '처음으로' });
+      el.before(h('div', { class: 'ch-play' }, run, back));
+      const item = { el, run, back, sec: Number.isFinite(sec) && sec > 0 ? clamp(sec, 1, 120) : PLAY_SEC,
+        loop: el.hasAttribute('data-loop'), running: false, raf: 0, p: 0, last: 0 };
+      run.addEventListener('click', (e) => { this.toggle(item); e.currentTarget.blur(); });
+      back.addEventListener('click', (e) => { this.stop(item); this.seek(item, 0, true, false); e.currentTarget.blur(); });   // 되감기는 손 조작처럼 흘려 보낸다
+      el.addEventListener('pointerdown', () => this.stop(item));
+      el.addEventListener('input', (e) => { if (e.isTrusted) this.stop(item); });
+      this.list.push(item);
+    }
+    on('hide', (slide) => { for (const item of this.list) if (slide.contains(item.el)) this.stop(item); });
+  },
+
+  range(item) {
+    const lo = Number(item.el.min || 0);
+    const hi = Number(item.el.max || 100);
+    const st = item.el.step === 'any' ? 0 : Number(item.el.step || 1);
+    return { lo, hi, st };
+  },
+
+  // 0~1 자리로 옮긴다. 값이 바뀌었으면 input(끝이면 change도)을 보낸다. timed가 false면 재생 시간(chPlay)을 붙이지 않는다.
+  seek(item, p, end, timed = true) {
+    const { lo, hi, st } = this.range(item);
+    item.p = clamp(p, 0, 1);
+    const before = item.el.value;
+    item.el.value = String(lo + (hi - lo) * item.p);   // 브라우저가 step 칸에 맞춘다
+    if (item.el.value === before) return;
+    const steps = st > 0 && hi > lo ? (hi - lo) / st : 0;
+    const ms = steps ? (item.sec * 1000) / steps : 0;
+    const send = (type) => { const ev = new Event(type, { bubbles: true }); if (timed) ev.chPlay = ms; item.el.dispatchEvent(ev); };
+    send('input');
+    if (end) send('change');
+  },
+
+  start(item) {
+    if (item.running) return;
+    const { lo, hi } = this.range(item);
+    item.p = hi > lo ? clamp((Number(item.el.value) - lo) / (hi - lo), 0, 1) : 0;
+    if (item.p >= 1) this.seek(item, 0);   // 끝에 있으면 처음부터
+    item.running = true;
+    item.run.textContent = '❚❚ 멈춤';
+    item.last = performance.now();
+    const tick = (now) => {
+      if (!item.running) return;
+      const dt = Math.min(0.1, Math.max(0, now - item.last) / 1000);
+      item.last = now;
+      let p = item.p + dt / item.sec;
+      if (p >= 1 && !item.loop) { this.seek(item, 1, true); this.stop(item); return; }
+      if (p >= 1) p -= 1;
+      this.seek(item, p);
+      item.raf = requestAnimationFrame(tick);
+    };
+    item.raf = requestAnimationFrame(tick);
+  },
+
+  stop(item) {
+    if (!item.running) return;
+    item.running = false;
+    cancelAnimationFrame(item.raf);
+    item.run.textContent = '▶ 재생';
+  },
+
+  toggle(item) { if (item.running) this.stop(item); else this.start(item); },
+};
+
 /* ---- 99-boot.js ---- */
 // 시작 순서. 엔진이 두 번 포함돼도 한 번만 실행한다.
 let readyResolve;
@@ -7509,7 +7727,7 @@ function boot() {
   ClassHTML.next = () => Nav.next();
   ClassHTML.prev = () => Nav.prev();
   ClassHTML.audit = () => Audit.run();
-  ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Editor, Live, LiveCore };
+  ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Play, Editor, Live, LiveCore };
   start().then(() => readyResolve(ClassHTML), (err) => {
     console.error('[class-html]', err);
     readyResolve(ClassHTML);

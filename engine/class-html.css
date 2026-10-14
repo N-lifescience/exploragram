@@ -1,4 +1,4 @@
-/*! class-html engine v1.5.0 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.6.0 | MIT | https://github.com/N-lifescience/exploragram */
 /* ---- 00-tokens.css ---- */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
@@ -441,7 +441,7 @@ body .slide.chapter::before { display: none; }
 :where(.slide) .calc input[type="range"] { width: 100%; }
 :where(.slide) .calc output { margin: 0; font: inherit; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 :where(.slide) .calc .bar { position: relative; height: 26px; border-radius: 13px; background: var(--ch-soft); overflow: hidden; }
-:where(.slide) .calc .bar::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--bar-c, var(--accent)); transform: scaleX(var(--f, 0)); transform-origin: 0 50%; transition: transform .2s var(--ch-ease-out); }
+:where(.slide) .calc .bar::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--bar-c, var(--accent)); transform: scaleX(var(--f, 0)); transform-origin: 0 50%; }   /* 길이 변화는 엔진이 흘려 보낸다(58-calc.js) */
 :where(.slide) .calc [data-set] { min-height: 56px; }
 :where(.slide) .calc [data-set][aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: #fff; }
 
@@ -915,3 +915,9 @@ html.ch-live-student :is(.ch-stops, .ch-yearline) input:disabled, html.ch-live-s
   .ch-video-note { display: none !important; }
   .ch-video-url { display: block; }
 }
+
+/* ---- 90-play.css ---- */
+/* 재생 단추: data-play 슬라이더 바로 위 */
+:where(.slide) .ch-play { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 8px; }
+:where(.slide) .ch-play-run { min-height: 56px; padding: 0 22px; border-color: var(--accent); background: var(--accent); color: #fff; font-size: 22px; }
+@media print { .ch-play { display: none !important; } }

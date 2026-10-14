@@ -78,6 +78,8 @@ const Audit = {
       '- 글자를 20px 아래로 줄이지 말고 넘치는 장은 둘로 나눠 주세요.',
       '- <head>의 엔진 css·js 두 줄과 장마다 붙인 id는 그대로 두세요.',
       '- 수업 내용(사실, 정답, 순서)은 그대로 두고 위 항목만 고쳐 주세요.',
+      ...(report.warnings.some((x) => x.code === 'static-model' || x.code === 'use-part')
+        ? ['- 익스플로라그램은 엔진 부품(계산 상자, 입자 상자, 그래프)을 먼저 쓰고 맞는 부품이 없을 때만 직접 짜 주세요.'] : []),
     ].join('\n');
   },
 
@@ -119,6 +121,7 @@ const Audit = {
     };
     const err = add(errors, 'error');
     const warn = add(warnings, 'warn');
+    Calc.settle();   // 흘러가는 중인 그림은 끝값으로 놓고 잰다
     const ids = new Map();
     for (const el of qsa('[id]')) ids.set(el.id, (ids.get(el.id) || 0) + 1);
     for (const [id, count] of ids) if (count > 1) err(null, 'dup-id', `id "${id}"가 ${count}번 쓰였어요`);
@@ -388,6 +391,7 @@ const Audit = {
       if (!shown) s.classList.remove('ch-measure');
     }
     this.checkWriting(warn);
+    this.checkMotion(warn);
     const imgs = qsa('img[data-ppt]', Stage.deck);
     return { activities, activityPages, placeholders: imgs.length, emptyPlaceholders: imgs.filter((x) => !x.getAttribute('src')).length };
   },
@@ -401,6 +405,30 @@ const Audit = {
     [/엔진\s?(?:툴바|기능)|이\s?HTML은|HTML을\s?열/, '파일 사용 안내가'],
     [/수업\s?전(?:에)?\s?교사가|교사가\s?수업\s?전/, '선생님께 하는 말이'],
   ],
+
+  // 직접 짠 익스플로라그램(엔진 부품 밖의 슬라이더·고르기가 있는 장)을 본다. 2026-10 연수의 ChatGPT판 삼투 수업은
+  // 엔진에 입자 상자가 있는데도 입자를 손으로 그렸고, 슬라이더를 밀면 그림이 한 번에 바뀌기만 했다.
+  // 수업 스크립트·CSS에 움직임이 조금이라도 있으면 둘 다 알리지 않는다(소음을 줄인다). 경고라 툴바 「점검 N」에는 세지 않는다.
+  checkMotion(warn) {
+    const ENGINE = '.calc, .ch-stops, .ch-yearline, .ch-stepper, .particles, .plot, .poll';
+    const hand = [];
+    Stage.slides.forEach((s, i) => {
+      const own = qsa('input[type="range"], select', s).filter((x) => !x.closest(ENGINE));
+      if (own.length && !own.some((x) => x.hasAttribute('data-play'))) hand.push([s, i]);
+    });
+    if (!hand.length) return;
+    const mine = (el) => !/class-html engine v\d/.test(el.textContent.slice(0, 400));   // --offline으로 넣은 엔진은 뺀다
+    const js = qsa('script:not([src])').filter(mine).map((el) => el.textContent).join('\n');
+    const css = qsa('style').filter(mine).map((el) => el.textContent).join('\n');
+    if (/requestAnimationFrame|\.animate\(|setInterval/.test(js) || /transition|@keyframes|animation\s*:/.test(css)) return;
+    warn(hand[0][1], 'static-model', `직접 짠 익스플로라그램(${hand.map(([, i]) => i + 1).join(', ')}쪽)은 손잡이를 움직이면 그림이 한 번에 바뀌어요. 그림을 계산 상자(.calc)의 data-attr, data-style, data-value로 바꾸면 엔진이 0.6초 동안 움직여 보여 줘요. 시간이 흐르는 실험이면 슬라이더에 data-play를 붙이세요`);
+    // 움직이지 않는 점 그림이 많으면 입자 상자를 권한다(농도를 점으로 나타낸 정지 그림일 수도 있어 경고로만)
+    for (const [s, i] of hand) {
+      if (s.querySelector('.particles')) continue;
+      const dots = qsa('svg circle', s).filter((c) => !c.closest('.plot')).length;
+      if (dots >= 12) warn(i, 'use-part', `입자 ${dots}개를 직접 그렸어요. 입자가 막을 오가며 움직이는 모습은 입자 상자(figure.particles)로 만드세요`);
+    }
+  },
 
   checkWriting(warn) {
     const flat = (t) => String(t || '').replace(/⁠/g, '').replace(/\s+/g, ' ');

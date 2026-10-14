@@ -15,6 +15,7 @@ const Parts = {
     Calc.init();
     Plot.init();
     Particles.init();
+    Play.init();     // 계산 상자 뒤: 재생이 보내는 input을 계산 상자가 받는다
     PptFill.init();
     Timer.init();
     Picker.init();

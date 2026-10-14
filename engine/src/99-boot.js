@@ -34,7 +34,7 @@ function boot() {
   ClassHTML.next = () => Nav.next();
   ClassHTML.prev = () => Nav.prev();
   ClassHTML.audit = () => Audit.run();
-  ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Editor, Live, LiveCore };
+  ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Play, Editor, Live, LiveCore };
   start().then(() => readyResolve(ClassHTML), (err) => {
     console.error('[class-html]', err);
     readyResolve(ClassHTML);

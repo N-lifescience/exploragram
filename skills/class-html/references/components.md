@@ -1,6 +1,6 @@
 # 부품 사전
 
-엔진이 동작을 붙인다. 수업 HTML에는 구조와 `data-*` 속성만 쓴다. 퀴즈·분류 같은 확인 활동과 단계 공개는 부품으로 쓴다. 익스플로라그램(Exploragram)은 개념에 맞춰 직접 짜도 된다(`exploragram.md`, 이 문서 12절).
+엔진이 동작을 붙인다. 수업 HTML에는 구조와 `data-*` 속성만 쓴다. 퀴즈·분류 같은 확인 활동과 단계 공개는 부품으로 쓴다. 익스플로라그램(Exploragram)도 부품(계산 상자, 그래프, 입자 상자, 재생)으로 먼저 만들고 맞는 부품이 없을 때만 직접 짠다(`exploragram.md`, 이 문서 12절).
 
 `data-why`·`data-hint`·`data-stops` 같은 속성 값은 글자만 된다(태그 없음). 위첨자·아래첨자는 유니코드로 쓴다(Na⁺, H₂O, x²).
 
@@ -215,6 +215,9 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 - 식이 틀리면 그 자리에 '?'가 나오고 점검(D)에 오류로 뜬다. 근거 없는 수치를 지어내지 않는다. 단위를 쓴다.
 - 계산 상자의 슬라이더는 중간값에서 시작해도 된다(단계를 여는 막대가 아니다). 엔진이 손을 뗄 때 초점을 풀어 주므로 → 키가 그대로 장을 넘긴다. 0단계 가림이 필요하면 위의 `.reveal data-name`을 쓴다.
 - 입자·점이 많은 모식도는 `data-attr`로 점마다 식을 쓰지 말고 입자 상자 `figure.particles`(13절)를 쓰거나, 그림 몇 장을 단계 막대로 바꾼다.
+- **움직임**: 사람이 손잡이를 움직이면 수(`data-expr`), 막대(`.bar`), `data-attr`, `data-style` 값이 0.6초 동안 끝값으로 흘러간다. 끝값이 정수면 정수로 세어 간다. 수만 다른 글자 값(`'rotate(' + a + ' 100 100)'`, 꺾은선 `points`)도 흐르고 `#` 색과 글자 결과는 바로 바뀐다. 그래프 곡선과 입자 상자는 흐르지 않고 다시 그린다.
+- 바로 바뀌게 하려면 그 요소나 상자에 `data-tween="off"`를, 더 천천히 움직이려면 `data-tween="1.5"`(초)를 붙인다. 파일 전체는 `<html data-tween="off">`로 끈다. 자동 점검, `states.mjs`, 수업 스크립트가 값을 바꾸면 바로 끝값이 되고 ⚙ 「움직임 끄기」도 따른다.
+- 시간을 엔진이 흘리게 하려면 슬라이더에 `data-play`를 붙인다(16절).
 
 ## 9. 그래프 `figure.plot`
 
@@ -330,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
 - `</body>` 바로 앞에 둔다. `ClassHTML.onShow/onHide/go/next/prev/audit`를 쓴다. `ClassHTML.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
 - 설계 방법과 뼈대 코드는 `exploragram.md`. 조작한 상태를 찍어 확인할 때는 `scripts/states.mjs`.
 - 펜을 든 채로 쓰는 규칙: 누르는 요소는 `button`·`a`·`label` 또는 `data-tap`, 끄는 요소(슬라이더가 아닌 것)는 `data-no-ink`.
+- 값이 바뀌면 그림이 건너뛰지 않게 바뀌는 SVG 요소에 CSS `transition`을 준다(`exploragram.md`의 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).
 
 ## 13. 입자 상자 `figure.particles`
 
@@ -391,6 +395,31 @@ document.addEventListener('DOMContentLoaded', () => {
 - `data-qr`을 붙이면 학생이 자기 기기로 찍을 QR이 붙는다(영상 카드와 링크 카드 모두). 그 장을 처음 열 때 그리며 인터넷이 없으면 주소가 글로 나온다.
 - 영상 카드와 링크 카드는 활동 장으로 세지 않는다.
 
+## 16. 재생 `data-play` — 시간을 엔진이 흘려 준다
+
+```html
+<div class="calc" data-let="top = 8 * c; h = top * (1 - exp(-t / 3))" style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start">
+  <figure class="plot" data-x="0, 10" data-y="0, 9" data-xstep="2" data-ystep="2" data-height="300" data-xlabel="시간(분)" data-ylabel="높이(칸)">
+    <i data-line="top * (1 - exp(-x / 3))" data-x="0, max(t, 0.01)"></i>
+    <i data-point="t, h"></i>
+  </figure>
+  <div>
+    <button data-set="c" data-value="0.5" aria-pressed="true">0.5 M</button>
+    <button data-set="c" data-value="1">1 M</button>
+    <p>시간 <output data-expr="t" data-unit="분"></output></p>
+    <input type="range" name="t" min="0" max="10" step="0.5" value="0" data-play="8" aria-label="시간">
+    <p>높이 <output data-expr="h" data-digits="1" data-unit="칸"></output> (모형)</p>
+  </div>
+</div>
+```
+
+- 슬라이더에 `data-play="8"`을 붙이면 엔진이 슬라이더 바로 위에 「▶ 재생」과 「처음으로」 단추를 단다. 숫자는 최솟값에서 최댓값까지 가는 초이고 비우면 6초다. 끝에 닿으면 멈춘다. `data-loop`를 붙이면 처음부터 되풀이한다.
+- 계산 상자 안이면 값이 바뀔 때마다 다시 계산한다. 칸이 성기면 다음 칸까지 걸리는 시간 동안 그림을 흘려 보낸다. 그래프 선에 `data-x="0, max(t, 0.01)"`을 주면 곡선이 시간을 따라 그려진다.
+- 직접 짠 그림의 슬라이더에도 붙인다. 엔진이 값을 바꿀 때마다 `input` 이벤트를 보내므로 직접 짠 처리기가 그대로 그린다.
+- 끝에 있을 때 「▶ 재생」을 누르면 처음부터 다시 간다. 슬라이더를 손으로 잡거나 장을 넘기면 멈춘다. ⚙ 「움직임 끄기」를 켜도 재생은 된다.
+- 재생할 슬라이더는 최솟값('시작'이나 0)에서 시작한다. 「재생」 줄만큼(약 64px) 높이가 늘어나니 점검(D)으로 넘침을 확인한다.
+- 단계 막대(`.reveal`)가 만드는 막대에는 붙이지 않는다. 단계를 차례로 보여 주려면 `→` 키로 넘긴다.
+
 ## 점검 코드(D 키, `?audit`, ⚙ 설정의 「자동 점검」)
 
 | 코드 | 뜻 | 고치는 법 |
@@ -406,6 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
 | `quiz-spot` | 문제 3개 이상의 정답이 모두 같은 번호 | 정답 자리를 섞는다 |
 | `long-deck` | 40장을 넘음 | 차시별로 파일을 나눈다 |
 | `slide-shown` | 보고 있지 않은 장이 화면에 남음 | 장에 준 `display`를 지운다 |
+| `static-model` | 직접 짠 익스플로라그램이 있는데 수업 스크립트와 CSS에 움직임이 하나도 없음(경고) | 그림을 계산 상자로 옮긴다. 직접 짠 그림이면 바뀌는 SVG 요소에 `transition`을 주고 시간 막대에는 `data-play`를 붙인다 |
+| `use-part` | 움직임이 없는 파일에서 손잡이가 있는 장에 직접 그린 점이 12개 이상(경고) | 입자가 막을 오가는 그림이면 입자 상자(13절)로 바꾼다. 농도를 점으로 나타낸 정지 그림이면 그대로 두어도 된다 |
 | `empty-image`, `no-alt`, `dup-id` | 빈 그림 자리, 그림 설명 없음, 중복 id | |
 
 - 오류가 있으면 선생님이 파일을 처음 열 때 툴바에 「점검 N」 단추가 뜬다. 점검 창의 「AI에게 보낼 말 복사」는 목록을 수정 요청 글로 복사한다. 변환 과정을 설명하는 덱처럼 알림이 필요 없으면 `<html data-audit="off">`로 끈다.
