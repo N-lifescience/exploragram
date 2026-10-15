@@ -8,4 +8,4 @@
 | `WantedSans-Variable.woff2` | Wanted Sans (가변, 한글·라틴) | Wanted Lab, Inc. (2024), The Wanted Sans Project Authors | 본문·한글 제목 |
 | `JetBrainsMono-Variable.woff2` | JetBrains Mono (가변) | JetBrains, The JetBrains Mono Project Authors (2020) | 모노 라벨 |
 
-한 파일로 묶을 때(`skills/class-html/scripts/bundle.py`) CSS의 `url('….woff2')`가 data URI로 들어간다.
+한 파일로 묶을 때(`skills/exploragram/scripts/bundle.py`) CSS의 `url('….woff2')`가 data URI로 들어간다.

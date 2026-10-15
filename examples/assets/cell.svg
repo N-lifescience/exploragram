@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-  <!-- 식물 세포 모식도(자체 제작, MIT) -->
+  <!-- 식물 세포 모식도(자체 제작) -->
   <rect width="600" height="400" fill="#FFFFFF"/>
   <rect x="60" y="40" width="480" height="320" rx="36" fill="#E8F5DF" stroke="#4E7A3A" stroke-width="10"/>
   <rect x="84" y="64" width="432" height="272" rx="26" fill="#F6FBF1" stroke="#7FA36B" stroke-width="4"/>

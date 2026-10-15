@@ -34,7 +34,7 @@
   <h1>실시간 수업 체험</h1>
 </header>
 <ol class="steps">
-  <li><b>1</b> 왼쪽 선생님 화면에서 ◀ ▶로 장을 넘겨 보세요. 오른쪽 학생 화면이 따라옵니다.</li>
+  <li><b>1</b> 선생님 화면에서 ◀ ▶로 장을 넘겨 보세요. 학생 화면이 따라옵니다.</li>
   <li><b>2</b> 학생 화면에서 막대를 움직이면, 선생님 「학생 보기」에 값이 막대로 모입니다.</li>
 </ol>
 <p id="status" role="status" aria-live="polite">선생님 화면에서 실시간을 켜는 중…</p>
@@ -46,7 +46,7 @@
   <section class="pane s" aria-label="학생 화면">
     <small>학생 · 디벗</small>
     <div class="frame"><iframe id="student" title="학생 화면" data-w="390" data-h="760"></iframe></div>
-    <p class="phone" id="phone" hidden>휴대폰으로도 들어와 보세요. 왼쪽 선생님 화면의 QR을 찍으면 됩니다.</p>
+    <p class="phone" id="phone" hidden>휴대폰으로도 들어와 보세요. 선생님 화면 도구 막대의 「실시간」을 누르면 QR이 나옵니다.</p>
   </section>
 </div>
 <script src="live-config.js"></script>
@@ -56,7 +56,7 @@
 (function () {
   const LESSON = 'lessons/sci-diffusion.html';
   const WAIT_MS = 15000;
-  const cfg = window.CLASS_HTML_LIVE || {};
+  const cfg = window.EXPLORAGRAM_LIVE || {};
   const teacher = document.getElementById('teacher');
   const student = document.getElementById('student');
   const status = document.getElementById('status');
@@ -90,9 +90,11 @@
         const codeEl = doc.querySelector('.ch-live-code');
         const code = codeEl ? codeEl.textContent.replace(/\D/g, '') : '';
         if (/^\d{6}$/.test(code)) {
-          status.textContent = `코드 ${code.slice(0, 3)} ${code.slice(3)} · 학생 화면이 들어갑니다`;
+          const shown = `코드 ${code.slice(0, 3)} ${code.slice(3)}`;
+          status.textContent = `${shown} · 학생 화면이 들어갑니다`;
           student.src = `${LESSON}?join=${code}${local ? '&live=local' : ''}`;
           phone.hidden = local;
+          clearBoard(doc, id, shown);
           return;
         }
         if (btn && !btn.dataset.pressed) { btn.dataset.pressed = '1'; btn.click(); }
@@ -106,6 +108,25 @@
       };
       tick();
     };
+  }
+
+  // 학생이 들어오면 QR 창을 닫고 「학생 보기」만 아래에 띄운다. QR 창이 칠판 오른쪽을 덮어 장이 잘 보이지 않기 때문이다.
+  function clearBoard(doc, id, shown) {
+    const t0 = Date.now();
+    const tick = () => {
+      if (id !== run) return;
+      const count = doc.querySelector('.ch-live-count');
+      if (count && /[1-9]\d*명/.test(count.textContent)) {
+        const dist = doc.querySelector('.ch-live-dist');
+        if (!dist || dist.hidden) { const b = doc.querySelector('.ch-live-dist-btn'); if (b) b.click(); }
+        const x = doc.querySelector('.ch-live-head .ch-live-x');
+        if (x) x.click();
+        status.textContent = `${shown} · 학생이 들어왔어요`;
+        return;
+      }
+      if (Date.now() - t0 < WAIT_MS) setTimeout(tick, 300);
+    };
+    tick();
   }
 
   start(!(cfg.url && cfg.key));

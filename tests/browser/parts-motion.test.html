@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>motion</title>
-<link rel="stylesheet" href="../../engine/class-html.css">
-<script defer src="../../engine/class-html.js"></script>
+<link rel="stylesheet" href="../../engine/exploragram.css">
+<script defer src="../../engine/exploragram.js"></script>
 <script src="harness.js"></script>
 <script src="pointer.js"></script>
 </head>
@@ -195,7 +195,7 @@ test('수업 스크립트에 움직임이 있으면 둘 다 알리지 않고, �
     assert(!r.warnings.some((w) => w.code === 'static-model'), '수업 스크립트에 움직임');
     assert(!r.warnings.some((w) => w.code === 'use-part'), 'use-part도 알리지 않는다');
   } finally { mine.remove(); }
-  const engine = add(`/*! class-html engine v9.9.9 */ window.__engineProbe = typeof ${rafWord};`);
+  const engine = add(`/*! exploragram engine v9.9.9 */ window.__engineProbe = typeof ${rafWord};`);
   try {
     assert(ClassHTML.audit().warnings.some((w) => w.code === 'static-model'), '엔진 코드는 빼고 본다');
   } finally { engine.remove(); }

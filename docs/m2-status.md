@@ -24,7 +24,7 @@
 
 자동 점검(D, `?audit`, `ClassHTML.audit()`)에 더한 것: 단계 막대 칸마다 넘침, 부품 작성 실수(`part`), 부품 밖 슬라이더 시작 값(`not-veiled`), 활동 장 3분의 1 미만(`few-activities`), 정보(활동 장 수, 그림 자리 수).
 
-도구: `tools/shots.mjs`(장마다 캡처 + audit.json), `skills/class-html/scripts/extract_pptx.py`(글·그림·테마 색 추출, 엔진과 같은 그림 번호).
+도구: `tools/shots.mjs`(장마다 캡처 + audit.json), `skills/exploragram/scripts/extract_pptx.py`(글·그림·테마 색 추출, 엔진과 같은 그림 번호).
 
 ## 재현 명령 (저장소 루트)
 
@@ -52,7 +52,7 @@ node tools/shots.mjs examples/m2-parts.html /tmp/shots --open
 ## M2 다음에 더한 것 (같은 날)
 
 - 부품: 빈칸, 교실 도구(타이머·뽑기·점수판·체크리스트·핫스팟), 모션 어휘(`data-anim`), 수식(KaTeX), 장 표지·목차 슬라이드, 입자 상자(`figure.particles`). 설계서 6.1 ★ 공통 부품 가운데 남았던 라벨 붙이기(`figure.labeling`), 투표(`.poll`), 영상·링크 카드(`.video`, `a.link-card`, QR)는 v1.4.0(2026-10-13)에 넣었다.
-- 스킬 지침(M4 일부): `skills/class-html/`(SKILL.md, references, 교과별 7개, template, extract_pptx.py, bundle.py), 합본 지침 `guide/class-html-guide.md`(빌드 때 생성), README, 지침 예시 점검 `tests/run-docs.mjs`.
+- 스킬 지침(M4 일부): `skills/exploragram/`(SKILL.md, references, 교과별 7개, template, extract_pptx.py, bundle.py), 합본 지침 `guide/exploragram-guide.md`(빌드 때 생성), README, 지침 예시 점검 `tests/run-docs.mjs`.
 - 연수 HTML 공개본 `examples/training.html`(21장 연수 진행용; 이전 23장 이야기 테마는 `examples/intro-story.html`, 레퍼런스 익스플로라그램(Exploragram) 3개, 실습 구간 타이머). 2026-10-08 다시 만듦.
 
 ## 지침만 읽은 AI의 변환 시험 (2026-10-03)

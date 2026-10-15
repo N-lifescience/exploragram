@@ -288,7 +288,7 @@ const Live = {
       this.main = main;
       this.inbox = inbox;
     } catch (err) {
-      console.error('[class-html] live', err);
+      console.error('[exploragram] live', err);
       if (main) main.close();
       if (!alive()) return;
       this.run = null;
@@ -634,10 +634,10 @@ const Live = {
   studentHtml() {
     const doc = PptFill.buildDoc();
     doc.documentElement.setAttribute('data-live', 'student');
-    const cdn = 'https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/';
+    const cdn = 'https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/';
     for (const [sel, attr] of [['link[rel~="stylesheet"][href]', 'href'], ['script[src]', 'src']]) {
       for (const el of qsa(sel, doc)) {
-        const m = /^(?![a-z]+:|\/\/)(?:[^?#]*\/)?(class-html\.(?:css|js))(?:[?#].*)?$/i.exec(el.getAttribute(attr));
+        const m = /^(?![a-z]+:|\/\/)(?:[^?#]*\/)?(exploragram\.(?:css|js))(?:[?#].*)?$/i.exec(el.getAttribute(attr));
         if (m) el.setAttribute(attr, cdn + m[1]);
       }
     }
@@ -752,7 +752,7 @@ const Live = {
       this.main = main;
       this.inbox = inbox;
     } catch (err) {
-      console.error('[class-html] live', err);
+      console.error('[exploragram] live', err);
       if (main) main.close();
       if (this.attempt === mine) {
         this.attempt = null;

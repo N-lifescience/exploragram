@@ -7,7 +7,7 @@ const hooks = {};
 function on(name, fn) { (hooks[name] = hooks[name] || []).push(fn); }
 function emit(name, ...args) {
   for (const fn of hooks[name] || []) {
-    try { fn(...args); } catch (err) { console.error('[class-html]', name, err); }
+    try { fn(...args); } catch (err) { console.error('[exploragram]', name, err); }
   }
 }
 

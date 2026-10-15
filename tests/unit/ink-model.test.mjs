@@ -103,10 +103,11 @@ test('백업 왕복과 거절', () => {
   assert.equal(r.classes['2반'].slides.a.length, 1);
   assert.equal(InkModel.parseBackup('not json').ok, false);
   assert.equal(InkModel.parseBackup('{"app":"other"}').ok, false);
-  const evil = InkModel.parseBackup('{"app":"class-html","kind":"ink-backup","classes":{"__proto__":{}}}');
+  assert.equal(InkModel.parseBackup('{"app":"class-html","kind":"ink-backup","classes":{}}').ok, true);   // v1 백업
+  const evil = InkModel.parseBackup('{"app":"exploragram","kind":"ink-backup","classes":{"__proto__":{}}}');
   assert.equal(evil.ok, true);
   assert.deepStrictEqual(Object.keys(evil.classes), []);
   assert.equal(Object.getPrototypeOf(evil.classes), PROTO);
-  assert.equal(InkModel.parseBackup('{"app":"class-html","kind":"ink-backup","classes":[{}]}').ok, false);
-  assert.equal(InkModel.parseBackup('{"app":"class-html","kind":"ink-backup","deck":{},"classes":{}}').deck, '');
+  assert.equal(InkModel.parseBackup('{"app":"exploragram","kind":"ink-backup","classes":[{}]}').ok, false);
+  assert.equal(InkModel.parseBackup('{"app":"exploragram","kind":"ink-backup","deck":{},"classes":{}}').deck, '');
 });

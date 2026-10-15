@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
-  <!-- 가상의 섬나라 지도(자체 제작, MIT) -->
+  <!-- 가상의 섬나라 지도(자체 제작) -->
   <rect width="800" height="500" fill="#BFE3F5"/>
   <path d="M120 90 L380 60 L600 110 L640 220 L610 360 L420 420 L180 380 L110 250 Z" fill="#E9F2D8" stroke="#7FA36B" stroke-width="4"/>
   <ellipse cx="712" cy="350" rx="52" ry="36" fill="#E9F2D8" stroke="#7FA36B" stroke-width="4"/>

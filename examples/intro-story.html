@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exploragram 교직원 연수</title>
-<link rel="stylesheet" href="../engine/class-html.css">
-<script defer src="../engine/class-html.js"></script>
+<link rel="stylesheet" href="../engine/exploragram.css">
+<script defer src="../engine/exploragram.js"></script>
 <style>
 /* 이야기(story) 테마: 따뜻한 종이 바탕 · 필름 그레인 · 기하 산세리프 제목 · 모노 라벨 · 어두운 둥근 패널 · 주황 강조.
    글꼴 3종은 모두 OFL 1.1(assets/fonts/README.md). */
@@ -35,11 +35,11 @@ body[data-theme="story"] section.slide {
 }
 /* 머리줄(점선 아래) · 쪽 번호 */
 body[data-theme="story"] section.slide::before {
-  content: "CLASS-HTML  ·  " attr(data-sec); left: 64px; right: 64px; top: 0; height: 58px;
+  content: "EXPLORAGRAM  ·  " attr(data-sec); left: 64px; right: 64px; top: 0; height: 58px;
   display: flex; align-items: center; border-bottom: 1px dashed var(--st-line);
   font: 600 15px/1 var(--st-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--st-muted);
 }
-body[data-theme="story"] section.slide:not([data-sec])::before { content: "CLASS-HTML"; }
+body[data-theme="story"] section.slide:not([data-sec])::before { content: "EXPLORAGRAM"; }
 body[data-theme="story"] section.slide::after { right: 64px; bottom: 18px; font: 700 14px/1 var(--st-mono); color: var(--st-ink); }
 
 /* 글 */
@@ -304,7 +304,7 @@ section.slide#try-eth input.ms-range::-moz-range-thumb { width: 28px; height: 28
       <li><b>06</b><span>성장 기록 · 마무리</span><small>5분</small></li>
     </ol>
   </div>
-  <p class="byline">N-LIFESCIENCE · GITHUB.COM/N-LIFESCIENCE/CLASS-HTML</p>
+  <p class="byline">N-LIFESCIENCE · GITHUB.COM/N-LIFESCIENCE/EXPLORAGRAM</p>
 </section>
 
 <section class="slide" id="numbers" data-sec="숫자로 보기" data-title="숫자로 보는 Exploragram">
@@ -663,7 +663,7 @@ section.slide#try-eth input.ms-range::-moz-range-thumb { width: 28px; height: 28
     </ol>
   </div>
   <div style="display:flex;gap:14px;margin-top:22px">
-    <a class="btn ghost" href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/class-html-guide.md" target="_blank" rel="noopener">합본 지침 받기 ↓</a>
+    <a class="btn ghost" href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/exploragram-guide.md" target="_blank" rel="noopener">합본 지침 받기 ↓</a>
     <p class="note" style="align-self:center">받은 파일은 더블클릭하면 바로 열려요.</p>
   </div>
 </section>
@@ -744,7 +744,7 @@ section.slide#try-eth input.ms-range::-moz-range-thumb { width: 28px; height: 28
       <a class="btn ghost" href="https://n-lifescience.github.io/exploragram/examples/training.html" target="_blank" rel="noopener">이 연수 자료 다시 보기</a>
       <a class="btn ghost" href="https://docs.google.com/forms/d/e/1FAIpQLSe4DfQKW7-8lPddGTpcaFvEHNzqouGJ5jtAxoqpY96aH9vQrg/viewform" target="_blank" rel="noopener">설문</a>
     </div>
-    <p class="handle">GITHUB.COM/N-LIFESCIENCE/CLASS-HTML · MIT</p>
+    <p class="handle">GITHUB.COM/N-LIFESCIENCE/EXPLORAGRAM</p>
   </div>
 </section>
 
@@ -768,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* 다짐: 이 PC 브라우저에만 남긴다 */
   {
-    const t = $('#pledge-text'), KEY = 'class-html-training-pledge';
+    const t = $('#pledge-text'), KEY = 'exploragram-training-pledge';
     try { t.value = localStorage.getItem(KEY) || ''; } catch {}
     t.addEventListener('input', () => {
       try { localStorage.setItem(KEY, t.value); $('#pledge-note').textContent = '저장했어요. 이 PC 브라우저에만 남아요.'; }

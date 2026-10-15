@@ -20,7 +20,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function runPage(file) {
   const port = 9300 + Math.floor(Math.random() * 600);
-  const profile = mkdtempSync(join(tmpdir(), 'class-html-test-'));
+  const profile = mkdtempSync(join(tmpdir(), 'exploragram-test-'));
   // --allow-file-access-from-files: 실시간 시험(live.test.html)이 file:// iframe 속 덱을 들여다본다
   const proc = spawn(browser, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--allow-file-access-from-files',
     `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--window-size=1280,800', 'about:blank'], { stdio: 'ignore' });

@@ -417,7 +417,7 @@ const Audit = {
       if (own.length && !own.some((x) => x.hasAttribute('data-play'))) hand.push([s, i]);
     });
     if (!hand.length) return;
-    const mine = (el) => !/class-html engine v\d/.test(el.textContent.slice(0, 400));   // --offline으로 넣은 엔진은 뺀다
+    const mine = (el) => !/exploragram engine v\d/.test(el.textContent.slice(0, 400));   // --offline으로 넣은 엔진은 뺀다
     const js = qsa('script:not([src])').filter(mine).map((el) => el.textContent).join('\n');
     const css = qsa('style').filter(mine).map((el) => el.textContent).join('\n');
     if (/requestAnimationFrame|\.animate\(|setInterval/.test(js) || /transition|@keyframes|animation\s*:/.test(css)) return;

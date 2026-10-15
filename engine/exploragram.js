@@ -1,7 +1,7 @@
-/*! class-html engine v1.6.1 | MIT | https://github.com/N-lifescience/exploragram */
+/*! exploragram engine v2.0.0 | © N-lifescience | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '1.6.1';
+const VERSION = '2.0.0';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
 // 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 ClassHTML.
@@ -13,7 +13,7 @@ const hooks = {};
 function on(name, fn) { (hooks[name] = hooks[name] || []).push(fn); }
 function emit(name, ...args) {
   for (const fn of hooks[name] || []) {
-    try { fn(...args); } catch (err) { console.error('[class-html]', name, err); }
+    try { fn(...args); } catch (err) { console.error('[exploragram]', name, err); }
   }
 }
 
@@ -400,7 +400,7 @@ const Panels = {
   shadeTo(mode) { this.shade.dataset.mode = this.shade.dataset.mode === mode ? '' : mode; },
 
   fullscreen() {
-    const warn = (err) => console.warn('[class-html] 전체 화면', err);
+    const warn = (err) => console.warn('[exploragram] 전체 화면', err);
     const p = document.fullscreenElement
       ? document.exitFullscreen && document.exitFullscreen()
       : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
@@ -532,6 +532,7 @@ const InkGeom = {
 // Stroke = { t: 'pen' | 'hl', c: '#rrggbb', w: number, p: number[] }
 const BOARD_BGS = ['white', 'grid', 'lines', 'green', 'coord'];
 const BAD_KEYS = ['__proto__', 'constructor', 'prototype'];
+const BACKUP_APPS = ['exploragram', 'class-html'];   // v1 엔진이 만든 판서 백업 파일도 받는다
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 
 const InkModel = {
@@ -641,14 +642,14 @@ const InkModel = {
   },
 
   backup(deck, docsByClass) {
-    return JSON.stringify({ app: 'class-html', kind: 'ink-backup', v: 1, deck, savedAt: new Date().toISOString(), classes: docsByClass });
+    return JSON.stringify({ app: 'exploragram', kind: 'ink-backup', v: 1, deck, savedAt: new Date().toISOString(), classes: docsByClass });
   },
 
   parseBackup(text) {
     let data;
     try { data = JSON.parse(text); } catch (err) { return { ok: false, error: '파일을 읽을 수 없어요 (JSON 형식이 아님)' }; }
-    if (!data || data.app !== 'class-html' || data.kind !== 'ink-backup' || !data.classes || typeof data.classes !== 'object' || Array.isArray(data.classes)) {
-      return { ok: false, error: 'class-html 판서 백업 파일이 아니에요' };
+    if (!data || !BACKUP_APPS.includes(data.app) || data.kind !== 'ink-backup' || !data.classes || typeof data.classes !== 'object' || Array.isArray(data.classes)) {
+      return { ok: false, error: 'Exploragram 판서 백업 파일이 아니에요' };
     }
     const classes = {};
     for (const [name, d] of Object.entries(data.classes)) {
@@ -670,7 +671,7 @@ const Store = {
   async init() {
     try {
       this.db = await new Promise((resolve, reject) => {
-        const req = indexedDB.open('class-html', 1);
+        const req = indexedDB.open('exploragram', 1);
         req.onupgradeneeded = () => req.result.createObjectStore('kv');
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
@@ -680,12 +681,12 @@ const Store = {
       return;
     } catch (err) { /* localStorage로 */ }
     try {
-      localStorage.setItem('class-html:probe', '1');
-      localStorage.removeItem('class-html:probe');
+      localStorage.setItem('exploragram:probe', '1');
+      localStorage.removeItem('exploragram:probe');
       this.backend = 'local';
     } catch (err) {
       this.backend = 'memory';
-      console.warn('[class-html] 브라우저 저장소를 쓸 수 없어 판서가 창을 닫으면 사라집니다.');
+      console.warn('[exploragram] 브라우저 저장소를 쓸 수 없어 판서가 창을 닫으면 사라집니다.');
     }
   },
 
@@ -702,7 +703,7 @@ const Store = {
   // 수업 중에 멈추거나 예외를 던지지 않도록, 실패하면 경고만 남기고 fallback을 돌려준다.
   async guard(what, key, fallback, fn) {
     try { return await fn(); } catch (err) {
-      console.warn(`[class-html] 저장소 ${what} 실패:`, key, err);
+      console.warn(`[exploragram] 저장소 ${what} 실패:`, key, err);
       return fallback;
     }
   },
@@ -711,7 +712,7 @@ const Store = {
     return this.guard('읽기', key, undefined, () => {
       if (this.backend === 'idb') return this.tx('readonly', (s) => s.get(key));
       if (this.backend === 'local') {
-        const v = localStorage.getItem(`class-html:${key}`);
+        const v = localStorage.getItem(`exploragram:${key}`);
         return v == null ? undefined : JSON.parse(v);
       }
       return this.mem.get(key);
@@ -721,7 +722,7 @@ const Store = {
   set(key, value) {
     return this.guard('쓰기', key, false, async () => {
       if (this.backend === 'idb') await this.tx('readwrite', (s) => s.put(value, key));
-      else if (this.backend === 'local') localStorage.setItem(`class-html:${key}`, JSON.stringify(value));
+      else if (this.backend === 'local') localStorage.setItem(`exploragram:${key}`, JSON.stringify(value));
       else this.mem.set(key, value);
       return true;
     });
@@ -730,7 +731,7 @@ const Store = {
   del(key) {
     return this.guard('지우기', key, false, async () => {
       if (this.backend === 'idb') await this.tx('readwrite', (s) => s.delete(key));
-      else if (this.backend === 'local') localStorage.removeItem(`class-html:${key}`);
+      else if (this.backend === 'local') localStorage.removeItem(`exploragram:${key}`);
       else this.mem.delete(key);
       return true;
     });
@@ -2592,7 +2593,7 @@ const Audit = {
       if (own.length && !own.some((x) => x.hasAttribute('data-play'))) hand.push([s, i]);
     });
     if (!hand.length) return;
-    const mine = (el) => !/class-html engine v\d/.test(el.textContent.slice(0, 400));   // --offline으로 넣은 엔진은 뺀다
+    const mine = (el) => !/exploragram engine v\d/.test(el.textContent.slice(0, 400));   // --offline으로 넣은 엔진은 뺀다
     const js = qsa('script:not([src])').filter(mine).map((el) => el.textContent).join('\n');
     const css = qsa('style').filter(mine).map((el) => el.textContent).join('\n');
     if (/requestAnimationFrame|\.animate\(|setInterval/.test(js) || /transition|@keyframes|animation\s*:/.test(css)) return;
@@ -3190,7 +3191,7 @@ const Stepper = {
       el.classList.toggle('ch-off', off);
     }
     for (const fn of st.listeners) {
-      try { fn(next, prev, src); } catch (err) { console.error('[class-html] stepper', err); }
+      try { fn(next, prev, src); } catch (err) { console.error('[exploragram] stepper', err); }
     }
     st.el.dispatchEvent(new CustomEvent('ch-stepper', { bubbles: true, detail: { pos: next, prev, label: st.stops[next], src } }));
   },
@@ -4134,7 +4135,7 @@ const Calc = {
     cancelAnimationFrame(item.raf);
     if (next.length) this.play(item);
     for (const fn of item.listeners) {
-      try { fn(scope); } catch (err) { console.error('[class-html] calc', err); }
+      try { fn(scope); } catch (err) { console.error('[exploragram] calc', err); }
     }
   },
 
@@ -4972,7 +4973,7 @@ const PptFill = {
 
   // 오프라인용: 엔진 CSS·JS를 파일 안에 넣는다. 인터넷 주소(CDN)로 엔진을 불러온 경우에만 받을 수 있다.
   async offlineHtml() {
-    const isEngine = (url, ext) => new RegExp(`class-html(\\.min)?\\.${ext}(\\?|#|$)`).test(url || '');
+    const isEngine = (url, ext) => new RegExp(`exploragram(\\.min)?\\.${ext}(\\?|#|$)`).test(url || '');
     const liveCss = qsa('link[rel~="stylesheet"]').find((l) => isEngine(l.getAttribute('href'), 'css'));
     const liveJs = qsa('script[src]').find((s) => isEngine(s.getAttribute('src'), 'js'));
     if (!liveCss || !liveJs) throw new Error('엔진 파일 주소를 찾지 못했어요');
@@ -5400,7 +5401,7 @@ const MathTex = {
     for (const node of nodes) this.mark(node);
     if (!this.spans.length) return;
     this.ready = this.load().then(() => this.render(), (err) => {
-      console.warn('[class-html] 수식 글꼴·스크립트를 불러오지 못했어요', err);
+      console.warn('[exploragram] 수식 글꼴·스크립트를 불러오지 못했어요', err);
       for (const s of this.spans) s.classList.add('ch-math-raw');
     });
   },
@@ -6630,7 +6631,7 @@ const Live = {
       this.main = main;
       this.inbox = inbox;
     } catch (err) {
-      console.error('[class-html] live', err);
+      console.error('[exploragram] live', err);
       if (main) main.close();
       if (!alive()) return;
       this.run = null;
@@ -6976,10 +6977,10 @@ const Live = {
   studentHtml() {
     const doc = PptFill.buildDoc();
     doc.documentElement.setAttribute('data-live', 'student');
-    const cdn = 'https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/';
+    const cdn = 'https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/';
     for (const [sel, attr] of [['link[rel~="stylesheet"][href]', 'href'], ['script[src]', 'src']]) {
       for (const el of qsa(sel, doc)) {
-        const m = /^(?![a-z]+:|\/\/)(?:[^?#]*\/)?(class-html\.(?:css|js))(?:[?#].*)?$/i.exec(el.getAttribute(attr));
+        const m = /^(?![a-z]+:|\/\/)(?:[^?#]*\/)?(exploragram\.(?:css|js))(?:[?#].*)?$/i.exec(el.getAttribute(attr));
         if (m) el.setAttribute(attr, cdn + m[1]);
       }
     }
@@ -7094,7 +7095,7 @@ const Live = {
       this.main = main;
       this.inbox = inbox;
     } catch (err) {
-      console.error('[class-html] live', err);
+      console.error('[exploragram] live', err);
       if (main) main.close();
       if (this.attempt === mine) {
         this.attempt = null;
@@ -7729,7 +7730,7 @@ function boot() {
   ClassHTML.audit = () => Audit.run();
   ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Play, Editor, Live, LiveCore };
   start().then(() => readyResolve(ClassHTML), (err) => {
-    console.error('[class-html]', err);
+    console.error('[exploragram]', err);
     readyResolve(ClassHTML);
   });
 }

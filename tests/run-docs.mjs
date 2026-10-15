@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const ref = join(root, 'skills/class-html/references');
+const ref = join(root, 'skills/exploragram/references');
 const blocks = (file) => [...readFileSync(file, 'utf8').matchAll(/```html\n([\s\S]*?)```/g)].map((m) => m[1]);
 const fake = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221600%22 height=%22945%22/%3E';
 const slides = [];
@@ -23,10 +23,10 @@ for (const f of ['exploragram.md']) {
 }
 // exploragram.md의 css 블록(익스플로라그램 예시가 쓰는 모양)을 덱에 넣는다
 const exploragramCss = [...readFileSync(join(ref, 'exploragram.md'), 'utf8').matchAll(/```css([^`]*)```/g)].map((m) => m[1]).join('');
-const dir = mkdtempSync(join(tmpdir(), 'class-html-docs-'));
+const dir = mkdtempSync(join(tmpdir(), 'exploragram-docs-'));
 const deck = join(dir, 'docs.html');
 writeFileSync(deck, `<!doctype html><html lang="ko" data-deck="docs-check"><head><meta charset="utf-8"><title>지침 예시 점검</title>
-<link rel="stylesheet" href="${join(root, 'engine/class-html.css')}"><script defer src="${join(root, 'engine/class-html.js')}"></script>
+<link rel="stylesheet" href="${join(root, 'engine/exploragram.css')}"><script defer src="${join(root, 'engine/exploragram.js')}"></script>
 <style>${exploragramCss}</style></head>
 <body data-theme="ppt">${slides.join('\n')}</body></html>`);
 let code = 0;

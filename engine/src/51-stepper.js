@@ -138,7 +138,7 @@ const Stepper = {
       el.classList.toggle('ch-off', off);
     }
     for (const fn of st.listeners) {
-      try { fn(next, prev, src); } catch (err) { console.error('[class-html] stepper', err); }
+      try { fn(next, prev, src); } catch (err) { console.error('[exploragram] stepper', err); }
     }
     st.el.dispatchEvent(new CustomEvent('ch-stepper', { bubbles: true, detail: { pos: next, prev, label: st.stops[next], src } }));
   },

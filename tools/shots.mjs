@@ -36,7 +36,7 @@ if (!browser) { console.error('Chrome or Edge not found. Set CHROME_PATH.'); pro
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 mkdirSync(out, { recursive: true });
 const port = 9500 + Math.floor(Math.random() * 400);
-const profile = mkdtempSync(join(tmpdir(), 'class-html-shots-'));
+const profile = mkdtempSync(join(tmpdir(), 'exploragram-shots-'));
 const proc = spawn(browser, ['--headless=new', '--disable-gpu', '--no-first-run', '--hide-scrollbars',
   `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, `--window-size=${width},${height}`, 'about:blank'], { stdio: 'ignore' });
 let code = 0;

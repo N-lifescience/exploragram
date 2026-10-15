@@ -247,7 +247,7 @@ const PptFill = {
 
   // 오프라인용: 엔진 CSS·JS를 파일 안에 넣는다. 인터넷 주소(CDN)로 엔진을 불러온 경우에만 받을 수 있다.
   async offlineHtml() {
-    const isEngine = (url, ext) => new RegExp(`class-html(\\.min)?\\.${ext}(\\?|#|$)`).test(url || '');
+    const isEngine = (url, ext) => new RegExp(`exploragram(\\.min)?\\.${ext}(\\?|#|$)`).test(url || '');
     const liveCss = qsa('link[rel~="stylesheet"]').find((l) => isEngine(l.getAttribute('href'), 'css'));
     const liveJs = qsa('script[src]').find((s) => isEngine(s.getAttribute('src'), 'js'));
     if (!liveCss || !liveJs) throw new Error('엔진 파일 주소를 찾지 못했어요');

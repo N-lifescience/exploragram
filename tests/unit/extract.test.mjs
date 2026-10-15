@@ -8,12 +8,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildMiniPptx } from '../fixtures/mini-pptx.mjs';
 
-const script = fileURLToPath(new URL('../../skills/class-html/scripts/extract_pptx.py', import.meta.url));
+const script = fileURLToPath(new URL('../../skills/exploragram/scripts/extract_pptx.py', import.meta.url));
 // 윈도우의 python3·python 바로 가기(스토어 안내)는 실행되지 않는다. py는 첫 줄(python3)을 따르지 않게 -3을 준다
 const python = [['python3'], ['python'], ['py', '-3']].find((p) => spawnSync(p[0], [...p.slice(1), '-c', 'pass']).status === 0);
 
 test('extract_pptx.py: 그림 번호·파일·노트 없는 개요·테마 색', { skip: !python && '파이썬 없음' }, () => {
-  const dir = mkdtempSync(join(tmpdir(), 'class-html-extract-'));
+  const dir = mkdtempSync(join(tmpdir(), 'exploragram-extract-'));
   try {
     const pptx = join(dir, 'mini.pptx');
     writeFileSync(pptx, buildMiniPptx());

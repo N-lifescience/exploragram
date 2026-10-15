@@ -6,7 +6,7 @@
   - <img src="media/…">처럼 파일 옆의 그림과 CSS의 글꼴 파일(url('….woff2'))을 data URI로 넣는다(이미 data:나 http인 것은 그대로).
   - 긴 변이 --max(기본 1600px)를 넘으면 줄인다: Pillow가 있으면 Pillow, 맥이면 sips. 둘 다 없으면 원래 크기로 넣고 알린다.
   - --offline: 엔진 CSS·JS도 파일 안에 넣는다(인터넷 없이 열림). --engine을 주면 그 폴더의
-    class-html.css·js를, 없으면 HTML에 적힌 주소에서 받는다.
+    exploragram.css·js를, 없으면 HTML에 적힌 주소에서 받는다.
     장에 수식($…$, $$…$$, \\(…\\), \\[…\\])이 있으면 수식 도구 KaTeX의 CSS(글꼴은 woff2만)와 JS도 </head> 앞에 넣는다.
     --katex를 주면 그 폴더의 katex.min.css, katex.min.js, fonts/를 쓴다. 주지 않으면 엔진과 같은 주소(KATEX_URL)에서 받는다.
     받지 못하면 알리고 KaTeX 없이 묶는다(인터넷이 있으면 엔진이 받아서 그린다).
@@ -133,12 +133,12 @@ def read_engine(url, engine_dir, name):
 
 
 def inline_engine(html, engine_dir):
-    link = re.search(r'<link[^>]+href="([^"]*class-html(?:\.min)?\.css)"[^>]*>', html)
-    script = re.search(r'<script[^>]+src="([^"]*class-html(?:\.min)?\.js)"[^>]*>\s*</script>', html)
+    link = re.search(r'<link[^>]+href="([^"]*exploragram(?:\.min)?\.css)"[^>]*>', html)
+    script = re.search(r'<script[^>]+src="([^"]*exploragram(?:\.min)?\.js)"[^>]*>\s*</script>', html)
     if not link or not script:
         raise SystemExit('엔진 <link>와 <script>를 찾지 못했어요')
-    css = read_engine(link.group(1), engine_dir, 'class-html.css')
-    js = read_engine(script.group(1), engine_dir, 'class-html.js').replace('</script', '<\\/script')
+    css = read_engine(link.group(1), engine_dir, 'exploragram.css')
+    js = read_engine(script.group(1), engine_dir, 'exploragram.js').replace('</script', '<\\/script')
     # str.replace는 역참조(\1 등)를 해석하지 않아 엔진 코드가 그대로 들어간다(re.sub와 다름)
     html = html.replace(link.group(0), f'<style>\n{css}\n</style>', 1)
     return html.replace(script.group(0), f'<script>\n{js}\n</script>', 1)
@@ -190,7 +190,7 @@ def main():
     ap.add_argument('-o', '--out')
     ap.add_argument('--max', type=int, default=1600, help='그림 긴 변 최대 px')
     ap.add_argument('--offline', action='store_true', help='엔진도 파일 안에 넣는다')
-    ap.add_argument('--engine', help='class-html.css·js가 있는 폴더(없으면 HTML의 주소에서 받는다)')
+    ap.add_argument('--engine', help='exploragram.css·js가 있는 폴더(없으면 HTML의 주소에서 받는다)')
     ap.add_argument('--katex', help='katex.min.css·js와 fonts/가 있는 폴더(없으면 KATEX_URL에서 받는다)')
     a = ap.parse_args()
     src = Path(a.html)

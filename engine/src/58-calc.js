@@ -260,7 +260,7 @@ const Calc = {
     cancelAnimationFrame(item.raf);
     if (next.length) this.play(item);
     for (const fn of item.listeners) {
-      try { fn(scope); } catch (err) { console.error('[class-html] calc', err); }
+      try { fn(scope); } catch (err) { console.error('[exploragram] calc', err); }
     }
   },
 

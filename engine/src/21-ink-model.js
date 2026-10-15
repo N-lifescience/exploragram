@@ -3,6 +3,7 @@
 // Stroke = { t: 'pen' | 'hl', c: '#rrggbb', w: number, p: number[] }
 const BOARD_BGS = ['white', 'grid', 'lines', 'green', 'coord'];
 const BAD_KEYS = ['__proto__', 'constructor', 'prototype'];
+const BACKUP_APPS = ['exploragram', 'class-html'];   // v1 엔진이 만든 판서 백업 파일도 받는다
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 
 const InkModel = {
@@ -112,14 +113,14 @@ const InkModel = {
   },
 
   backup(deck, docsByClass) {
-    return JSON.stringify({ app: 'class-html', kind: 'ink-backup', v: 1, deck, savedAt: new Date().toISOString(), classes: docsByClass });
+    return JSON.stringify({ app: 'exploragram', kind: 'ink-backup', v: 1, deck, savedAt: new Date().toISOString(), classes: docsByClass });
   },
 
   parseBackup(text) {
     let data;
     try { data = JSON.parse(text); } catch (err) { return { ok: false, error: '파일을 읽을 수 없어요 (JSON 형식이 아님)' }; }
-    if (!data || data.app !== 'class-html' || data.kind !== 'ink-backup' || !data.classes || typeof data.classes !== 'object' || Array.isArray(data.classes)) {
-      return { ok: false, error: 'class-html 판서 백업 파일이 아니에요' };
+    if (!data || !BACKUP_APPS.includes(data.app) || data.kind !== 'ink-backup' || !data.classes || typeof data.classes !== 'object' || Array.isArray(data.classes)) {
+      return { ok: false, error: 'Exploragram 판서 백업 파일이 아니에요' };
     }
     const classes = {};
     for (const [name, d] of Object.entries(data.classes)) {

@@ -50,8 +50,15 @@
   .code-link:hover { color: var(--on); }
   .hero .btn:focus-visible, .hero a:focus-visible { outline-color: #6EA0FF; }
 
-  /* 덱 크기: 한 화면에 도구 막대까지 보이게. 화면 높이에서 머리 글·여백·도구 막대·설명(약 390px)을 빼고 16:9 */
-  .tour { justify-self: center; width: min(100%, max(640px, calc((100svh - 390px) * 16 / 9))); margin: 0; }
+  /* 덱 크기: 한 화면에 도구 막대까지 보이게. 화면 높이에서 머리 글·여백·전환 단추·도구 막대·설명(약 450px)을 빼고 16:9 */
+  .tour { justify-self: center; width: min(100%, max(640px, calc((100svh - 450px) * 16 / 9))); margin: 0; }
+  .tour-tabs { display: inline-flex; gap: 4px; margin: 0 0 12px; padding: 4px; border-radius: 14px; background: var(--night-2); border: 1px solid rgba(255,255,255,.12); }
+  .tour-tabs button { min-height: 44px; padding: 0 18px; border-radius: 10px; background: transparent; color: var(--on-2); font-size: 16px; }
+  .tour-tabs button:hover { background: rgba(255,255,255,.06); color: var(--on); }
+  .tour-tabs button[aria-selected="true"] { background: var(--on); color: var(--night); }
+  .tour-tabs button:focus-visible { outline-color: #6EA0FF; }
+  .tour-view[hidden] { display: none; }
+  .tour-video video { display: block; width: 100%; height: calc(100cqw * 9 / 16 + 80px); background: var(--night); object-fit: contain; }
   .tour-frame { position: relative; container-type: inline-size; border-radius: 16px; overflow: hidden; background: #1B1D21; box-shadow: 0 28px 70px -24px rgba(0,0,0,.85); }
   .tour-frame iframe { display: block; width: 100%; height: calc(100cqw * 9 / 16 + 80px); border: 0; }
   .tour-frame iframe[hidden] { display: none; }
@@ -59,8 +66,10 @@
   .tour-poster img { display: block; width: 100%; height: auto; }
   .tour-poster span { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 800; white-space: nowrap; box-shadow: 0 8px 20px -6px rgba(0,0,0,.5); }
   .tour-frame.is-live .tour-poster { display: none; }
-  .tour figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 10px 2px 0; color: var(--on-2); font-size: 15px; }
-  .tour figcaption a { color: var(--on); font-weight: 700; }
+  .tour figcaption { margin: 10px 2px 0; }
+  .tour .cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; color: var(--on-2); font-size: 15px; }
+  .tour .cap[hidden] { display: none; }
+  .tour .cap a { color: var(--on); font-weight: 700; }
 
   /* ── 아래 화면 ── */
   main.wrap { padding-top: 56px; padding-bottom: 72px; }
@@ -120,6 +129,7 @@
     .hero-in { padding-top: 48px; padding-bottom: 40px; }
     .tour { width: 100%; }
     .tour .wide-only { display: none; }
+    .tour-video video { height: auto; aspect-ratio: 16 / 9; }
     .btn { flex: 1 1 100%; }
     .ba .pair { grid-template-columns: 1fr; }
     .ba .to { transform: rotate(90deg); justify-self: center; }
@@ -157,11 +167,23 @@
     </div>
 
     <figure class="tour">
-      <div class="tour-frame">
-        <iframe id="tour" title="Exploragram 체험 덱: 막대 밀기, 판서, 실시간 수업 영상" data-src="tour.html" allow="fullscreen" hidden></iframe>
-        <a class="tour-poster" href="tour.html"><img src="img/tour-poster.webp" width="1280" height="720" alt="체험 덱 첫 장: 시간 막대를 밀면 잉크 입자가 퍼지는 상자"><span>체험 덱 열기</span></a>
+      <div class="tour-tabs" role="tablist" aria-label="가운데 화면">
+        <button type="button" role="tab" id="tab-try" aria-controls="view-try" aria-selected="true">체험</button>
+        <button type="button" role="tab" id="tab-video" aria-controls="view-video" aria-selected="false" tabindex="-1">사용법 영상</button>
       </div>
-      <figcaption><span>수업 PPT가 이런 파일이 됩니다.<span class="wide-only"> 펜을 골라 직접 써 보세요.</span></span><a class="wide-only" href="tour.html">크게 열기</a></figcaption>
+      <div class="tour-frame">
+        <div class="tour-view" id="view-try" role="tabpanel" aria-labelledby="tab-try">
+          <iframe id="tour" title="Exploragram 체험 덱: 막대 밀기, 판서" data-src="tour.html" allow="fullscreen" hidden></iframe>
+          <a class="tour-poster" href="tour.html"><img src="img/tour-poster.webp" width="1280" height="720" alt="체험 덱 첫 장: 시간 막대를 밀면 잉크 입자가 퍼지는 상자"><span>체험 덱 열기</span></a>
+        </div>
+        <div class="tour-view tour-video" id="view-video" role="tabpanel" aria-labelledby="tab-video" hidden>
+          <video id="how-video" src="media/live.mp4" poster="media/live-poster.jpg" controls muted playsinline preload="none" aria-label="사용법 영상: 선생님이 「실시간」을 켜면 학생이 코드로 들어와 막대를 밀고 퀴즈에 답하고, 그 값이 선생님 화면에 모인다"></video>
+        </div>
+      </div>
+      <figcaption>
+        <div class="cap" data-for="try"><span>수업 PPT가 이런 파일이 됩니다.<span class="wide-only"> 펜을 골라 직접 써 보세요.</span></span><a class="wide-only" href="tour.html">크게 열기</a></div>
+        <div class="cap" data-for="video" hidden><span>학생이 코드로 들어오면 학생 값이 선생님 화면에 모입니다.</span><a href="live-demo.html">실시간 수업 체험</a></div>
+      </figcaption>
     </figure>
   </div>
 </header>
@@ -217,7 +239,7 @@
     <ol class="how">
       <li><b>AI에게 PPT와 한 줄을 줍니다</b><p>ChatGPT, Gemini, Claude 어느 것이든 됩니다. 수업 PPT를 올리고 아래 글을 붙여 넣으세요.</p>
         <div class="prompt"><code id="prompt">https://github.com/N-lifescience/exploragram 지침대로 이 PPT를 수업 HTML로 바꿔줘</code><button type="button" class="copy" data-copy="prompt">글 복사</button></div>
-        <p>주소를 못 읽는 AI라면 <a href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/class-html-guide.md">합본 지침 파일</a>을 받아 PPT와 함께 올립니다.</p></li>
+        <p>주소를 못 읽는 AI라면 <a href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/exploragram-guide.md">합본 지침 파일</a>을 받아 PPT와 함께 올립니다.</p></li>
       <li><b>AI의 질문에 답합니다</b><p>학생이 헷갈리는 지점과 꼭 만지게 하고 싶은 장면을 묻습니다. 설계표를 보여 주면 확인합니다.</p></li>
       <li><b>받은 파일을 열어 수업합니다</b><p>더블클릭해 크롬에서 엽니다. 고칠 곳은 도구 막대의 「편집」으로 바로 고치고 학생과 함께하려면 「실시간」을 누릅니다.</p></li>
     </ol>
@@ -227,7 +249,7 @@
 
 <footer class="wrap">
   <p>학생 값은 저장하지 않고 이름도 받지 않습니다. 수업 중 선생님 화면에만 있다가 창을 닫으면 사라집니다.</p>
-  <p><a href="https://github.com/N-lifescience/exploragram">GitHub</a> (MIT) · 옛 이름 class-html</p>
+  <p><a href="https://github.com/N-lifescience/exploragram">GitHub</a> · © N-lifescience</p>
 </footer>
 
 <script src="live-config.js"></script>
@@ -247,10 +269,40 @@
 }());
 </script>
 <script>
+// 가운데 화면 전환: 「체험」 덱과 「사용법 영상」. 영상은 고를 때 소리 없이 재생하고, 덱으로 돌아가면 멈춘다.
+(function () {
+  const tabs = [...document.querySelectorAll('.tour-tabs [role="tab"]')];
+  const video = document.getElementById('how-video');
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  function show(tab, focus) {
+    for (const t of tabs) {
+      const on = t === tab;
+      const key = t.id.slice(4);
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      document.querySelector(`.tour .cap[data-for="${key}"]`).hidden = !on;
+    }
+    if (focus) tab.focus();
+    if (tab.id === 'tab-video') { if (!still.matches) video.play().catch(() => {}); }
+    else video.pause();
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => show(t));
+    t.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      show(tabs[(i + d + tabs.length) % tabs.length], true);
+    });
+  });
+}());
+</script>
+<script>
 // 코드로 교사 상태를 한 번 들은 뒤, 사이트의 예시 수업이면 그 수업으로 보낸다(학생 역할로).
 (function () {
   const SUPA = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.min.js';
-  const cfg = window.CLASS_HTML_LIVE || {};
+  const cfg = window.EXPLORAGRAM_LIVE || {};
   const q = new URLSearchParams(location.search);
   const forceLocal = q.get('live') === 'local';
   const local = forceLocal || !(cfg.url && cfg.key);

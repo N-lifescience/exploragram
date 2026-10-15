@@ -3,8 +3,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exploragram 교직원 연수</title>
-<link rel="stylesheet" href="../engine/class-html.css">
-<script defer="" src="../engine/class-html.js"></script>
+<link rel="stylesheet" href="../engine/exploragram.css">
+<script defer="" src="../engine/exploragram.js"></script>
 <style>
 /* 이야기(story) 테마: 따뜻한 종이 바탕 · 필름 그레인 · 기하 산세리프 제목 · 모노 라벨 · 어두운 둥근 패널 · 주황 강조.
    글꼴 3종은 모두 OFL 1.1(assets/fonts/README.md). */
@@ -652,7 +652,7 @@ table.wish td:nth-child(3), table.wish td:nth-child(4) { font-weight: 800; color
     </ol>
   </div>
   <div style="display:flex;gap:14px;margin-top:22px">
-    <a class="btn ghost" href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/class-html-guide.md" target="_blank" rel="noopener">합본 지침 받기 ↓</a>
+    <a class="btn ghost" href="https://raw.githubusercontent.com/N-lifescience/exploragram/main/guide/exploragram-guide.md" target="_blank" rel="noopener">합본 지침 받기 ↓</a>
     <p class="note" style="align-self:center">지침은 열린 화면에서 Ctrl+S로 저장해요. 받은 HTML은 크롬 창에 끌어다 놓아요.</p>
   </div>
 </section>
@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* 다짐: 이 PC 브라우저에만 남긴다 */
   {
-    const t = $('#pledge-text'), KEY = 'class-html-training-v2-pledge';
+    const t = $('#pledge-text'), KEY = 'exploragram-training-v2-pledge';
     try { t.value = localStorage.getItem(KEY) || ''; } catch {}
     t.addEventListener('input', () => {
       try { localStorage.setItem(KEY, t.value); $('#pledge-note').textContent = '저장했어요. 이 PC 브라우저에만 남아요.'; }

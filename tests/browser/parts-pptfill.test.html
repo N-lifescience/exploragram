@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>pptfill</title>
-<link rel="stylesheet" href="../../engine/class-html.css">
-<script defer src="../../engine/class-html.js"></script>
+<link rel="stylesheet" href="../../engine/exploragram.css">
+<script defer src="../../engine/exploragram.js"></script>
 <script src="harness.js"></script>
 <script src="../fixtures/mini-pptx.js"></script>
 </head>
@@ -111,7 +111,7 @@ test('오프라인용: 엔진 CSS·JS를 안에 넣고 </script를 막는다', a
     const html = await I().PptFill.offlineHtml();
     assert(html.includes('<style>.x{color:red}</style>'), 'style');
     assert(html.includes('var a = "<\\/' + 'script>";'), 'escaped');
-    assert(!/<script[^>]+class-html\.js/.test(html) && !/<link[^>]+class-html\.css/.test(html), 'no external engine');
+    assert(!/<script[^>]+exploragram\.js/.test(html) && !/<link[^>]+exploragram\.css/.test(html), 'no external engine');
   } finally { window.fetch = realFetch; }
 });
 test('엔진 파일을 못 받으면 알아듣는 오류', async () => {

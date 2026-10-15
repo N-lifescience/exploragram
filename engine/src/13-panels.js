@@ -114,7 +114,7 @@ const Panels = {
   shadeTo(mode) { this.shade.dataset.mode = this.shade.dataset.mode === mode ? '' : mode; },
 
   fullscreen() {
-    const warn = (err) => console.warn('[class-html] 전체 화면', err);
+    const warn = (err) => console.warn('[exploragram] 전체 화면', err);
     const p = document.fullscreenElement
       ? document.exitFullscreen && document.exitFullscreen()
       : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();

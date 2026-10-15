@@ -16,7 +16,7 @@ const browser = [process.env.CHROME_PATH,
 if (!browser) throw new Error('Chrome or Edge not found. Set CHROME_PATH.');
 const file = resolve(process.argv[2] || 'examples/m1-demo.html');
 if (!existsSync(file)) throw new Error(`Demo not found: ${file}`);
-const output = mkdtempSync(join(tmpdir(), 'class-html-demo-'));
+const output = mkdtempSync(join(tmpdir(), 'exploragram-demo-'));
 const resolutions = [[1280, 720], [1920, 1080], [3840, 2160]];
 const report = { file, browser, output, runs: [], limitations: [
   'CDP pointerType:pen 드래그는 엔진 없는 기본 range에서도 값을 바꾸지 않으므로, 펜 도구 상태의 range는 실제 mouse/touch 입력으로 검증한다. 실제 전자펜 range 조작은 학교 장치 확인이 필요하다.',

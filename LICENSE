@@ -1,21 +1,17 @@
-MIT License
+Copyright (c) 2026 N-lifescience. All rights reserved.
 
-Copyright (c) 2026 N-lifescience
+이 저장소의 코드·문서·예시·그림은 N-lifescience의 저작물이다.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+허용하는 것
+- 선생님과 학생이 Exploragram 사이트와 엔진(CDN 주소)으로 수업 HTML을 만들어 수업에 쓰는 것.
+- 그렇게 만든 수업 HTML을 수업 목적으로 학생·동료 교사와 나누는 것.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+허락이 필요한 것
+- 이 저장소의 코드·문서를 복제하거나 고쳐서 다시 배포하는 것.
+- 다른 서비스·상품에 넣거나 상업적으로 쓰는 것.
+문의: https://github.com/N-lifescience
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+v1.6.1까지는 MIT 라이선스로 배포했다. 그 버전을 이미 받은 사람에게는 그 버전의 MIT 조건이
+그대로 적용된다. v2.0.0부터는 이 문서의 조건을 따른다.
+
+글꼴(examples/assets/fonts)은 각 글꼴에 딸린 라이선스(OFL)를 따른다.

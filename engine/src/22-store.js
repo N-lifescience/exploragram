@@ -7,7 +7,7 @@ const Store = {
   async init() {
     try {
       this.db = await new Promise((resolve, reject) => {
-        const req = indexedDB.open('class-html', 1);
+        const req = indexedDB.open('exploragram', 1);
         req.onupgradeneeded = () => req.result.createObjectStore('kv');
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
@@ -17,12 +17,12 @@ const Store = {
       return;
     } catch (err) { /* localStorage로 */ }
     try {
-      localStorage.setItem('class-html:probe', '1');
-      localStorage.removeItem('class-html:probe');
+      localStorage.setItem('exploragram:probe', '1');
+      localStorage.removeItem('exploragram:probe');
       this.backend = 'local';
     } catch (err) {
       this.backend = 'memory';
-      console.warn('[class-html] 브라우저 저장소를 쓸 수 없어 판서가 창을 닫으면 사라집니다.');
+      console.warn('[exploragram] 브라우저 저장소를 쓸 수 없어 판서가 창을 닫으면 사라집니다.');
     }
   },
 
@@ -39,7 +39,7 @@ const Store = {
   // 수업 중에 멈추거나 예외를 던지지 않도록, 실패하면 경고만 남기고 fallback을 돌려준다.
   async guard(what, key, fallback, fn) {
     try { return await fn(); } catch (err) {
-      console.warn(`[class-html] 저장소 ${what} 실패:`, key, err);
+      console.warn(`[exploragram] 저장소 ${what} 실패:`, key, err);
       return fallback;
     }
   },
@@ -48,7 +48,7 @@ const Store = {
     return this.guard('읽기', key, undefined, () => {
       if (this.backend === 'idb') return this.tx('readonly', (s) => s.get(key));
       if (this.backend === 'local') {
-        const v = localStorage.getItem(`class-html:${key}`);
+        const v = localStorage.getItem(`exploragram:${key}`);
         return v == null ? undefined : JSON.parse(v);
       }
       return this.mem.get(key);
@@ -58,7 +58,7 @@ const Store = {
   set(key, value) {
     return this.guard('쓰기', key, false, async () => {
       if (this.backend === 'idb') await this.tx('readwrite', (s) => s.put(value, key));
-      else if (this.backend === 'local') localStorage.setItem(`class-html:${key}`, JSON.stringify(value));
+      else if (this.backend === 'local') localStorage.setItem(`exploragram:${key}`, JSON.stringify(value));
       else this.mem.set(key, value);
       return true;
     });
@@ -67,7 +67,7 @@ const Store = {
   del(key) {
     return this.guard('지우기', key, false, async () => {
       if (this.backend === 'idb') await this.tx('readwrite', (s) => s.delete(key));
-      else if (this.backend === 'local') localStorage.removeItem(`class-html:${key}`);
+      else if (this.backend === 'local') localStorage.removeItem(`exploragram:${key}`);
       else this.mem.delete(key);
       return true;
     });

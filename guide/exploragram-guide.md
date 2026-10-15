@@ -1,11 +1,11 @@
 <!-- 자동 생성: node tools/build.mjs (손으로 고치지 않는다) -->
-# class-html 합본 지침
+# exploragram 합본 지침
 
-> **AI에게**: 이 파일 하나가 Exploragram(옛 이름 class-html) 지침 전체다. 선생님이 수업 PPT를 주면 이 지침대로 수업용 HTML을 만든다.
+> **AI에게**: 이 파일 하나가 Exploragram 지침 전체다. 선생님이 수업 PPT를 주면 이 지침대로 수업용 HTML을 만든다.
 > **반드시**: `<head>`에 아래 엔진 css·js 두 줄을 넣는다(지금 환경에서 안 열려도 그대로 둔다). 넘기기·툴바를 직접 짜지 않고, PPT 장을 통째로 그림으로 넣지 않는다(1절 기준 8·9).
-> 본문의 `references/…`는 이 파일의 해당 절을, `scripts/…`는 저장소 https://github.com/N-lifescience/exploragram 의 `skills/class-html/scripts/`를 가리킨다.
-> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css`·`.js` (v1.6.1)
-> 레퍼런스 완성본(`references/examples/`): https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/elem-shadow.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/eth-exploragram.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/mid-linear.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/sci-diffusion.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/skills/class-html/references/examples/soc-supply-demand.html
+> 본문의 `references/…`는 이 파일의 해당 절을, `scripts/…`는 저장소 https://github.com/N-lifescience/exploragram 의 `skills/exploragram/scripts/`를 가리킨다.
+> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.css`·`.js` (v2.0.0)
+> 레퍼런스 완성본(`references/examples/`): https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/elem-shadow.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/eth-exploragram.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/mid-linear.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/sci-diffusion.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/soc-supply-demand.html
 
 ## 차례
 
@@ -35,7 +35,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 
 판서(펜·형광펜·지우개·레이저), 칠판, 반별 저장, 넘기기, 인쇄, 자동 점검, 편집 모드(교사가 툴바 「편집」에서 글·상자·그림·도형을 골라 고치고 HTML로 저장)는 엔진이 한다. 이 기능을 직접 만들지 않는다. 펜을 든 채로 익스플로라그램의 단추나 슬라이더를 눌러도 엔진이 조작으로 처리한다. 교사가 펜 모드와 조작 모드를 오갈 필요가 없다. 다만 엔진은 초점이 입력란에 있으면 → 키를 무시하므로, 직접 짠 슬라이더는 손을 떼면 초점을 풀어야 한다(`exploragram.md` 뼈대).
 
-- 뼈대는 `assets/template.html`이다. `<head>`에 엔진 css·js 두 줄(`@1`)을 넣는다. 판서 저장 열쇠인 `<html data-deck="…">`는 영문 소문자·숫자·하이픈으로 덱마다 다르게 쓴다(예: `sci-diffusion-1`). 몸체는 `<body data-theme="ppt">`로 연다.
+- 뼈대는 `assets/template.html`이다. `<head>`에 엔진 css·js 두 줄(`@2`)을 넣는다. 판서 저장 열쇠인 `<html data-deck="…">`는 영문 소문자·숫자·하이픈으로 덱마다 다르게 쓴다(예: `sci-diffusion-1`). 몸체는 `<body data-theme="ppt">`로 연다.
 - 장 하나는 `<section class="slide" id="고정-id" data-title="…">` 하나다. 무대는 1280×720이고 엔진이 화면에 맞춰 키운다.
 - 답이나 결론은 `class="step"`으로 숨긴다. → 키를 누르면 차례로 열린다.
 - 익스플로라그램 스크립트는 `</body>` 앞 `<script>` 하나에 `document.addEventListener('DOMContentLoaded', () => { … })`로 쓴다. 학생 입력을 `innerHTML`로 넣지 않는다.
@@ -508,8 +508,8 @@ Ctrl+P로 장마다 한 쪽씩 인쇄된다. 엔진이 단계를 모두 펼치�
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>자유주의와 민족주의</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css">
-<script defer src="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.css">
+<script defer src="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.js"></script>
 <style>/* 이 수업만의 모양 */</style>
 </head>
 <body data-theme="ppt" style="--accent:#C04F15">

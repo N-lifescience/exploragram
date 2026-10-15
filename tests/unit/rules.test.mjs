@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const js = readFileSync(new URL('../../engine/class-html.js', import.meta.url), 'utf8');
-const css = readFileSync(new URL('../../engine/class-html.css', import.meta.url), 'utf8');
+const js = readFileSync(new URL('../../engine/exploragram.js', import.meta.url), 'utf8');
+const css = readFileSync(new URL('../../engine/exploragram.css', import.meta.url), 'utf8');
 
 test('엔진은 innerHTML·eval·new Function을 쓰지 않는다', () => {
   assert.ok(!/\.innerHTML\s*=|\binsertAdjacentHTML\b|\beval\s*\(|new Function\s*\(/.test(js));

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exploragram 체험 덱</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="engine/class-html.css">
-<script defer src="engine/class-html.js"></script>
+<link rel="stylesheet" href="engine/exploragram.css">
+<script defer src="engine/exploragram.js"></script>
 <style>
 /* 첫 화면(히어로)에 넣는 체험 덱. 사이트와 같은 종이색·주황 강조·Pretendard. */
 body { --accent: #E8541A; --ch-paper: #F4F1EA; --ch-card: #FFFFFF; --ch-ink: #1F2328; --ch-mute: #62666D;
@@ -61,15 +61,6 @@ section.slide input.dx-range::-moz-range-thumb { width: 34px; height: 34px; bord
 .pad-slider { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; padding: 14px 22px; border-radius: 18px; background: #FFFFFF; font-size: 24px; font-weight: 700; }
 .pad-slider input { width: 100%; height: 44px; margin: 0; accent-color: var(--accent); }
 .pad-slider output { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; color: var(--accent); }
-
-/* 3 실시간: 영상 안 자막이 순서를 말하므로 장에는 제목과 단추만 */
-#live { padding-bottom: 36px; }
-.live-head { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 0 0 20px; }
-.live-head h2 { margin: 0; }
-#live video { display: block; align-self: center; width: 940px; height: 529px; border-radius: 16px; background: #121418; object-fit: contain; }
-.go { flex: none; display: inline-flex; align-items: center; justify-content: center; min-height: 60px; padding: 0 26px; border-radius: 14px;
-  background: var(--accent); color: #fff; font-size: 24px; font-weight: 800; text-decoration: none; }
-.go:hover { background: #D04712; }
 </style>
 </head>
 <body>
@@ -132,14 +123,6 @@ section.slide input.dx-range::-moz-range-thumb { width: 34px; height: 34px; bord
   </div>
 </section>
 
-<section class="slide" id="live" data-title="실시간 수업 영상">
-  <div class="live-head">
-    <h2>학생 값이 선생님 화면에 모여요</h2>
-    <a class="go" data-no-ink href="live-demo.html" target="_top">직접 해 보기</a>
-  </div>
-  <video id="live-video" data-no-ink src="media/live.mp4" poster="media/live-poster.jpg" controls muted playsinline preload="metadata" aria-label="실시간 수업 영상: 선생님이 「실시간」을 켜고, 학생이 코드로 들어와 막대를 밀고 퀴즈에 답하면 선생님 화면에 모인다"></video>
-</section>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (s) => document.querySelector(s);
@@ -194,18 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#ik-t').addEventListener('input', drawInk);
     $('#ik-t').addEventListener('change', (e) => e.target.blur());   // 손을 떼면 ◀ ▶ 키가 다시 장을 넘긴다
     drawInk();
-  }
-
-  /* 3 영상: 이 장에 오면 소리 없이 재생하고, 떠나면 멈춘다. 동작 줄이기를 켠 화면에서는 저절로 재생하지 않는다 */
-  {
-    const slide = $('#live'), video = $('#live-video');
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const sync = () => {
-      if (slide.classList.contains('is-active')) { if (!still) video.play().catch(() => {}); }
-      else video.pause();
-    };
-    new MutationObserver(sync).observe(slide, { attributes: true, attributeFilter: ['class'] });
-    sync();   // 주소가 #3이면 처음부터 이 장이다
   }
 });
 </script>

@@ -19,7 +19,7 @@ const MathTex = {
     for (const node of nodes) this.mark(node);
     if (!this.spans.length) return;
     this.ready = this.load().then(() => this.render(), (err) => {
-      console.warn('[class-html] 수식 글꼴·스크립트를 불러오지 못했어요', err);
+      console.warn('[exploragram] 수식 글꼴·스크립트를 불러오지 못했어요', err);
       for (const s of this.spans) s.classList.add('ch-math-raw');
     });
   },

@@ -170,7 +170,7 @@ test('학생용 파일에는 학생 표시만 붙고 엔진 흔적은 없다', (
   const html = T.Live.studentHtml();
   assert(html.includes('data-live="student"'), '학생 표시');
   assert(!html.includes('ch-toolbar') && !html.includes('ch-live-ui'), '툴바·실시간 창은 들어가지 않는다');
-  assert(html.includes('https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.js'), '상대 주소 엔진은 CDN으로');
+  assert(html.includes('https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.js'), '상대 주소 엔진은 CDN으로');
   assert(!html.includes('../../engine/'), '상대 주소가 남지 않는다');
 });
 

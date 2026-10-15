@@ -12,8 +12,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>자유주의와 민족주의</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.css">
-<script defer src="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@1/engine/class-html.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.css">
+<script defer src="https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.js"></script>
 <style>/* 이 수업만의 모양 */</style>
 </head>
 <body data-theme="ppt" style="--accent:#C04F15">
