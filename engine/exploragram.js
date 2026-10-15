@@ -1,10 +1,10 @@
-/*! exploragram engine v2.0.0 | © N-lifescience | https://github.com/N-lifescience/exploragram */
+/*! exploragram engine v2.0.1 | © N-lifescience | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '2.0.0';
+const VERSION = '2.0.1';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
-// 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 ClassHTML.
+// 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 Exploragram.
 const STAGE_W = 1280;
 const STAGE_H = 720;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -47,7 +47,7 @@ function keyName(e) {
   return String(e.key || '').toLowerCase();
 }
 
-const ClassHTML = {
+const Exploragram = {
   version: typeof VERSION === 'string' ? VERSION : 'dev',
   onShow(fn) { on('show', fn); },
   onHide(fn) { on('hide', fn); },
@@ -2174,7 +2174,7 @@ const Print = {
 };
 
 /* ---- 42-audit.js ---- */
-// D 또는 ?audit로 열며, ClassHTML.audit()은 화면 상태를 보존하고 보고서만 반환한다.
+// D 또는 ?audit로 열며, Exploragram.audit()은 화면 상태를 보존하고 보고서만 반환한다.
 const Audit = {
   panel: null,
   badge: null,     // 툴바의 「점검 N」 단추(고칠 곳이 있을 때만)
@@ -7024,7 +7024,7 @@ const Live = {
     emit('live-role');   // 투표는 학생 화면에서 '세기'가 아니라 '고르기'가 된다
     Nav.override = { next: () => this.move(1), prev: () => this.move(-1), close() {} };
     Nav.revealTo = () => false;   // 정답 상자 ✓ 등이 교사보다 먼저 단계를 열지 않게
-    // 차례 장의 단추·ClassHTML.go도 교사가 연 장으로만
+    // 차례 장의 단추·Exploragram.go도 교사가 연 장으로만
     Nav.go = (index) => {
       const i = Math.round(Number(index));
       if (this.teacher && this.teacher.reach[i]) this.showSlide(i);
@@ -7694,7 +7694,7 @@ const Play = {
 /* ---- 99-boot.js ---- */
 // 시작 순서. 엔진이 두 번 포함돼도 한 번만 실행한다.
 let readyResolve;
-ClassHTML.ready = new Promise((resolve) => { readyResolve = resolve; });
+Exploragram.ready = new Promise((resolve) => { readyResolve = resolve; });
 
 async function start() {
   Editor.tag();       // 원본 보관 전: 화면과 원본에 같은 편집 번호를 붙인다
@@ -7722,16 +7722,16 @@ async function start() {
 }
 
 function boot() {
-  if (window.ClassHTML && window.ClassHTML !== ClassHTML) return;
-  window.ClassHTML = ClassHTML;
-  ClassHTML.go = (n) => Nav.go(n);
-  ClassHTML.next = () => Nav.next();
-  ClassHTML.prev = () => Nav.prev();
-  ClassHTML.audit = () => Audit.run();
-  ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Play, Editor, Live, LiveCore };
-  start().then(() => readyResolve(ClassHTML), (err) => {
+  if (window.Exploragram && window.Exploragram !== Exploragram) return;
+  window.Exploragram = Exploragram;
+  Exploragram.go = (n) => Nav.go(n);
+  Exploragram.next = () => Nav.next();
+  Exploragram.prev = () => Nav.prev();
+  Exploragram.audit = () => Audit.run();
+  Exploragram._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Play, Editor, Live, LiveCore };
+  start().then(() => readyResolve(Exploragram), (err) => {
     console.error('[exploragram]', err);
-    readyResolve(ClassHTML);
+    readyResolve(Exploragram);
   });
 }
 

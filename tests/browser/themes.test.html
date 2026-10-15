@@ -12,7 +12,7 @@
   <div class="quiz"><button class="opt" data-ok>보기</button></div></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 // WCAG 상대 휘도와 대비
 const rgb = (c) => { const m = c.match(/\d+(\.\d+)?/g).map(Number); return m.slice(0, 3); };
 const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };

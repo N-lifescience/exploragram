@@ -21,7 +21,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const check = (id) => $(id).querySelector('.ch-check');
 
@@ -39,20 +39,20 @@ test('✓를 누르면 열리고 ✓는 사라진다', () => {
   eq(getComputedStyle(check('ans')).display, 'none');
 });
 test('→ 로도 연다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
   assert($('ans').querySelector('.step').classList.contains('is-shown'), 'shown by nav');
 });
 test('다른 장의 정답 상자 ✓는 무시하고, 단계가 있으면 첫 단계까지 연다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   I().Answer.reveal($('ans2'));
   eq(I().Nav.state, { slide: 0, shown: 0 });
-  ClassHTML.go(1);
+  Exploragram.go(1);
   check('ans2').click();
   assert($('s2a').classList.contains('is-shown') && !$('s2b').classList.contains('is-shown'), 'first step only');
 });
 test('빈칸: 처음엔 가리고 누르면 열리고 다시 누르면 가린다, 펜으로 톡 눌러도', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   const b = $('bl');
   eq(getComputedStyle(b).color, 'rgba(0, 0, 0, 0)');
   b.click();
@@ -68,7 +68,7 @@ test('빈칸: 처음엔 가리고 누르면 열리고 다시 누르면 가린다
   I().Tools.set('hand');
 });
 test('확대 단추를 누르면 크게, 설명 글도 함께, Esc로 닫기', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   $('fig').querySelector('.ch-zoom-btn').click();
   const z = I().Zoom;
   assert(z.isOpen, 'open');
@@ -85,11 +85,11 @@ test('손 모드에서만 그림을 눌러 확대한다(펜이면 판서)', () =
   I().Tools.set('hand');
   $('img').click();
   assert(z.isOpen, 'hand: zoom');
-  ClassHTML.go(1);
+  Exploragram.go(1);
   assert(!z.isOpen, 'closed on slide change');
 });
 test('비어 있는 그림 자리는 확대하지 않는다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   $('empty').querySelector('.ch-zoom-btn').click();
   assert(!I().Zoom.isOpen, 'empty');
 });

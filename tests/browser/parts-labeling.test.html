@@ -37,7 +37,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const item = (id) => I().Labeling.list.find((x) => x.fig.id === id);
 const spot = (it, key) => it.spots.find((s) => s.key === key);
@@ -124,7 +124,7 @@ test('펜을 든 채로 끌어도 판서가 아니라 이름표가 움직인다.
   eq(I().Ink.page.length, before, 'no ink');
 });
 test('이름이 같은 자리가 둘이면 어느 쪽에 놓아도 맞다', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   const it = item('twin');
   const [a, b] = it.spots;
   dragTo(a, b);
@@ -143,11 +143,11 @@ test('키보드: 이름표에서 Enter로 고르고 자리 단추로 놓는다(�
   assert(it.spots[1].done, 'dropped');
 });
 test('점검: 자리 없는 이름표·이름표 하나뿐인 그림은 부품 오류, 다 붙인 상태로 재고 되돌린다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   const it = item('lb');
   $('lb').querySelector('.ch-reset').click();
   dragTo(spot(it, '핵'), spot(it, '핵'));
-  const r = ClassHTML.audit();
+  const r = Exploragram.audit();
   const part = r.errors.filter((e) => e.code === 'part').map((e) => e.msg);
   eq(part.length, 2, JSON.stringify(part));
   assert(part.some((m) => m.includes('#nopos') && m.includes('자리가 없어요')), 'no position');

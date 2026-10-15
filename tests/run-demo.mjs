@@ -91,8 +91,8 @@ async function runViewport(width, height) {
       const start = Date.now();
       while (loadVersion === previous && Date.now() - start < 15000) await sleep(50);
       check(loadVersion > previous, `Page did not load: ${method}`);
-      await until('!!window.ClassHTML');
-      await evaluate('ClassHTML.ready');
+      await until('!!window.Exploragram');
+      await evaluate('Exploragram.ready');
     };
     const pass = (message) => { run.checks.push(message); console.log(`PASS ${name} ${message}`); };
     const key = async (value, code, virtualKey) => {
@@ -122,7 +122,7 @@ async function runViewport(width, height) {
       await mouse('mousePressed', p, true);
       await mouse('mouseReleased', p);
     };
-    const stagePoint = async (x, y) => evaluate(`(() => { const r=ClassHTML._internal.Stage.deck.getBoundingClientRect();
+    const stagePoint = async (x, y) => evaluate(`(() => { const r=Exploragram._internal.Stage.deck.getBoundingClientRect();
       return {x:r.left+${x}*r.width/1280,y:r.top+${y}*r.height/720}; })()`);
     const drag = async (start, end, pointerType = 'pen') => {
       await mouse('mouseMoved', start, false, pointerType);
@@ -157,7 +157,7 @@ async function runViewport(width, height) {
       writeFileSync(path, Buffer.from(image.data, 'base64'));
       run.screenshots.push(path);
     };
-    const canonicalDoc = () => evaluate('JSON.stringify(ClassHTML._internal.InkModel.sanitizeDoc(ClassHTML._internal.Session.doc))');
+    const canonicalDoc = () => evaluate('JSON.stringify(Exploragram._internal.InkModel.sanitizeDoc(Exploragram._internal.Session.doc))');
 
     await send('Page.enable');
     await send('Runtime.enable');
@@ -168,7 +168,7 @@ async function runViewport(width, height) {
     await send('Page.bringToFront');
     const viewport = await evaluate('[innerWidth,innerHeight]');
     check(viewport[0] === width && viewport[1] === height, `Viewport mismatch: ${viewport}`);
-    run.audit = await evaluate('ClassHTML.audit()');
+    run.audit = await evaluate('Exploragram.audit()');
     check(run.audit.errors.length === 0, `Audit errors: ${JSON.stringify(run.audit.errors)}`);
     pass(`audit 오류 0 · 경고 ${run.audit.warnings.length}`);
     await key('Escape', 'Escape', 27);
@@ -176,40 +176,40 @@ async function runViewport(width, height) {
 
     await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 2 });
     await touchDrag(await stagePoint(900, 500), await stagePoint(300, 500));
-    check(await evaluate("ClassHTML._internal.Nav.state.slide===1 && ClassHTML._internal.Tools.current==='hand' && ClassHTML._internal.Ink.page.length===0"), 'Hand touch swipe did not navigate');
+    check(await evaluate("Exploragram._internal.Nav.state.slide===1 && Exploragram._internal.Tools.current==='hand' && Exploragram._internal.Ink.page.length===0"), 'Hand touch swipe did not navigate');
     await touchDrag(await stagePoint(300, 500), await stagePoint(900, 500));
-    check(await evaluate('ClassHTML._internal.Nav.state.slide===0'), 'Reverse touch swipe did not restore cover');
+    check(await evaluate('Exploragram._internal.Nav.state.slide===0'), 'Reverse touch swipe did not restore cover');
     await send('Emulation.setTouchEmulationEnabled', { enabled: false });
     pass('실제 touch: 손 모드 좌우 스와이프 · 판서 없음');
 
     await click(toolbar('pen'));
     await draw(200, 490, 540, 520);
-    check(await evaluate('ClassHTML._internal.Ink.page.length === 1'), 'Cover pen stroke not recorded');
+    check(await evaluate('Exploragram._internal.Ink.page.length === 1'), 'Cover pen stroke not recorded');
     await click(toolbar('next'));
     await click(toolbar('prev'));
-    check(await evaluate("ClassHTML._internal.Nav.state.slide===0 && ClassHTML._internal.Tools.current==='pen' && ClassHTML._internal.Ink.page.length===1"), 'Pen/navigation/cover preservation failed');
+    check(await evaluate("Exploragram._internal.Nav.state.slide===0 && Exploragram._internal.Tools.current==='pen' && Exploragram._internal.Ink.page.length===1"), 'Pen/navigation/cover preservation failed');
     pass('펜 유지 · 앞 장 판서 보존');
 
     await key('3', 'Digit3', 51);
     await key('Enter', 'Enter', 13);
-    check(await evaluate('ClassHTML._internal.Nav.state.slide===2'), 'Numeric navigation failed');
+    check(await evaluate('Exploragram._internal.Nav.state.slide===2'), 'Numeric navigation failed');
     await sleep(350);
     await click('#counter-btn');
-    check(await evaluate("document.querySelector('#counter').textContent==='1' && ClassHTML._internal.Ink.page.length===0"), 'Button tap must increment counter without ink');
+    check(await evaluate("document.querySelector('#counter').textContent==='1' && Exploragram._internal.Ink.page.length===0"), 'Button tap must increment counter without ink');
     const counter = await center('#counter-btn');
     await drag(counter, { x: counter.x + width * .08, y: counter.y + height * .04 });
-    check(await evaluate("document.querySelector('#counter').textContent==='1' && ClassHTML._internal.Ink.page.length===1"), 'Button drag must create ink without incrementing counter');
+    check(await evaluate("document.querySelector('#counter').textContent==='1' && Exploragram._internal.Ink.page.length===1"), 'Button drag must create ink without incrementing counter');
     pass('실제 펜 포인터: 톡 버튼 실행 · 드래그는 판서');
 
     const slider = await center('#demo-range');
     await drag({ x: slider.x - slider.width * .1, y: slider.y }, { x: slider.x + slider.width * .35, y: slider.y }, 'mouse');
-    const range = await evaluate("({value:document.querySelector('#demo-range').value,out:document.querySelector('#demo-out').textContent,ink:ClassHTML._internal.Ink.page.length,tool:ClassHTML._internal.Tools.current})");
+    const range = await evaluate("({value:document.querySelector('#demo-range').value,out:document.querySelector('#demo-out').textContent,ink:Exploragram._internal.Ink.page.length,tool:Exploragram._internal.Tools.current})");
     check(range.value !== '40' && range.value === range.out && range.ink === 1 && range.tool === 'pen', `Slider failed: ${JSON.stringify(range)}`);
     pass(`펜 상태 실제 mouse 슬라이더 ${range.value} · 추가 판서 없음`);
 
     await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 2 });
     await touchDrag({ x: slider.x + slider.width * .35, y: slider.y }, { x: slider.x - slider.width * .3, y: slider.y });
-    const touchRange = await evaluate("({value:document.querySelector('#demo-range').value,out:document.querySelector('#demo-out').textContent,ink:ClassHTML._internal.Ink.page.length})");
+    const touchRange = await evaluate("({value:document.querySelector('#demo-range').value,out:document.querySelector('#demo-out').textContent,ink:Exploragram._internal.Ink.page.length})");
     check(touchRange.value !== range.value && touchRange.value === touchRange.out && touchRange.ink === 1, `Touch slider failed: ${JSON.stringify(touchRange)}`);
     pass(`펜 상태 실제 touch 슬라이더 ${touchRange.value} · 추가 판서 없음`);
     const first = await stagePoint(220, 560);
@@ -221,42 +221,42 @@ async function runViewport(width, height) {
     await touch('touchMove', [{ ...firstMoved, id: 1 }, { ...secondMoved, id: 2 }]);
     await touch('touchEnd', [{ ...secondMoved, id: 2 }]);
     await touch('touchEnd', []);
-    check(await evaluate("ClassHTML._internal.Ink.page.length===2 && ClassHTML._internal.Tools.current==='pen' && ClassHTML._internal.Nav.state.slide===2 && ClassHTML._internal.Ink.page.at(-1).p.every((v,i)=>i%2===0||Math.abs(v-560)<1)"), 'Touch first-contact ink/second-contact suppression failed');
+    check(await evaluate("Exploragram._internal.Ink.page.length===2 && Exploragram._internal.Tools.current==='pen' && Exploragram._internal.Nav.state.slide===2 && Exploragram._internal.Ink.page.at(-1).p.every((v,i)=>i%2===0||Math.abs(v-560)<1)"), 'Touch first-contact ink/second-contact suppression failed');
     await send('Emulation.setTouchEmulationEnabled', { enabled: false });
     pass('실제 multi-touch: 첫 접촉만 판서 · 두 번째 접촉 무시 · 펜/현재 장 유지');
 
     await click(toolbar('pen'));
     await key('c', 'KeyC', 67);
-    check(await evaluate('ClassHTML._internal.Board.active'), 'C did not open board');
+    check(await evaluate('Exploragram._internal.Board.active'), 'C did not open board');
     await click(toolbar('boardAdd'));
     await click(toolbar('bg'));
     await click('.ch-bg[data-bg="green"]');
     await draw(200, 360, 610, 420);
-    check(await evaluate("ClassHTML._internal.Session.doc.boards.length===2 && ClassHTML._internal.Session.doc.board===1 && ClassHTML._internal.Ink.page.length===1 && ClassHTML._internal.Tools.penColor==='#FFFFFF'"), 'Green board/page/white pen failed');
+    check(await evaluate("Exploragram._internal.Session.doc.boards.length===2 && Exploragram._internal.Session.doc.board===1 && Exploragram._internal.Ink.page.length===1 && Exploragram._internal.Tools.penColor==='#FFFFFF'"), 'Green board/page/white pen failed');
     await screenshot('green-board');
     await key('c', 'KeyC', 67);
-    check(await evaluate('!ClassHTML._internal.Board.active && ClassHTML._internal.Nav.state.slide===2'), 'C did not restore slide');
+    check(await evaluate('!Exploragram._internal.Board.active && Exploragram._internal.Nav.state.slide===2'), 'C did not restore slide');
     pass('실제 C 토글 · 칠판 추가 · 초록 바탕 흰 펜 · 원래 장 복원');
 
     // 실제 네이티브 prompt/confirm은 CDP dialog handler가 이 독립 프로필 안에서만 수락한다.
     dialogReply = { accept: true, promptText: '2반' };
     await menu('반 추가');
-    await until("ClassHTML._internal.Session.current==='2반'");
-    check(await evaluate('ClassHTML._internal.Ink.page.length===0 && ClassHTML._internal.Session.doc.boards.length===1'), 'New class must have separate ink and board');
+    await until("Exploragram._internal.Session.current==='2반'");
+    check(await evaluate('Exploragram._internal.Ink.page.length===0 && Exploragram._internal.Session.doc.boards.length===1'), 'New class must have separate ink and board');
     await click(toolbar('class'));
     const baseIndex = await evaluate("Array.from(document.querySelectorAll('.ch-class')).findIndex(b=>b.textContent==='기본')");
     await click(`.ch-class:nth-child(${baseIndex + 1})`);
-    await until("ClassHTML._internal.Session.current==='기본'");
-    check(await evaluate('ClassHTML._internal.Ink.page.length===2 && ClassHTML._internal.Session.doc.boards.length===2'), 'Original class ink/board missing');
+    await until("Exploragram._internal.Session.current==='기본'");
+    check(await evaluate('Exploragram._internal.Ink.page.length===2 && Exploragram._internal.Session.doc.boards.length===2'), 'Original class ink/board missing');
     pass('반 추가/전환 · 반별 슬라이드/칠판 분리');
 
     await click(toolbar('dock'));
-    await evaluate('ClassHTML._internal.Session.flush()');
+    await evaluate('Exploragram._internal.Session.flush()');
     const expected = await canonicalDoc();
     await load('Page.reload', { ignoreCache: true });
     await key('Escape', 'Escape', 27);
     check(await canonicalDoc() === expected, 'Stored slide/board ink changed after reload');
-    check(await evaluate("ClassHTML._internal.Session.current==='기본' && ClassHTML._internal.Session.classes.includes('2반') && ClassHTML._internal.Toolbar.prefs.dock==='left'"), 'Class/toolbar preferences missing after reload');
+    check(await evaluate("Exploragram._internal.Session.current==='기본' && Exploragram._internal.Session.classes.includes('2반') && Exploragram._internal.Toolbar.prefs.dock==='left'"), 'Class/toolbar preferences missing after reload');
     pass('reload 후 슬라이드/칠판 판서 · 반 · 툴바 위치 유지');
 
     await menu('백업 파일로 저장');
@@ -270,13 +270,13 @@ async function runViewport(width, height) {
     check(JSON.parse(readFileSync(backup, 'utf8')).kind === 'ink-backup', 'Downloaded file is not an ink backup');
     run.backup = backup;
     await menu('판서 모두 지우기');
-    await until('Object.values(ClassHTML._internal.Session.doc.slides).every(p=>!p.length) && ClassHTML._internal.Session.doc.boards.length===1');
+    await until('Object.values(Exploragram._internal.Session.doc.slides).every(p=>!p.length) && Exploragram._internal.Session.doc.boards.length===1');
     await click(toolbar('class'));
     const root = await send('DOM.getDocument');
     const input = await send('DOM.querySelector', { nodeId: root.root.nodeId, selector: '.ch-pop input[type="file"]' });
     check(input.nodeId, 'Backup file input is missing');
     await send('DOM.setFileInputFiles', { nodeId: input.nodeId, files: [backup] });
-    await until('ClassHTML._internal.Session.doc.boards.length===2 && !!ClassHTML._internal.Session.doc.slides.cover?.length');
+    await until('Exploragram._internal.Session.doc.boards.length===2 && !!Exploragram._internal.Session.doc.slides.cover?.length');
     check(await canonicalDoc() === expected, 'Backup import did not restore slide/board ink');
     pass('실제 JSON 백업 다운로드 → 반 판서 지우기 → 파일 불러오기 왕복');
     check(run.consoleErrors.length === 0, `Browser console errors: ${run.consoleErrors.join('\n')}`);

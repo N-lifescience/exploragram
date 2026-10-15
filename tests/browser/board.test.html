@@ -13,7 +13,7 @@
 <section class="slide" id="b2"><h2>둘</h2></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const btn = (name) => document.querySelector(`.ch-toolbar [data-name="${name}"]`);
 const key = (k, opts, target) => (target || document).dispatchEvent(new KeyboardEvent('keydown', Object.assign({ key: k, bubbles: true, cancelable: true }, opts || {})));
 const toggleLabel = () => btn('board').querySelector('span').textContent;
@@ -21,7 +21,7 @@ const boardLabel = () => document.querySelector('.ch-board-label').textContent;
 const board = () => I().Session.doc.boards[I().Session.doc.board];
 const reset = async () => {
   I().Board.close();
-  ClassHTML.go(0);
+  Exploragram.go(0);
   I().Tools.penColor = '#1F2328';
   I().Tools.set('hand');
   await I().Session.clearCurrent();
@@ -63,7 +63,7 @@ test('슬라이드 | 칠판 두 칸: 지금 보는 쪽에 불이 들어오고 �
 
 test('칠판 모드 중 보던 슬라이드와 단계·주소를 그대로 보존', async () => {
   await reset();
-  ClassHTML.next();
+  Exploragram.next();
   eq(I().Nav.state.shown, 1);
   const before = { ...I().Nav.state };
   const hash = location.hash;
@@ -264,7 +264,7 @@ test('C는 토글하고 반복·조합·수정키·입력칸에서는 토글하�
 test('직접 쪽 이동·Home·End·숫자 Enter는 칠판을 닫고 슬라이드 이동', async () => {
   await reset();
   I().Board.open();
-  ClassHTML.go(1);
+  Exploragram.go(1);
   assert(!I().Board.active, 'go closes');
   eq(I().Nav.state.slide, 1);
   I().Board.open();

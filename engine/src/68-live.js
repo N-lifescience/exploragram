@@ -681,7 +681,7 @@ const Live = {
     emit('live-role');   // 투표는 학생 화면에서 '세기'가 아니라 '고르기'가 된다
     Nav.override = { next: () => this.move(1), prev: () => this.move(-1), close() {} };
     Nav.revealTo = () => false;   // 정답 상자 ✓ 등이 교사보다 먼저 단계를 열지 않게
-    // 차례 장의 단추·ClassHTML.go도 교사가 연 장으로만
+    // 차례 장의 단추·Exploragram.go도 교사가 연 장으로만
     Nav.go = (index) => {
       const i = Math.round(Number(index));
       if (this.teacher && this.teacher.reach[i]) this.showSlide(i);

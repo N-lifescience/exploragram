@@ -63,7 +63,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const it = (id) => I().Plot.list.find((p) => p.fig.id === id);
 const grip = (id, label) => it(id).drags.find((g) => g.d.label === label);
@@ -92,7 +92,7 @@ const key = (el, k) => {
 };
 
 test('처음 자리는 data-value(변수의 초깃값)에서 시작하고, 계산 상자가 무게중심을 계산한다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   const s = scope('cen');
   eq([s.ax, s.ay, s.bx, s.by, s.cx, s.cy], [-3, -2, 4, -1, 1, 4]);
   eq([text('gx'), text('gy')], ['0.67', '0.33']);
@@ -191,7 +191,7 @@ test('그래프 끝에서는 점 이름을 안쪽으로 돌린다', () => {
   assert(!c.el.classList.contains('is-left') && !c.el.classList.contains('is-low'), c.el.className);
 });
 test('눈금 없는 점은 범위의 20분의 1씩, 세로 직선이 되면 세로선으로 바꿔 그린다', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   const q = grip('lp', 'Q');
   eq(text('eqn'), 'y = 1.00x + 1.00');
   key(q.el, 'ArrowLeft');
@@ -210,7 +210,7 @@ test('눈금 없는 점은 범위의 20분의 1씩, 세로 직선이 되면 세�
   near(scope('ln').qy, 2.61, 0.03, 'free y');
 });
 test('줄여 보인 장(Fit)에서도 점이 손가락을 따라온다', async () => {
-  ClassHTML.go(2);
+  Exploragram.go(2);
   await wait(50);
   const k = parseFloat($('fz').style.zoom) || 1;
   assert(k < 1, `zoom ${k}`);
@@ -223,7 +223,7 @@ test('줄여 보인 장(Fit)에서도 점이 손가락을 따라온다', async (
   assert(Math.abs((b[0] - a[0]) - 100) < 3 && Math.abs((b[1] - a[1]) + 60) < 3, `moved ${b[0] - a[0]}, ${b[1] - a[1]}`);
 });
 test('편집 모드에서도 점을 끌어 상태를 바꿀 수 있고, 저장할 원본에는 손잡이가 없다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   I().Editor.toggle(true);
   pull(grip('tri', 'A'), at(it('tri'), 0, 0));
   eq([scope('cen').ax, scope('cen').ay], [0, 0]);
@@ -232,7 +232,7 @@ test('편집 모드에서도 점을 끌어 상태를 바꿀 수 있고, 저장�
   pull(grip('tri', 'A'), at(it('tri'), -3, -2));
 });
 test('자동 점검: 잘못 쓴 변수 이름·범위·눈금은 part 오류로 알린다', () => {
-  const report = ClassHTML.audit();
+  const report = Exploragram.audit();
   const msgs = report.errors.filter((e) => e.code === 'part' && e.slide === 3).map((e) => e.msg);
   const has = (re, what) => assert(msgs.some((m) => re.test(m)), `${what}: ${msgs.join(' | ')}`);
   has(/data-drag="a x, ay"/, '이름 꼴');
@@ -250,7 +250,7 @@ test('자동 점검: 잘못 쓴 변수 이름·범위·눈금은 part 오류로 
   eq([scope('bp').ox, scope('bp').oy], [5, 1]);
 });
 test('자동 점검: 점을 범위 끝으로 옮겨 넘침을 재고, 점이 있는 장을 활동 장으로 센다', () => {
-  const report = ClassHTML.audit();
+  const report = Exploragram.audit();
   const over = report.errors.filter((e) => e.slide === 4 && e.code === 'slide-overflow');
   assert(over.length === 1 && /점 W을\(를\) 오른쪽 위 끝 \(5, 5\)로 옮겼을 때/.test(over[0].msg), JSON.stringify(over));
   eq([scope('ovc').wx, scope('ovc').wy], [1, 1], '점검 뒤 제자리');

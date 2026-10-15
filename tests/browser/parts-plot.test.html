@@ -35,7 +35,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const it = (id) => I().Plot.list.find((p) => p.fig.id === id);
 const near = (a, b, tol) => assert(Math.abs(a - b) <= tol, `${a} vs ${b}`);
 const set = (v) => { const r = document.getElementById('v'); r.value = String(v); r.dispatchEvent(new Event('input', { bubbles: true })); };
@@ -47,7 +47,7 @@ test('보이지 않는 장에 있어도 실제 크기로 그린다', () => {
   eq(it('inv').h, 240);
 });
 test('눈금은 1·2·5 간격, 글자는 20px', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   const ys = Array.from(it('pl').svg.querySelectorAll('.ch-plot-ticks text')).map((t) => t.textContent);
   assert(ys.includes('0') && ys.includes('10'), ys.join(','));
   assert(ys.includes('0.9') || ys.includes('0.95') || ys.includes('1'), 'x ticks');
@@ -84,7 +84,7 @@ test('계산 상자 값이 바뀌면 표시선과 점이 따라 움직인다', (
   eq(it('pl').marks.querySelector('text').textContent, '지금');
 });
 test('눈금 간격·천 단위 쉼표, 긴 눈금 글자에 맞춘 왼쪽 여백(세로축 이름과 겹치지 않음)', () => {
-  ClassHTML.go(2);
+  Exploragram.go(2);
   const mk = it('mk');
   const ys = Array.from(mk.svg.querySelectorAll('.ch-plot-ticks text')).map((t) => t.textContent.replace(/\u2060/g, ''));
   ['2,000', '2,500', '3,000', '4,500'].forEach((t) => assert(ys.includes(t), ys.join(' ')));

@@ -17,46 +17,46 @@
 const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 
 test('점검 결과 형식과 정보', () => {
-  const r = ClassHTML.audit();
+  const r = Exploragram.audit();
   eq(r.ok, false);
   eq(r.info.slides, 4);
   eq(r.info.aiAdded, 2);
 });
 test('중복 id는 오류', () => {
-  assert(ClassHTML.audit().errors.some((e) => e.code === 'dup-id'), 'dup');
+  assert(Exploragram.audit().errors.some((e) => e.code === 'dup-id'), 'dup');
 });
 test('슬라이드보다 큰 내용은 오류', () => {
-  assert(ClassHTML.audit().errors.some((e) => e.slide === 1 && (e.code === 'slide-overflow' || e.code === 'out')), 'overflow');
+  assert(Exploragram.audit().errors.some((e) => e.slide === 1 && (e.code === 'slide-overflow' || e.code === 'out')), 'overflow');
 });
 test('20px보다 작은 글자는 오류', () => {
-  assert(ClassHTML.audit().errors.some((e) => e.slide === 2 && e.code === 'tiny-text'), 'tiny');
+  assert(Exploragram.audit().errors.some((e) => e.slide === 2 && e.code === 'tiny-text'), 'tiny');
 });
 test('19px 글자, 줄인 SVG 안 글자(30 × 0.5 = 15px)도 오류', () => {
-  const errs = ClassHTML.audit().errors.filter((e) => e.slide === 2 && e.code === 'tiny-text');
+  const errs = Exploragram.audit().errors.filter((e) => e.slide === 2 && e.code === 'tiny-text');
   assert(errs.some((e) => e.msg.includes('#p19')), '19px');
   assert(errs.some((e) => e.msg.includes('줄어든 글자') && e.msg.includes('15px')), JSON.stringify(errs));
 });
 test('빈 그림 자리는 경고', () => {
-  assert(ClassHTML.audit().warnings.some((w) => w.code === 'empty-image' && w.slide === 2), 'empty image');
+  assert(Exploragram.audit().warnings.some((w) => w.code === 'empty-image' && w.slide === 2), 'empty image');
 });
 test('정상 슬라이드에는 오류가 없다', () => {
-  assert(!ClassHTML.audit().errors.some((e) => e.slide === 0), 'slide 0 clean');
+  assert(!Exploragram.audit().errors.some((e) => e.slide === 0), 'slide 0 clean');
 });
 test('점검 뒤에는 보던 장과 단계로 돌아오고, 수업 훅은 불리지 않으며, 등장 효과가 다시 돌지 않는다', () => {
-  ClassHTML.go(2);
+  Exploragram.go(2);
   let calls = 0;
-  ClassHTML.onShow(() => { calls += 1; });
-  ClassHTML.onHide(() => { calls += 1; });
-  const slide = ClassHTML._internal.Stage.slides[2];
+  Exploragram.onShow(() => { calls += 1; });
+  Exploragram.onHide(() => { calls += 1; });
+  const slide = Exploragram._internal.Stage.slides[2];
   for (const a of slide.getAnimations()) a.finish();
-  ClassHTML.audit();
-  eq(ClassHTML._internal.Nav.state, { slide: 2, shown: 0 });
+  Exploragram.audit();
+  eq(Exploragram._internal.Nav.state, { slide: 2, shown: 0 });
   eq(calls, 0);
   assert(slide.classList.contains('is-active'), 'still active');
   eq(slide.getAnimations().filter((a) => a.playState === 'running').length, 0);
 });
 test('어절로 나뉜 작은 글자는 덩어리 하나로 한 번만 알린다', () => {
-  const tiny = ClassHTML.audit().errors.filter((e) => e.code === 'tiny-text' && e.slide === 2);
+  const tiny = Exploragram.audit().errors.filter((e) => e.code === 'tiny-text' && e.slide === 2);
   assert(tiny.every((e) => !e.msg.includes('.w>')), 'not per word');
   eq(tiny.filter((e) => e.msg.includes('#tinydiv')).length, 1);
 });
@@ -70,7 +70,7 @@ test('D 키로 점검 창, AI 추가 표시는 점선, Esc로 닫기', () => {
   assert(!document.documentElement.classList.contains('ch-audit-on'), 'ai outline off');
 });
 test('인쇄: 판서 포함이 켜지면 판서 그림과 칠판 쪽이 붙었다가 사라진다', () => {
-  const { Session, Settings } = ClassHTML._internal;
+  const { Session, Settings } = Exploragram._internal;
   Settings.set('printInk', true);
   Session.doc.slides.ok1 = [{ t: 'pen', c: '#D7263D', w: 6, p: [10, 10, 200, 200] }];
   Session.doc.boards[0].strokes.push({ t: 'pen', c: '#1F2328', w: 6, p: [10, 10, 100, 100] });
@@ -81,23 +81,23 @@ test('인쇄: 판서 포함이 켜지면 판서 그림과 칠판 쪽이 붙었�
   eq(document.querySelectorAll('.ch-print-ink, .ch-print-board').length, 0);
 });
 test('인쇄: 판서 포함이 꺼져 있으면 아무것도 붙이지 않는다', () => {
-  ClassHTML._internal.Settings.set('printInk', false);
+  Exploragram._internal.Settings.set('printInk', false);
   window.dispatchEvent(new Event('beforeprint'));
   eq(document.querySelectorAll('.ch-print-ink, .ch-print-board').length, 0);
   window.dispatchEvent(new Event('afterprint'));
 });
 
 test('점검은 단계 DOM과 훅·칠판·판서 입력 상태를 보존한다', () => {
-  const { Board, Nav, Ink, on } = ClassHTML._internal;
-  ClassHTML.go(2);
-  ClassHTML.next();
+  const { Board, Nav, Ink, on } = Exploragram._internal;
+  Exploragram.go(2);
+  Exploragram.next();
   const before = [...document.querySelectorAll('.step')].map((el) => el.className);
   let shows = 0;
   on('show', () => { shows += 1; });
   Board.open();
   Board.setBg('green');
   const ref = JSON.stringify(Ink.ref);
-  ClassHTML.audit();
+  Exploragram.audit();
   eq(Nav.state, { slide: 2, shown: 1 });
   eq([...document.querySelectorAll('.step')].map((el) => el.className), before);
   eq(shows, 0);
@@ -120,7 +120,7 @@ test('허용한 넘침 안에서도 작은 글씨와 빈 그림을 검사한다'
   allowed.append(tiny, img);
   section.append(allowed);
   try {
-    const report = ClassHTML.audit();
+    const report = Exploragram.audit();
     assert(!report.errors.some((e) => e.slide === 0 && ['slide-overflow', 'out', 'clip'].includes(e.code)), 'allowed overflow');
     assert(report.errors.some((e) => e.slide === 0 && e.code === 'tiny-text'), 'still checks text');
     assert(report.warnings.some((e) => e.slide === 0 && e.code === 'empty-image'), 'still checks images');
@@ -137,12 +137,12 @@ test('본문 안 작은 인라인 글씨도 놓치지 않는다', () => {
   p.append(span);
   document.getElementById('ok1').append(p);
   try {
-    assert(ClassHTML.audit().errors.some((e) => e.slide === 0 && e.code === 'tiny-text'), 'small inline');
+    assert(Exploragram.audit().errors.some((e) => e.slide === 0 && e.code === 'tiny-text'), 'small inline');
   } finally { p.remove(); }
 });
 
 test('점검 도중 예외가 나도 표시 클래스는 복구한다', () => {
-  const { Audit } = ClassHTML._internal;
+  const { Audit } = Exploragram._internal;
   const before = [...document.querySelectorAll('.slide, .step')].map((el) => el.className);
   const original = Audit.describe;
   Audit.describe = () => { throw new Error('점검 중 예외'); };
@@ -155,7 +155,7 @@ test('점검 도중 예외가 나도 표시 클래스는 복구한다', () => {
 });
 
 test('인쇄 반복 준비가 그림을 중복시키지 않고 형광펜과 펜을 분리한다', () => {
-  const { Print, Session, Settings } = ClassHTML._internal;
+  const { Print, Session, Settings } = Exploragram._internal;
   Settings.set('printInk', true);
   Session.doc.slides.ok1.push({ t: 'hl', c: '#FFE45C', w: 24, p: [100, 100, 200, 100] });
   Print.before();
@@ -181,7 +181,7 @@ test('수식의 스크린리더용 숨긴 MathML은 잘림 오류로 보지 않�
   formula.append(hidden, document.createTextNode('x'));
   document.getElementById('ok1').append(formula);
   try {
-    assert(!ClassHTML.audit().errors.some((e) => e.slide === 0), 'valid formula');
+    assert(!Exploragram.audit().errors.some((e) => e.slide === 0), 'valid formula');
   } finally { formula.remove(); }
 });
 
@@ -195,7 +195,7 @@ test('꼬리표(20px)는 통과하고 19px 본문은 오류(어떤 글자도 20p
   document.getElementById('ok1').append(kicker, body);
   try {
     eq(getComputedStyle(kicker).fontSize, '20px');
-    const errs = ClassHTML.audit().errors.filter((item) => item.slide === 0 && item.code === 'tiny-text');
+    const errs = Exploragram.audit().errors.filter((item) => item.slide === 0 && item.code === 'tiny-text');
     eq(errs.length, 1);
     assert(errs[0].msg.includes('19px'), 'body error');
   } finally { kicker.remove(); body.remove(); }

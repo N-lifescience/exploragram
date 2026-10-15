@@ -51,7 +51,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const txt = (id) => $(id).textContent.replace(/⁠/g, '');
 const set = (id, v) => { $(id).value = String(v); $(id).dispatchEvent(new Event('input', { bubbles: true })); };
@@ -121,7 +121,7 @@ test('식 오류는 ?로 쓰고 오류 목록에 남긴다', () => {
   eq(item('osm').errors.length, 0);
 });
 test('단계 막대의 칸 번호를 계산 상자 변수로 쓴다(data-name), 글자 수', () => {
-  ClassHTML.go(2);
+  Exploragram.go(2);
   eq(txt('kOut'), '0');
   const st = I().Stepper.all.find((s) => s.el.id === 'rk');
   st.set(2, 'input');
@@ -134,7 +134,7 @@ test('단계 막대의 칸 번호를 계산 상자 변수로 쓴다(data-name), 
   eq(txt('tl'), '6 / 200자');
 });
 test('펜을 든 채로 슬라이더를 움직여도 판서가 생기지 않는다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   I().Tools.set('pen');
   I().Ink.lastUp = -1e9;
   const r = $('v').getBoundingClientRect();

@@ -36,7 +36,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const item = (id) => I().MapReveal.list.find((m) => m.fig.id === id);
 const open = (id) => document.getElementById(id).classList.contains('is-open');
 const off = (id) => document.getElementById(id).classList.contains('ch-off');
@@ -83,13 +83,13 @@ test('빗금 무늬 id는 지도마다 다르고, 근사 꼬리표 글을 바꿀
   const ids = I().MapReveal.list.map((m) => m.fig.querySelector('pattern').id);
   eq(new Set(ids).size, ids.length);
   eq(item('m2').fig.querySelector('.ch-approx').textContent, '근사 영역');
-  eq(ClassHTML.audit().errors.filter((e) => e.code === 'dup-id').length, 0);
+  eq(Exploragram.audit().errors.filter((e) => e.code === 'dup-id').length, 0);
 });
 test('지도가 둘인 장에서 data-for 없는 설명은 어느 막대에도 묶이지 않는다', () => {
   assert(I().Stepper.orphans.includes(document.getElementById('orphan')), 'orphan');
 });
 test('인쇄 전에는 모든 땅이 열린다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   const m = item('m1');
   eq(m.st.pos, 0);
   window.dispatchEvent(new Event('beforeprint'));

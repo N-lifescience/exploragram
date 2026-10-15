@@ -41,7 +41,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const st = (id) => I().Stepper.all.find((s) => s.el.id === id);
 const off = (id) => document.getElementById(id).classList.contains('ch-off');
 const shown = (id) => document.getElementById(id).classList.contains('is-shown');
@@ -68,7 +68,7 @@ test('첫 칸이 시작이 아니면 붙이고, <br>은 줄바꿈', () => {
   eq(st('sw').stops[1], '7월 혁명\n1830');
 });
 test('슬라이더를 움직이면 칸에 맞게 보이고 숨는다', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   const s = st('r1');
   let got = null;
   s.el.addEventListener('ch-stepper', (e) => { got = e.detail; }, { once: true });
@@ -83,7 +83,7 @@ test('슬라이더를 움직이면 칸에 맞게 보이고 숨는다', () => {
   eq(s.input.style.getPropertyValue('--p'), '100%');
 });
 test('→ 는 막대를 먼저 한 칸씩 열고 그다음 단계, 그다음 장', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   const s = st('r1');
   eq(s.pos, 0);
   key('ArrowRight'); eq(s.pos, 1);
@@ -113,13 +113,13 @@ test('← 는 뒤에서부터 닫고, 이전 장으로 오면 막대는 끝 칸'
   key('ArrowLeft'); eq(st('r1').pos, 2);
 });
 test('다음 장이나 쪽 이동으로 들어오면 0단계', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   key('ArrowRight');
   eq(slide(), 1); eq(st('r1').pos, 0);
   assert(st('r1').el.classList.contains('is-veiled'), 'veiled again');
 });
 test('비교 전환: 처음엔 아무것도 안 눌림, 누르면 그 칸', () => {
-  ClassHTML.go(3);
+  Exploragram.go(3);
   const s = st('sw');
   eq(s.buttons.length, 2);
   assert(s.buttons.every((b) => b.getAttribute('aria-pressed') === 'false'), 'none pressed');
@@ -132,7 +132,7 @@ test('비교 전환: 처음엔 아무것도 안 눌림, 누르면 그 칸', () =
   assert(s.buttons[0].getBoundingClientRect().height >= 56 * I().Stage.scale - 0.5, 'button 56px');
 });
 test('펜을 든 채로 비교 전환 단추를 톡 누르면 작동한다', () => {
-  ClassHTML.go(3);
+  Exploragram.go(3);
   I().Tools.set('pen');
   const b = st('sw').buttons[0];
   const r = b.getBoundingClientRect();
@@ -144,7 +144,7 @@ test('펜을 든 채로 비교 전환 단추를 톡 누르면 작동한다', () 
   I().Tools.set('hand');
 });
 test('펜을 든 채로 슬라이더를 끌면 판서가 아니라 막대가 움직인다', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   I().Tools.set('pen');
   const s = st('r1');
   const r = s.input.getBoundingClientRect();
@@ -158,7 +158,7 @@ test('펜을 든 채로 슬라이더를 끌면 판서가 아니라 막대가 움
   I().Tools.set('hand');
 });
 test('두 낱말 눈금 이름도 겹치지 않는다(어절 span은 제자리), 비교 전환 안의 단계 막대도 제 막대를 가진다', () => {
-  ClassHTML.go(3);
+  Exploragram.go(3);
   st('sw').set(1, 'input');
   const s = st('two');
   assert(s.input.isConnected && s.labels[0].isConnected, 'nested stepper keeps its bar');
@@ -170,7 +170,7 @@ test('두 낱말 눈금 이름도 겹치지 않는다(어절 span은 제자리),
   assert(lines[1].getBoundingClientRect().top > lines[0].getBoundingClientRect().top, 'br makes a new line');
 });
 test('grid로 배치한 단계 막대는 막대를 바깥 뒤에 두고, 가림막은 내용이 숨어도 높이를 지킨다', () => {
-  ClassHTML.go(3);
+  Exploragram.go(3);
   const s = st('gridr');
   eq(s.el.nextElementSibling, s.input.parentElement);
   assert(document.getElementById('gv').getBoundingClientRect().height >= 160 * I().Stage.scale - 1, 'veil min height');
@@ -178,13 +178,13 @@ test('grid로 배치한 단계 막대는 막대를 바깥 뒤에 두고, 가림�
 test('눈금이 8개 넘으면 지금 칸과 양 끝만', () => {
   const s = st('dense');
   assert(s.labels[0].parentElement.classList.contains('is-dense'), 'dense');
-  ClassHTML.go(3);
+  Exploragram.go(3);
   slideInput(s, 4);
   const vis = s.labels.map((l) => getComputedStyle(l).visibility);
   eq(vis[0], 'visible'); eq(vis[4], 'visible'); eq(vis[8], 'visible'); eq(vis[2], 'hidden');
 });
 test('인쇄 전에는 모두 끝 칸, 인쇄 뒤에는 되돌린다', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   const before = I().Stepper.all.map((s) => s.pos);
   window.dispatchEvent(new Event('beforeprint'));
   assert(I().Stepper.all.every((s) => s.pos === s.max), 'all max');

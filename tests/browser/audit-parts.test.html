@@ -41,14 +41,14 @@
 <section class="slide" id="a9"><h2>설명만</h2></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 let report;
 const errs = (code, slide) => report.errors.filter((e) => e.code === code && (slide == null || e.slide === slide));
 
 test('점검을 돌려도 단계 막대는 보던 칸 그대로', () => {
   const sw = I().Stepper.all.find((s) => s.el.id === 'sw');
   sw.set(1, 'input');
-  report = ClassHTML.audit();
+  report = Exploragram.audit();
   eq(sw.pos, 1);
 });
 test('칸마다 다시 재서 가운데 칸의 넘침도 잡는다(한 번만)', () => {

@@ -30,7 +30,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const q = (id) => I().Quiz.list.find((x) => x.box.id === id);
 const $ = (id) => document.getElementById(id);
 const has = (id, c) => $(id).classList.contains(c);
@@ -59,7 +59,7 @@ test('맞는 보기: 초록과 이유, 조금 뒤 다음 단계', async () => {
   assert(has('after1', 'is-shown'), 'next step');
 });
 test('펜을 든 채로 보기를 톡 누르면 작동한다(span 보기도)', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   I().Tools.set('pen');
   const r = $('m1').getBoundingClientRect();
   const o = { clientX: r.left + 20, clientY: r.top + 10 };

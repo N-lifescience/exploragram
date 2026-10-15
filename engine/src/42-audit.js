@@ -1,4 +1,4 @@
-// D 또는 ?audit로 열며, ClassHTML.audit()은 화면 상태를 보존하고 보고서만 반환한다.
+// D 또는 ?audit로 열며, Exploragram.audit()은 화면 상태를 보존하고 보고서만 반환한다.
 const Audit = {
   panel: null,
   badge: null,     // 툴바의 「점검 N」 단추(고칠 곳이 있을 때만)

@@ -32,7 +32,7 @@ test('T로 목차를 열고 버튼으로 이동하면 닫힌다', () => {
   key('t');
   assert(visible($('.ch-toc')), 'open (visible)');
   document.querySelectorAll('.ch-toc button')[1].click();
-  eq(ClassHTML._internal.Nav.state.slide, 1);
+  eq(Exploragram._internal.Nav.state.slide, 1);
   assert(!visible($('.ch-toc')), 'closed');
   const b1 = document.querySelectorAll('.ch-toc button')[1];
   assert(b1.classList.contains('is-current'), 'current moved');
@@ -52,16 +52,16 @@ test('한글 입력 상태(key가 Process)여도 키 자리로 알아듣는다',
 });
 test('목차 버튼에서 Enter를 눌러도 넘기기로 가로채지 않는다', () => {
   key('t');
-  const before = ClassHTML._internal.Nav.state.slide;
+  const before = Exploragram._internal.Nav.state.slide;
   const ev = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
   document.querySelectorAll('.ch-toc button')[2].dispatchEvent(ev);
   eq(ev.defaultPrevented, false);
-  eq(ClassHTML._internal.Nav.state.slide, before);
+  eq(Exploragram._internal.Nav.state.slide, before);
   key('Escape');
 });
 test('목차와 도움말은 동시에 열리지 않고, 닫을 때 panels-close를 알린다', () => {
   let closes = 0;
-  ClassHTML._internal.on('panels-close', () => { closes += 1; });
+  Exploragram._internal.on('panels-close', () => { closes += 1; });
   key('t');
   key('?');
   assert(visible($('.ch-help')) && !visible($('.ch-toc')), 'only help open');
@@ -92,7 +92,7 @@ test('키를 누르고 있어도(반복 입력) 깜박이지 않는다', () => {
   eq($('.ch-shade').dataset.mode, '');
 });
 test('목차가 열려 있을 때 화면 아무 데나 누르면 닫히고, 그 누름은 아래로 가지 않는다', () => {
-  const I = () => ClassHTML._internal;
+  const I = () => Exploragram._internal;
   const deck = I().Stage.deck;
   key('t');
   assert($('.ch-toc').classList.contains('is-open'), 'open');

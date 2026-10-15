@@ -109,7 +109,7 @@
     return new Promise((res) => {
       f.onload = async () => {
         f.onload = null;
-        for (let i = 0; i < 100; i++) { if (f.contentWindow.ClassHTML && f.contentWindow.ClassHTML.ready) break; await sleep(100); }
+        for (let i = 0; i < 100; i++) { if (f.contentWindow.Exploragram && f.contentWindow.Exploragram.ready) break; await sleep(100); }
         await sleep(500);
         res(f.contentDocument);
       };
@@ -196,7 +196,7 @@
     await caption(3, '선생님이 넘기면 학생 화면도 따라와요');
     await press(teacher, T.querySelector('.ch-live .ch-live-x'), 300);
     // 6쪽에는 단계가 있다. 다음 장(7쪽)이 될 때까지 「다음」을 누른다.
-    const nav = teacher.contentWindow.ClassHTML._internal.Nav;
+    const nav = teacher.contentWindow.Exploragram._internal.Nav;
     for (let i = 0; i < 6 && nav.state.slide < 6; i++) await press(teacher, T.querySelector('.ch-toolbar button[data-name="next"]'), 700);
     await sleep(1300);
 

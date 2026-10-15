@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>live</title>
 <!-- 부모 페이지에는 엔진이 없다. 교사 하나와 학생 둘을 iframe으로 띄우고 로컬 전송(BroadcastChannel)으로 잇는다. -->
-<script>window.ClassHTML = { ready: Promise.resolve() };</script>
+<script>window.Exploragram = { ready: Promise.resolve() };</script>
 <script src="harness.js"></script>
 <style>iframe { width: 640px; height: 360px; border: 1px solid #ccc; }</style>
 </head>
@@ -36,9 +36,9 @@ async function until(fn, ms) {
 
 async function open(name, query) {
   const f = await frame(name, `live-deck.html?live=local${query || ''}`);
-  await until(() => f.contentWindow.ClassHTML && f.contentWindow.ClassHTML.ready);
-  await f.contentWindow.ClassHTML.ready;
-  return f.contentWindow.ClassHTML._internal;
+  await until(() => f.contentWindow.Exploragram && f.contentWindow.Exploragram.ready);
+  await f.contentWindow.Exploragram.ready;
+  return f.contentWindow.Exploragram._internal;
 }
 
 const doc = (name) => frames[name].contentDocument;
@@ -72,7 +72,7 @@ test('교사가 넘기면 장과 단계를 따라가고, 열지 않은 답은 �
   assert(!shown('a', 's2b'), '열지 않은 단계는 가림');
   A.Nav.go(3);
   await wait(100);
-  eq(A.Nav.state.slide, 1, '차례 단추·ClassHTML.go로도 교사가 안 연 장에는 못 간다');
+  eq(A.Nav.state.slide, 1, '차례 단추·Exploragram.go로도 교사가 안 연 장에는 못 간다');
 });
 
 test('단계 막대도 따라가고, 학생은 막대를 못 움직인다', async () => {

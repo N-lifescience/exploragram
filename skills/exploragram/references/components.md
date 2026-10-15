@@ -325,12 +325,12 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 ```html
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  ClassHTML.onShow((slide, i) => { /* 장이 보일 때 */ });
+  Exploragram.onShow((slide, i) => { /* 장이 보일 때 */ });
 });
 </script>
 ```
 
-- `</body>` 바로 앞에 둔다. `ClassHTML.onShow/onHide/go/next/prev/audit`를 쓴다. `ClassHTML.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
+- `</body>` 바로 앞에 둔다. `Exploragram.onShow/onHide/go/next/prev/audit`를 쓴다. `Exploragram.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
 - 설계 방법과 뼈대 코드는 `exploragram.md`. 조작한 상태를 찍어 확인할 때는 `scripts/states.mjs`.
 - 펜을 든 채로 쓰는 규칙: 누르는 요소는 `button`·`a`·`label` 또는 `data-tap`, 끄는 요소(슬라이더가 아닌 것)는 `data-no-ink`.
 - 값이 바뀌면 그림이 건너뛰지 않게 바뀌는 SVG 요소에 CSS `transition`을 준다(`exploragram.md`의 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).

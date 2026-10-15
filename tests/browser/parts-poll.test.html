@@ -16,7 +16,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const poll = (id) => I().Poll.list.find((p) => p.box.id === id);
 
@@ -97,7 +97,7 @@ test('실시간 학생 화면: 세지 않고 하나를 고른다(바꿀 수 있�
   eq(p.total.textContent, '모두 0명');
 });
 test('점검: 보기가 하나뿐인 투표는 부품 오류, 바른 투표는 넘치지 않는다', () => {
-  const r = ClassHTML.audit();
+  const r = Exploragram.audit();
   const part = r.errors.filter((e) => e.code === 'part');
   eq(part.length, 1, JSON.stringify(r.errors));
   assert(part[0].msg.includes('#one') && part[0].msg.includes('2개 이상'), part[0].msg);

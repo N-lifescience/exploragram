@@ -4,7 +4,7 @@
 > **AI에게**: 이 파일 하나가 Exploragram 지침 전체다. 선생님이 수업 PPT를 주면 이 지침대로 수업용 HTML을 만든다.
 > **반드시**: `<head>`에 아래 엔진 css·js 두 줄을 넣는다(지금 환경에서 안 열려도 그대로 둔다). 넘기기·툴바를 직접 짜지 않고, PPT 장을 통째로 그림으로 넣지 않는다(1절 기준 8·9).
 > 본문의 `references/…`는 이 파일의 해당 절을, `scripts/…`는 저장소 https://github.com/N-lifescience/exploragram 의 `skills/exploragram/scripts/`를 가리킨다.
-> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.css`·`.js` (v2.0.0)
+> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.css`·`.js` (v2.0.1)
 > 레퍼런스 완성본(`references/examples/`): https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/elem-shadow.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/eth-exploragram.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/mid-linear.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/sci-diffusion.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/soc-supply-demand.html
 
 ## 차례
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
 - 측정값과 모형값이 섞이면 모형값에만 '(모형)'을 붙이고, PPT 표의 값은 '표의 값'이라고 밝힌다.
 - 단추만 있는 익스플로라그램은 자동 점검이 활동으로 세지 않는다. 익스플로라그램을 감싼 요소에 `data-activity`를 붙이면 센다(뼈대처럼).
 - 펜 모드에서도 슬라이더와 단추는 조작된다.
-- 장이 보일 때 움직임을 시작해야 하면 `ClassHTML.onShow((slide, i) => …)`를, 넘길 때 멈춰야 하면 `ClassHTML.onHide`를 쓴다. 장을 넘겨도 직접 짠 익스플로라그램의 상태는 그대로 남는다. 다시 들어올 때 처음으로 돌리려면 `onShow`에서 값을 0으로 되돌린다.
+- 장이 보일 때 움직임을 시작해야 하면 `Exploragram.onShow((slide, i) => …)`를, 넘길 때 멈춰야 하면 `Exploragram.onHide`를 쓴다. 장을 넘겨도 직접 짠 익스플로라그램의 상태는 그대로 남는다. 다시 들어올 때 처음으로 돌리려면 `onShow`에서 값을 0으로 되돌린다.
 - 익스플로라그램이 여럿이면 장마다 `draw…` 함수를 하나씩 두고, id 앞머리(`ab-`, `vg-`)로 서로 섞이지 않게 한다.
 - SVG 화살촉(`marker`)은 그 SVG 안에 id를 따로 두고 `marker-end` 속성으로 건다. 다른 장의 SVG에 있는 marker를 가리키면 보이지 않는다.
 
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
 ]
 ```
 
-`node scripts/states.mjs 수업.html 폴더 states.json` — `slide`는 1부터 센 장 번호다(`ClassHTML.go`는 0부터). 최솟값·최댓값·경계값(팽압이 0이 되는 곳 같은)·모든 단추·'시작'으로 되돌리기를 적는다. 찍힌 그림을 직접 열어 겹침과 계산값을 본다.
+`node scripts/states.mjs 수업.html 폴더 states.json` — `slide`는 1부터 센 장 번호다(`Exploragram.go`는 0부터). 최솟값·최댓값·경계값(팽압이 0이 되는 곳 같은)·모든 단추·'시작'으로 되돌리기를 적는다. 찍힌 그림을 직접 열어 겹침과 계산값을 본다.
 
 ### 내기 전 확인
 
@@ -821,12 +821,12 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 ```html
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  ClassHTML.onShow((slide, i) => { /* 장이 보일 때 */ });
+  Exploragram.onShow((slide, i) => { /* 장이 보일 때 */ });
 });
 </script>
 ```
 
-- `</body>` 바로 앞에 둔다. `ClassHTML.onShow/onHide/go/next/prev/audit`를 쓴다. `ClassHTML.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
+- `</body>` 바로 앞에 둔다. `Exploragram.onShow/onHide/go/next/prev/audit`를 쓴다. `Exploragram.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
 - 설계 방법과 뼈대 코드는 `exploragram.md`. 조작한 상태를 찍어 확인할 때는 `scripts/states.mjs`.
 - 펜을 든 채로 쓰는 규칙: 누르는 요소는 `button`·`a`·`label` 또는 `data-tap`, 끄는 요소(슬라이더가 아닌 것)는 `data-no-ink`.
 - 값이 바뀌면 그림이 건너뛰지 않게 바뀌는 SVG 요소에 CSS `transition`을 준다(`exploragram.md`의 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).

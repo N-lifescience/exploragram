@@ -1,4 +1,4 @@
-// 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 ClassHTML.
+// 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 Exploragram.
 const STAGE_W = 1280;
 const STAGE_H = 720;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -41,7 +41,7 @@ function keyName(e) {
   return String(e.key || '').toLowerCase();
 }
 
-const ClassHTML = {
+const Exploragram = {
   version: typeof VERSION === 'string' ? VERSION : 'dev',
   onShow(fn) { on('show', fn); },
   onHide(fn) { on('hide', fn); },

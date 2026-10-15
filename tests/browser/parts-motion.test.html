@@ -36,7 +36,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const txt = (id) => $(id).textContent.replace(/⁠/g, '');
 const set = (id, v, type = 'input') => { $(id).value = String(v); $(id).dispatchEvent(new Event(type, { bubbles: true })); };
@@ -116,7 +116,7 @@ test('점검은 흘러가는 중인 그림을 끝값으로 놓고 잰다', () =>
   user();
   set('n', 12);
   eq(txt('nOut'), '0개');
-  ClassHTML.audit();
+  Exploragram.audit();
   eq(txt('nOut'), '12개');
   eq($('r').getAttribute('height'), '120');
   eq(item('tw').jobs.length, 0);
@@ -163,20 +163,20 @@ test('끝에서 누르면 처음부터, 슬라이더를 잡으면 멈춘다', as
 });
 
 test('직접 짠 슬라이더도 재생하고(data-loop는 되풀이), 장을 넘기면 멈춘다', async () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   await wait(50);
   const run = $('hp').previousElementSibling.querySelector('.ch-play-run');
   run.click();
   await wait(1400);
   eq(run.textContent, '❚❚ 멈춤', '되풀이라 계속 간다');
   assert(hpCount >= 5, `직접 짠 처리기가 input을 받는다: ${hpCount}`);
-  ClassHTML.go(0);
+  Exploragram.go(0);
   await wait(50);
   eq(run.textContent, '▶ 재생');
 });
 
 test('점검: 움직임 없는 직접 짠 익스플로라그램(static-model)과 손으로 그린 입자(use-part)를 알린다', () => {
-  const report = ClassHTML.audit();
+  const report = Exploragram.audit();
   const sm = report.warnings.find((w) => w.code === 'static-model');
   assert(sm, 'static-model');
   assert(/\(3쪽\)/.test(sm.msg) && /data-play/.test(sm.msg), sm.msg);
@@ -191,13 +191,13 @@ test('수업 스크립트에 움직임이 있으면 둘 다 알리지 않고, �
   const rafWord = 'requestAnimation' + 'Frame';
   const mine = add(`window.__motionProbe = typeof ${rafWord};`);
   try {
-    const r = ClassHTML.audit();
+    const r = Exploragram.audit();
     assert(!r.warnings.some((w) => w.code === 'static-model'), '수업 스크립트에 움직임');
     assert(!r.warnings.some((w) => w.code === 'use-part'), 'use-part도 알리지 않는다');
   } finally { mine.remove(); }
   const engine = add(`/*! exploragram engine v9.9.9 */ window.__engineProbe = typeof ${rafWord};`);
   try {
-    assert(ClassHTML.audit().warnings.some((w) => w.code === 'static-model'), '엔진 코드는 빼고 본다');
+    assert(Exploragram.audit().warnings.some((w) => w.code === 'static-model'), '엔진 코드는 빼고 본다');
   } finally { engine.remove(); }
 });
 </script>

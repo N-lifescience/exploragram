@@ -28,12 +28,12 @@
 <section class="slide" id="a3" data-enter="off"><p id="noauto">이 장은 자동 등장 없음</p></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const anim = (id, pseudo) => getComputedStyle($(id), pseudo || null).animationName;
 
 test('장이 보이면 움직임 이름이 붙는다(나타남·튀어나옴·형광·닦아 내기·선 그리기)', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   eq(anim('t'), 'ch-a-fade-up');
   eq(anim('l0'), 'ch-a-pop');
   eq(anim('hl', '::before'), 'ch-a-hl');
@@ -45,19 +45,19 @@ test('묶음은 0.06초씩 늦게', () => {
   eq(['l0', 'l1', 'l2'].map((id) => $(id).style.getPropertyValue('--ch-delay')), ['0.00s', '0.06s', '0.12s']);
 });
 test('숫자를 세어 올리고 쉼표·소수·단위를 지킨다', async () => {
-  ClassHTML.go(0); ClassHTML.go(1);
+  Exploragram.go(0); Exploragram.go(1);
   await wait(60);
   await wait(1000);
   eq($('n').textContent, '1,234명');
   eq($('r').textContent, '3.5%');
 });
 test('다시 보면 처음부터 다시 재생한다', async () => {
-  ClassHTML.go(0); ClassHTML.go(1);
+  Exploragram.go(0); Exploragram.go(1);
   const a = $('t').getAnimations()[0];
   assert(a && a.currentTime < 200, `restarted ${a && a.currentTime}`);
 });
 test('자동 등장: 제목·문단·틀 안 칸·목록 항목이 차례로, 꾸민 상자는 통째로', () => {
-  ClassHTML.go(2);
+  Exploragram.go(2);
   const ids = ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'box'];
   eq(ids.map((id) => anim(id)), ids.map(() => 'ch-a-fade-up'));
   eq(ids.map((id) => $(id).style.getPropertyValue('--ch-delay')), ['0.00s', '0.12s', '0.24s', '0.36s', '0.48s', '0.60s', '0.72s']);
@@ -71,7 +71,7 @@ test('자동 등장은 단계·data-enter="off"·직접 정한 움직임을 건�
 });
 test('움직임 끄기면 재생하지 않고 숫자는 바로 끝 값', async () => {
   await I().Settings.set('motionOff', true);
-  ClassHTML.go(0); ClassHTML.go(1);
+  Exploragram.go(0); Exploragram.go(1);
   eq(anim('t'), 'none');
   eq($('n').textContent, '1,234명');
   await I().Settings.set('motionOff', false);

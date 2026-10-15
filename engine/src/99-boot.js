@@ -1,6 +1,6 @@
 // 시작 순서. 엔진이 두 번 포함돼도 한 번만 실행한다.
 let readyResolve;
-ClassHTML.ready = new Promise((resolve) => { readyResolve = resolve; });
+Exploragram.ready = new Promise((resolve) => { readyResolve = resolve; });
 
 async function start() {
   Editor.tag();       // 원본 보관 전: 화면과 원본에 같은 편집 번호를 붙인다
@@ -28,16 +28,16 @@ async function start() {
 }
 
 function boot() {
-  if (window.ClassHTML && window.ClassHTML !== ClassHTML) return;
-  window.ClassHTML = ClassHTML;
-  ClassHTML.go = (n) => Nav.go(n);
-  ClassHTML.next = () => Nav.next();
-  ClassHTML.prev = () => Nav.prev();
-  ClassHTML.audit = () => Audit.run();
-  ClassHTML._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Play, Editor, Live, LiveCore };
-  start().then(() => readyResolve(ClassHTML), (err) => {
+  if (window.Exploragram && window.Exploragram !== Exploragram) return;
+  window.Exploragram = Exploragram;
+  Exploragram.go = (n) => Nav.go(n);
+  Exploragram.next = () => Nav.next();
+  Exploragram.prev = () => Nav.prev();
+  Exploragram.audit = () => Audit.run();
+  Exploragram._internal = { on, emit, Stage, Fit, Nav, Steps, Panels, Ask, InkGeom, InkModel, Store, Session, Tools, Ink, Toolbar, icon, Board, Settings, KeepWords, Print, Audit, Parts, TocSlide, Answer, Blank, Zoom, Expr, Stepper, MapReveal, Yearline, Sort, Quiz, Short, Order, Calc, Plot, Zip, Pptx, Source, PptFill, Timer, Picker, Score, Checklist, Hotspots, Poll, Labeling, Media, Anim, MathTex, Particles, Play, Editor, Live, LiveCore };
+  start().then(() => readyResolve(Exploragram), (err) => {
     console.error('[exploragram]', err);
-    readyResolve(ClassHTML);
+    readyResolve(Exploragram);
   });
 }
 

@@ -38,7 +38,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const slide = () => document.getElementById('s0');
 const room = () => {                                                // 내용 높이를 직접 재서 남는 높이를 구한다
   const s = slide();
@@ -50,7 +50,7 @@ const room = () => {                                                // 내용 �
 
 test('다 푼 상태에는 들어가지만 풀기 전(카드 더미가 칸 위에 있을 때) 넘치면 오류로 잡는다', () => {
   const { Sort } = I();
-  ClassHTML.go(0);
+  Exploragram.go(0);
   document.querySelector('#s0 .step').classList.add('is-shown');
   Sort.printOpen();
   const solved = room();
@@ -60,7 +60,7 @@ test('다 푼 상태에는 들어가지만 풀기 전(카드 더미가 칸 위�
   // 다 푼 상태에서 20px 남게 채운다. 풀기 전에는 넘친다.
   document.getElementById('spacer').style.height = `${solved - 20}px`;
   document.querySelector('#s0 .step').classList.remove('is-shown');
-  const report = ClassHTML.audit();
+  const report = Exploragram.audit();
   const over = report.errors.filter((e) => e.slide === 0 && e.code === 'slide-overflow');
   eq(over.length, 1);
   assert(over[0].msg.includes('(부품을 풀기 전)'), over[0].msg);
@@ -68,7 +68,7 @@ test('다 푼 상태에는 들어가지만 풀기 전(카드 더미가 칸 위�
   eq(document.querySelector('#s0 .step').classList.contains('is-shown'), false);
 });
 test('수업 CSS의 .bin 한 클래스 규칙이 엔진의 칸 높이를 이긴다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   const bin = document.querySelector('#s0 .bin');
   eq(Math.round(bin.getBoundingClientRect().height / I().Stage.scale), 100);
 });
@@ -81,10 +81,10 @@ test('다 푼 상태(점검·다 연 화면)에서는 빈칸도 열리고, 되�
   eq(bl.getAttribute('aria-pressed'), 'false');
 });
 test('숨은 칸의 SVG 글자는 0px로 재지 않는다', () => {
-  eq(ClassHTML.audit().errors.filter((e) => e.slide === 2 && e.code === 'tiny-text').length, 0);
+  eq(Exploragram.audit().errors.filter((e) => e.slide === 2 && e.code === 'tiny-text').length, 0);
 });
 test('계산 상자의 슬라이더 끝값·단추 값마다 재고, 재고 나면 되돌린다', () => {
-  const report = ClassHTML.audit();
+  const report = Exploragram.audit();
   const over = report.errors.filter((e) => e.slide === 1 && e.code === 'slide-overflow');
   eq(over.length, 1);
   assert(/슬라이더 v를 최댓값 10|단추 「길게」/.test(over[0].msg), over[0].msg);

@@ -46,7 +46,7 @@ for (let i = 0; i < 31; i++) {
 </script>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 let report;
 const warns = (code, slide) => report.warnings.filter((e) => e.code === code && (slide == null || e.slide === slide));
 
@@ -59,7 +59,7 @@ test('장에 display를 준 수업 CSS가 있어도 보고 있지 않은 장은 
   I().Nav.go(0);
 });
 test('인라인 스타일로 드러낸 장은 오류로 알린다', () => {
-  report = ClassHTML.audit();
+  report = Exploragram.audit();
   const shown = report.errors.filter((e) => e.code === 'slide-shown');
   eq(shown.map((e) => e.slide), [2]);
 });

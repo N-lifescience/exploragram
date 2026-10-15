@@ -18,7 +18,7 @@
 <section class="slide" id="i2"><h2>둘째</h2></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const page = () => I().Ink.page;
 let taps = 0;
 document.getElementById('tap').addEventListener('click', () => { taps += 1; });
@@ -257,9 +257,9 @@ test('레이저를 누르고 있으면 멈춰 있어도 빨간 점이 보이고 
   eq(Ink.laserRAF, 0);
 });
 test('장을 넘기면 그 장의 쪽으로 바뀐다', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   eq(page().length, 0);
-  ClassHTML.go(0);
+  Exploragram.go(0);
   assert(page().length > 0, 'first slide strokes back');
 });
 test('손바닥 지우기가 켜지면 넓은 터치는 지우개', () => {
@@ -316,17 +316,17 @@ test('그리면 0.5초 뒤 저장된다', async () => {
 test('지우다 장을 바꾸면 미완성 지우기는 취소되고 원래 획이 남는다', async () => {
   const { Session, Tools, Ink } = I();
   await Session.clearCurrent();
-  ClassHTML.go(0);
+  Exploragram.go(0);
   Tools.set('pen');
   drag(null, [300, 300], [400, 300]);
   const original = JSON.stringify(page());
   Tools.set('eraser');
   ptr('pointerdown', null, 300, 300);
   eq(page().length, 0);
-  ClassHTML.go(1);
+  Exploragram.go(1);
   ptr('pointerup', null, 300, 300);
   eq(page().length, 0);
-  ClassHTML.go(0);
+  Exploragram.go(0);
   eq(JSON.stringify(page()), original);
   eq(Ink.undo(), true);
   eq(page().length, 0);
@@ -358,11 +358,11 @@ test('지우던 중 저장이 끝나도 취소한 획이 다시 저장된다', a
   ptr('pointerdown', null, 300, 300);
   await wait(700); // 앞서 그린 획의 지연 저장이 지우개 입력 도중 실행됨
   eq((await I().Store.get(Session.key(Session.current))).slides.i1.length, 0);
-  ClassHTML.go(1);
+  Exploragram.go(1);
   ptr('pointerup', null, 300, 300);
   await wait(700);
   eq((await I().Store.get(Session.key(Session.current))).slides.i1.length, 1);
-  ClassHTML.go(0);
+  Exploragram.go(0);
 });
 
 test('완성된 획이 없어도 되돌리기·지우기는 미완성 펜 흔적을 지운다', async () => {

@@ -32,7 +32,7 @@ test('$5와 $10은 수식이 아니고 \\$는 글자 $', () => {
 test('수식 둘레의 글자는 어절 보정, 수식 안은 건드리지 않는다', () => {
   assert($('inline').querySelector('.w'), 'words wrapped');
   assert(!$('inline').querySelector('.ch-math .w'), 'no word spans inside math');
-  eq(ClassHTML.audit().errors.filter((e) => e.code.startsWith('math')).length, 0);
+  eq(Exploragram.audit().errors.filter((e) => e.code.startsWith('math')).length, 0);
 });
 test('오프라인용 저장에는 KaTeX와 글꼴이 들어간다(가짜 fetch)', async () => {
   const real = window.fetch;
@@ -44,7 +44,7 @@ test('오프라인용 저장에는 KaTeX와 글꼴이 들어간다(가짜 fetch)
     return { ok: true, text: async () => (u.endsWith('.css') ? '.engine{}' : 'var engine = 1;') };
   };
   try {
-    const html = await ClassHTML._internal.PptFill.offlineHtml();
+    const html = await Exploragram._internal.PptFill.offlineHtml();
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const css = Array.from(doc.querySelectorAll('head style')).map((x) => x.textContent).find((x) => x.includes('@font-face')) || '';
     assert(css.includes('url(data:font/woff2;base64,AQID) format("woff2")'), 'font inlined');

@@ -1,6 +1,6 @@
 // 합성 포인터 이벤트. x, y는 무대 좌표(1280×720). target이 없으면 무대(deck)에 보낸다.
 window.ptr = function (type, target, x, y, opts) {
-  const deck = ClassHTML._internal.Stage.deck;
+  const deck = Exploragram._internal.Stage.deck;
   const r = deck.getBoundingClientRect();
   const s = r.width / 1280;
   const init = Object.assign({

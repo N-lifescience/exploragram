@@ -1,6 +1,6 @@
 // 수업 HTML을 엔진 자동 점검으로 재고, 직접 짠 익스플로라그램은 상태마다 조작해 찍으며 다시 잰다(헤드리스 크롬, npm 패키지 없음, Node 22 이상).
 // 사용: node scripts/states.mjs 수업.html 출력폴더 [states.json]
-//   states.json을 빼면 처음 점검만 한다(ClassHTML.audit(): 모든 장, 단계를 모두 연 상태와 부품 상태들).
+//   states.json을 빼면 처음 점검만 한다(Exploragram.audit(): 모든 장, 단계를 모두 연 상태와 부품 상태들).
 //   states.json: [{ "slide": 7, "name": "가격-2500", "js": "const r = document.querySelector('#mk-p'); r.value = 5; r.dispatchEvent(new Event('input', { bubbles: true }))" }, …]
 //   slide는 1부터 센 장 번호, js는 그 장에서 돌릴 조작(없으면 지금 상태). 장이 바뀔 때만 이동하므로 같은 장의 상태를 차례로 쌓을 수 있다.
 // 출력: <장>-<name>.png. 상태마다 그 장의 점검 오류(넘침·잘림·작은 글자 등)와, 수업 스크립트에서 난 예외를 적는다.
@@ -67,13 +67,13 @@ try {
   await send('Runtime.enable');
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url: pathToFileURL(resolve(file)).href });
-  for (let t = 0; t < 80 && !(await ev('!!window.ClassHTML').catch(() => false)); t++) await sleep(250);
-  await ev('ClassHTML.ready.then(() => true)');
+  for (let t = 0; t < 80 && !(await ev('!!window.Exploragram').catch(() => false)); t++) await sleep(250);
+  await ev('Exploragram.ready.then(() => true)');
   await sleep(800);   // 글꼴·등장 효과
 
   // 1) 처음 점검: 모든 장
-  const first = await ev('ClassHTML.audit()');
-  console.log(`slides ${await ev('ClassHTML._internal.Stage.slides.length')} · errors ${first.errors.length} · warnings ${first.warnings.length}`);
+  const first = await ev('Exploragram.audit()');
+  console.log(`slides ${await ev('Exploragram._internal.Stage.slides.length')} · errors ${first.errors.length} · warnings ${first.warnings.length}`);
   print(first.errors.concat(first.warnings));
   flush('불러올 때');
 
@@ -82,16 +82,16 @@ try {
   for (const s of states) {
     const where = s.name ?? 'start';
     let bad = false;
-    if (s.slide - 1 !== at) { await ev(`ClassHTML.go(${s.slide - 1})`); at = s.slide - 1; await sleep(900); }
+    if (s.slide - 1 !== at) { await ev(`Exploragram.go(${s.slide - 1})`); at = s.slide - 1; await sleep(900); }
     if (s.js) {
       try { await ev(`(() => { ${s.js} })()`); } catch (err) { console.log(`ERR ${s.slide}쪽 ${where} 조작 실패: ${err.message.split('\n')[0]}`); code = 1; bad = true; }
       await sleep(s.wait ?? 600);
     }
     if (flush(`${s.slide}쪽 ${where}`)) bad = true;
-    const report = await ev('ClassHTML.audit()');
+    const report = await ev('Exploragram.audit()');
     const mine = report.errors.concat(report.warnings).filter((it) => it.page === s.slide && it.code !== 'not-veiled');
     print(mine, where);
-    const r = await ev('(() => { const r = ClassHTML._internal.Stage.deck.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })()');
+    const r = await ev('(() => { const r = Exploragram._internal.Stage.deck.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })()');
     const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: r.x, y: r.y, width: r.w, height: r.h, scale: 1 } });
     const name = `${String(s.slide).padStart(2, '0')}-${where}.png`;
     writeFileSync(join(out, name), Buffer.from(shot.result.data, 'base64'));

@@ -28,7 +28,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const E = () => I().Editor;
 const $ = (id) => document.getElementById(id);
 const src = (id) => I().Source.model().getElementById(id);
@@ -153,7 +153,7 @@ test('편집 중에는 → 키가 장을 넘기지 않고 고른 것을 옮긴�
   key('PageUp');
 });
 test('엔진이 안을 다시 짠 상자(퀴즈·정답)와 $가 든 글은 바로 고치지 않고 HTML 직접 고치기로 보낸다', () => {
-  ClassHTML.go(2);
+  Exploragram.go(2);
   for (const id of ['qz', 'ans', 'money']) {
     $(id).dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true }));
     assert(!$(id).hasAttribute('contenteditable'), `${id} not inline`);
@@ -162,7 +162,7 @@ test('엔진이 안을 다시 짠 상자(퀴즈·정답)와 $가 든 글은 바�
   }
   eq(src('qz').querySelectorAll('.opt').length, 2);
   eq(src('ans').innerHTML.replace(/ data-eid="\d+"/g, ''), '<p id="ansText">답은 바다다.</p>');
-  ClassHTML.go(0);
+  Exploragram.go(0);
 });
 test('두 번 눌렀다가 고치지 않고 끝내면 원본에 쓰지 않는다', () => {
   const n = E().undo.length;

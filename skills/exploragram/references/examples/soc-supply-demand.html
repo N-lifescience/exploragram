@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tick();
     });
     slider.addEventListener('input', () => { stop(); draw(); });
-    if (window.ClassHTML && ClassHTML.onHide) ClassHTML.onHide((slide) => { if (slide && slide.id === 'market') stop(); });
+    if (window.Exploragram && Exploragram.onHide) Exploragram.onHide((slide) => { if (slide && slide.id === 'market') stop(); });
     draw();
   })();
 

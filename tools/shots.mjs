@@ -1,7 +1,7 @@
 // 수업 HTML의 장을 헤드리스 크롬으로 찍고 자동 점검 결과를 낸다. npm 패키지 없음.
 // 사용: node tools/shots.mjs <수업.html> <출력 폴더> [--open] [--slides 1,3,5] [--width 1280]
 //   기본은 각 장의 처음 상태(0단계), --open은 단계·단계 막대를 모두 열고 분류·문제·순서 배열을 다 푼 상태(가장 길어지는 모습)를 찍는다.
-//   출력: s01.png …, audit.json(ClassHTML.audit() 결과). 점검 오류가 있으면 종료 코드 1.
+//   출력: s01.png …, audit.json(Exploragram.audit() 결과). 점검 오류가 있으면 종료 코드 1.
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -60,20 +60,20 @@ try {
   };
   await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url: pathToFileURL(resolve(file)).href });
-  for (let t = 0; t < 80 && !(await ev('!!(window.ClassHTML && window.ClassHTML.ready)').catch(() => false)); t++) await sleep(250);
-  await ev('ClassHTML.ready');
+  for (let t = 0; t < 80 && !(await ev('!!(window.Exploragram && window.Exploragram.ready)').catch(() => false)); t++) await sleep(250);
+  await ev('Exploragram.ready');
   await sleep(800);   // 글꼴
-  const n = await ev('ClassHTML._internal.Stage.slides.length');
+  const n = await ev('Exploragram._internal.Stage.slides.length');
   for (let i = 1; i <= n; i++) {
     if (pick && !pick.includes(i)) continue;
-    await ev(`(() => { const I = ClassHTML._internal; I.emit('audit-restore'); I.Nav.go(${i - 1}, ${open}); if (${open}) { I.Stepper.enter(${i - 1}, true); I.emit('audit-expand'); } })()`);
+    await ev(`(() => { const I = Exploragram._internal; I.emit('audit-restore'); I.Nav.go(${i - 1}, ${open}); if (${open}) { I.Stepper.enter(${i - 1}, true); I.emit('audit-expand'); } })()`);
     await sleep(900);   // 등장 효과
-    const r = await ev('(() => { const r = ClassHTML._internal.Stage.deck.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })()');
+    const r = await ev('(() => { const r = Exploragram._internal.Stage.deck.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })()');
     const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: r.x, y: r.y, width: r.w, height: r.h, scale: 1 } });
     writeFileSync(join(out, `s${String(i).padStart(2, '0')}${open ? 'o' : ''}.png`), Buffer.from(shot.result.data, 'base64'));
   }
-  await ev("ClassHTML._internal.emit('audit-restore')");
-  const report = await ev('ClassHTML.audit()');
+  await ev("Exploragram._internal.emit('audit-restore')");
+  const report = await ev('Exploragram.audit()');
   writeFileSync(join(out, 'audit.json'), JSON.stringify(report, null, 2));
   console.log(`slides ${n} · errors ${report.errors.length} · warnings ${report.warnings.length} · activities ${report.info.activities} (${report.info.activityPages.join(',')}쪽)`);
   for (const item of report.errors.concat(report.warnings)) console.log(`${item.level === 'error' ? 'ERR ' : 'WARN'} ${item.page == null ? '-' : item.page}쪽 ${item.code}: ${item.msg}`);

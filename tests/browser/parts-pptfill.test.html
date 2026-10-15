@@ -23,7 +23,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const ph = (id) => $(id).nextElementSibling;
 const pptxFile = () => new File([Uint8Array.from(atob(window.MINI_PPTX_B64), (c) => c.charCodeAt(0))], 'mini.pptx');
@@ -73,7 +73,7 @@ test('긴 변이 1600px을 넘는 그림은 줄인다', async () => {
   eq(img.naturalHeight, 200);
 });
 test('손 모드에서 그림 자리를 누르면 그 슬라이드 그림 가운데서 바꾼다', async () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   ph('emf').click();
   const p = I().PptFill.picker;
   for (let i = 0; i < 60 && !p.classList.contains('is-open'); i++) await wait(50);   // 그림을 읽는 동안 기다린다

@@ -12,7 +12,7 @@ const blocks = (file) => [...readFileSync(file, 'utf8').matchAll(/```html\n([\s\
 const fake = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221600%22 height=%22945%22/%3E';
 const slides = [];
 for (const [i, b] of blocks(join(ref, 'components.md')).entries()) {
-  if (i === 0 || b.includes('ClassHTML.onShow')) continue;   // 문서 뼈대, 스크립트 예시는 뺀다
+  if (i === 0 || b.includes('Exploragram.onShow')) continue;   // 문서 뼈대, 스크립트 예시는 뺀다
   slides.push(`<section class="slide" id="c${i}"><h2>부품 예시 ${i}</h2>${b.replaceAll('data:image/jpeg;base64,…', fake).replaceAll('…', '')}</section>`);
 }
 for (const f of ['exploragram.md']) {

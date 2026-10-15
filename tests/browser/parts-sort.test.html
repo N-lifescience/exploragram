@@ -22,7 +22,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const it = () => I().Sort.list[0];
 const $ = (id) => document.getElementById(id);
 const center = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
@@ -100,7 +100,7 @@ test('다시: 처음 섞인 순서로 카드 자리에 돌아간다', () => {
   eq(it().fb.textContent, '');
 });
 test('Enter로 카드를 고를 수 있고 장은 넘어가지 않는다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   $('c2').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
   assert($('c2').classList.contains('is-sel'), 'selected');
   eq(I().Nav.state.shown, 0);

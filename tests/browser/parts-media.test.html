@@ -20,7 +20,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const vid = (id) => I().Media.videos.find((v) => v.box.id === id);
 // 바깥(유튜브·QR 라이브러리)에 요청하지 않게 막아 둔다
@@ -80,7 +80,7 @@ test('사이트로 연 수업(https): 쿠키 없는 주소로 그 자리에서 �
     const b = $('v1').getBoundingClientRect();
     assert(Math.abs(f.width - b.width) < 1 && Math.abs(f.height - b.height) < 1, 'fills the card');
     eq(opened.length, 1, 'no new tab');
-    ClassHTML.go(1);
+    Exploragram.go(1);
     eq(document.querySelectorAll('iframe').length, 0, 'closed on leaving');
     eq(v.note.textContent, '');
   } finally { M.embedOk = ok; M.src = src; }
@@ -96,19 +96,19 @@ test('링크 카드: 새 탭으로 열리고 주소의 사이트 이름이 붙�
   eq($('abad').target, '');
 });
 test('QR: 다른 장의 QR은 그 장을 열 때 그리고, 다시 열어도 한 번만 그린다', async () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   await wait(50);
   const q = $('a1').querySelector('.ch-qr img');
   assert(q, 'link QR drawn on show');
   eq(q.alt, 'QR 코드: https://www.example.org/path?x=1');
   eq(qrAsked, 2);
-  ClassHTML.go(0);
-  ClassHTML.go(1);
+  Exploragram.go(0);
+  Exploragram.go(1);
   await wait(50);
   eq(qrAsked, 2, 'only once');
 });
 test('점검: 못 읽는 영상 주소와 http가 아닌 링크는 부품 오류', () => {
-  const part = ClassHTML.audit().errors.filter((e) => e.code === 'part').map((e) => e.msg);
+  const part = Exploragram.audit().errors.filter((e) => e.code === 'part').map((e) => e.msg);
   eq(part.length, 2, JSON.stringify(part));
   assert(part.some((m) => m.includes('#vbad') && m.includes('data-youtube')), 'video');
   assert(part.some((m) => m.includes('#abad') && m.includes('https://')), 'link');

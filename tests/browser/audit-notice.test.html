@@ -12,13 +12,13 @@
 <section class="slide" id="n1"><h2>문제</h2><p>원본 PPT의 표를 재구성함.</p></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const badge = () => document.querySelector('.ch-toolbar .ch-audit-badge');
 
 test('처음 연 파일에 고칠 곳이 있으면 툴바에 「점검 N」 단추가 뜬다', async () => {
   for (let i = 0; i < 40 && !badge(); i++) await wait(150);
   assert(badge(), 'badge');
-  const n = ClassHTML.audit().errors.length;
+  const n = Exploragram.audit().errors.length;
   assert(n >= 1, 'errors');
   eq(badge().textContent.trim(), `점검 ${n}`);
   eq((await I().Store.get('audit:test-audit-notice')).errors, n);
@@ -31,7 +31,7 @@ test('⚙ 설정에서도 자동 점검을 열 수 있다(전자칠판에는 D �
   I().Audit.close();
 });
 test('AI에게 보낼 말에는 꼭 고칠 것과 살펴볼 것, 지킬 것이 들어간다', () => {
-  const text = I().Audit.prompt(ClassHTML.audit());
+  const text = I().Audit.prompt(Exploragram.audit());
   assert(text.includes('[꼭 고칠 것]') && text.includes('- 1쪽: 내용이'), text);
   assert(text.includes('[함께 살펴볼 것]') && text.includes('원본 PPT 이야기'), 'warnings');
   assert(text.includes('[지킬 것]') && text.includes('엔진 css·js 두 줄'), 'keep');

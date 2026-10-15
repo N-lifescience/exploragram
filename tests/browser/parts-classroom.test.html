@@ -25,7 +25,7 @@
 </section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const pk = (id) => I().Picker.list.find((p) => p.el.id === id);
 
@@ -62,7 +62,7 @@ test('점수판: 모둠 이름, 더하기·빼기(0 아래로는 안 감), 1등 
   eq(I().Score.list.find((x) => x.el.id === 'sn').teams.map((t) => t.name), ['빨강', '파랑']);
 });
 test('체크리스트: 누르면 ✓와 개수, 펜으로 톡 눌러도', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   const li = $('cl').children;
   const count = $('cl').nextElementSibling;
   eq(count.textContent, '0 / 3');

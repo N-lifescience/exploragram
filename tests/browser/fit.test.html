@@ -21,7 +21,7 @@
   <div style="height:520px;background:#EEE">넘치게 하는 상자</div></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const $ = (id) => document.getElementById(id);
 const zoom = (id) => parseFloat($(id).style.zoom) || 1;
 const fits = (id) => $(id).scrollHeight <= $(id).clientHeight + 1 && $(id).scrollWidth <= $(id).clientWidth + 1;
@@ -57,7 +57,7 @@ test('너무 많이 넘치면 0.75까지만 줄인다', () => {
 });
 test('자동 점검은 줄이기 전 크기로 재서 계속 알린다', () => {
   I().Nav.go(0);
-  const report = ClassHTML.audit();
+  const report = Exploragram.audit();
   assert(report.errors.some((e) => e.code === 'slide-overflow' && e.slide === 0), 'f0');
   assert(report.errors.some((e) => e.code === 'slide-overflow' && e.slide === 2), 'f2');
   assert(zoom('f0') < 1, '점검 뒤에도 줄인 채로');

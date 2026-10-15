@@ -775,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const slides = [...document.querySelectorAll('section.slide')];
     document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
       const i = slides.findIndex((s) => s.id === b.dataset.go);
-      if (i >= 0 && window.ClassHTML) ClassHTML.go(i);
+      if (i >= 0 && window.Exploragram) Exploragram.go(i);
     }));
   }
 
@@ -915,7 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tick();
     });
     slider.addEventListener('input', () => { stop(); draw(); });
-    if (window.ClassHTML && ClassHTML.onHide) ClassHTML.onHide((slide) => { if (slide && slide.id === 'try-soc') stop(); });
+    if (window.Exploragram && Exploragram.onHide) Exploragram.onHide((slide) => { if (slide && slide.id === 'try-soc') stop(); });
     draw();
   }
 

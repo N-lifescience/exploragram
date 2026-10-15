@@ -10,7 +10,7 @@
   };
   window.wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   window.runTests = async function () {
-    await window.ClassHTML.ready;
+    await window.Exploragram.ready;
     const out = document.getElementById('results');
     const failed = [];
     if (!cases.length) failed.push('✗ 등록된 테스트가 없어요');

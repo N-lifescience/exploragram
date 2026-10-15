@@ -11,7 +11,7 @@
 <section class="slide" id="a"><h2>하나</h2></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const stroke = (t) => ({ t, c: t === 'hl' ? '#FFE45C' : '#000000', w: t === 'hl' ? 24 : 3, p: [1, 1, 5, 5] });
 // 판서층이 화면에 보이는 슬라이드의 빈 배열을 미리 만들 수 있으므로, 획이 있는 슬라이드만 센다.
 const inked = (doc) => Object.values(doc.slides).filter((a) => a.length).length;

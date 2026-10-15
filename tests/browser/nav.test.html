@@ -20,7 +20,7 @@
 <script>
 const key = (k, target) => (target || document).dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 const shown = (id) => document.getElementById(id).classList.contains('is-shown');
-const active = () => ClassHTML._internal.Nav.state.slide;
+const active = () => Exploragram._internal.Nav.state.slide;
 
 test('처음에는 1쪽, 단계는 숨김', () => {
   eq(active(), 0);
@@ -28,7 +28,7 @@ test('처음에는 1쪽, 단계는 숨김', () => {
   assert(document.getElementById('s1').classList.contains('is-active'), 's1 active');
 });
 test('무대가 확대·축소되고 쪽 번호와 열쇠가 붙는다', () => {
-  const { Stage } = ClassHTML._internal;
+  const { Stage } = Exploragram._internal;
   assert(Stage.scale > 0, 'scale');
   assert(Stage.deck.style.transform.includes('scale('), 'transform');
   eq(document.getElementById('s2').dataset.page, '2 / 3');
@@ -47,12 +47,12 @@ test('← 키는 이전 장을 단계 펼친 채로 보여 준다', () => {
 test('숫자 + Enter로 쪽 이동', () => { key('3'); key('Enter'); eq(active(), 2); });
 test('onShow 훅이 불린다', () => {
   let got = -1;
-  ClassHTML.onShow((el, i) => { got = i; });
-  ClassHTML.go(1);
+  Exploragram.onShow((el, i) => { got = i; });
+  Exploragram.go(1);
   eq(got, 1);
 });
 test('입력칸에서 친 키는 넘기지 않는다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   key('ArrowRight', document.getElementById('field'));
   eq(active(), 0);
   assert(!shown('a1'), 'no step');
@@ -60,76 +60,76 @@ test('입력칸에서 친 키는 넘기지 않는다', () => {
 test('Home · End', () => { key('End'); eq(active(), 2); key('Home'); eq(active(), 0); });
 test('처리하지 않은 키는 key 이벤트로 넘긴다', () => {
   let got = '';
-  ClassHTML._internal.on('key', (e) => { got = e.key; });
+  Exploragram._internal.on('key', (e) => { got = e.key; });
   key('q');
   eq(got, 'q');
 });
 test('Space·PageDown·↓·Enter는 다음, ↑·PageUp·Backspace는 이전', () => {
-  for (const k of [' ', 'PageDown', 'ArrowDown', 'Enter']) { ClassHTML.go(1); key(k); eq(active(), 2, k); }
-  for (const k of ['ArrowUp', 'PageUp', 'Backspace']) { ClassHTML.go(1); key(k); eq(active(), 0, k); }
+  for (const k of [' ', 'PageDown', 'ArrowDown', 'Enter']) { Exploragram.go(1); key(k); eq(active(), 2, k); }
+  for (const k of ['ArrowUp', 'PageUp', 'Backspace']) { Exploragram.go(1); key(k); eq(active(), 0, k); }
 });
 test('Ctrl 조합은 넘기지 않고 key 이벤트로만 넘긴다', () => {
-  ClassHTML.go(1);
+  Exploragram.go(1);
   let got = '';
-  ClassHTML._internal.on('key', (e) => { if (e.ctrlKey) got = e.key; });
+  Exploragram._internal.on('key', (e) => { if (e.ctrlKey) got = e.key; });
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', ctrlKey: true, bubbles: true, cancelable: true }));
   eq(active(), 1);
   eq(got, 'ArrowRight');
 });
 test('override가 있으면 넘기기를 맡기고, go는 먼저 닫는다', () => {
-  const { Nav } = ClassHTML._internal;
+  const { Nav } = Exploragram._internal;
   const calls = [];
-  ClassHTML.go(1);
+  Exploragram.go(1);
   Nav.override = { next: () => calls.push('next'), prev: () => calls.push('prev'), close: () => { calls.push('close'); Nav.override = null; } };
   key('ArrowRight');
   key('ArrowLeft');
   eq(active(), 1);
-  ClassHTML.go(2);
+  Exploragram.go(2);
   eq(calls, ['next', 'prev', 'close']);
   eq(active(), 2);
   eq(Nav.override, null);
 });
 test('hide 이벤트는 떠나는 장을 알려 준다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   let left = -1;
-  ClassHTML.onHide((el, i) => { left = i; });
-  ClassHTML.go(2);
+  Exploragram.onHide((el, i) => { left = i; });
+  Exploragram.go(2);
   eq(left, 0);
 });
 test('toStage: 무대 가운데는 (640, 360)', () => {
-  const { Stage } = ClassHTML._internal;
+  const { Stage } = Exploragram._internal;
   const r = Stage.deck.getBoundingClientRect();
   const [x, y] = Stage.toStage(r.left + r.width / 2, r.top + r.height / 2);
   eq([Math.round(x), Math.round(y)], [640, 360]);
 });
 test('scale은 창 안에 들어가는 가장 큰 배율', () => {
-  const { Stage } = ClassHTML._internal;
+  const { Stage } = Exploragram._internal;
   const v = Stage.viewport;
   eq(Stage.scale.toFixed(4), Math.min(v.clientWidth / 1280, v.clientHeight / 720).toFixed(4));
 });
 test('진행 막대는 transform으로 차오른다', () => {
-  ClassHTML.go(2);
+  Exploragram.go(2);
   eq(document.querySelector('.ch-progress > i').style.transform, 'scaleX(1)');
 });
 test('손 모드에서 손가락으로 왼쪽으로 밀면 다음 장', () => {
-  ClassHTML.go(1);
-  const d = ClassHTML._internal.Stage.deck;
+  Exploragram.go(1);
+  const d = Exploragram._internal.Stage.deck;
   const p = (type, x) => d.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 5, pointerType: 'touch', isPrimary: true, clientX: x, clientY: 300 }));
   p('pointerdown', 600);
   p('pointerup', 480);
   eq(active(), 2);
 });
 test('숫자가 아닌 쪽 번호는 무시하고, 소수는 반올림', () => {
-  ClassHTML.go(1);
-  ClassHTML.go('abc');
-  ClassHTML.go(NaN);
-  ClassHTML.go(undefined);
+  Exploragram.go(1);
+  Exploragram.go('abc');
+  Exploragram.go(NaN);
+  Exploragram.go(undefined);
   eq(active(), 1);
-  ClassHTML.go(1.6);
+  Exploragram.go(1.6);
   eq(active(), 2);
 });
 test('쪽 번호를 치다가 다른 키를 누르면 번호는 버린다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   key('3');
   key('ArrowRight');
   key('Enter');

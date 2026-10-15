@@ -23,7 +23,7 @@
 <section class="slide" id="z"><h2>다음</h2></section>
 <pre id="results" data-summary="pending"></pre>
 <script>
-const I = () => ClassHTML._internal;
+const I = () => Exploragram._internal;
 const it = () => I().Yearline.list[0];
 const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
 const move = (v) => { it().range.value = String(v); it().range.dispatchEvent(new Event('input', { bubbles: true })); };
@@ -77,7 +77,7 @@ test('글 안의 굵은 글씨를 목록에 그대로 옮긴다', () => {
   assert(it().recent.querySelector('b + span b'), 'bold kept');
 });
 test('→ 는 사건 해마다 한 칸, 끝나면 다음 단계, 그다음 장', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   eq(it().now.textContent, '시작');
   key('ArrowRight'); eq(it().now.textContent, '1905년');
   key('ArrowRight'); eq(it().now.textContent, '1920년');
@@ -89,7 +89,7 @@ test('→ 는 사건 해마다 한 칸, 끝나면 다음 단계, 그다음 장',
   key('ArrowLeft'); eq(it().st.pos, 5);
 });
 test('사건 연도를 막대로 고른 뒤 → 는 다음 사건 해로', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   move(1940);
   key('ArrowRight');
   eq(it().now.textContent, '1948년');
@@ -97,7 +97,7 @@ test('사건 연도를 막대로 고른 뒤 → 는 다음 사건 해로', () =>
   eq(it().now.textContent, '1931년');
 });
 test('인쇄 때는 끝 칸, 원래 목록을 보인다', () => {
-  ClassHTML.go(0);
+  Exploragram.go(0);
   window.dispatchEvent(new Event('beforeprint'));
   eq(lit(), 6);
   window.dispatchEvent(new Event('afterprint'));

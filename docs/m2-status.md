@@ -22,7 +22,7 @@
 
 테마: `body[data-theme]` = `paper`(기본)·`ppt`(원본 PPT 색 띠)·`grid`·`chalk`. 색은 `--accent`, `--tab`, `--tab-ink`. 본문 28px.
 
-자동 점검(D, `?audit`, `ClassHTML.audit()`)에 더한 것: 단계 막대 칸마다 넘침, 부품 작성 실수(`part`), 부품 밖 슬라이더 시작 값(`not-veiled`), 활동 장 3분의 1 미만(`few-activities`), 정보(활동 장 수, 그림 자리 수).
+자동 점검(D, `?audit`, `Exploragram.audit()`)에 더한 것: 단계 막대 칸마다 넘침, 부품 작성 실수(`part`), 부품 밖 슬라이더 시작 값(`not-veiled`), 활동 장 3분의 1 미만(`few-activities`), 정보(활동 장 수, 그림 자리 수).
 
 도구: `tools/shots.mjs`(장마다 캡처 + audit.json), `skills/exploragram/scripts/extract_pptx.py`(글·그림·테마 색 추출, 엔진과 같은 그림 번호).
 
