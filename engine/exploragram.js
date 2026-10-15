@@ -1,7 +1,7 @@
-/*! exploragram engine v2.0.2 | © N-lifescience | https://github.com/N-lifescience/exploragram */
+/*! exploragram engine v2.0.3 | © N-lifescience | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '2.0.2';
+const VERSION = '2.0.3';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
 // 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 Exploragram.
@@ -942,8 +942,10 @@ const Ink = {
     this.lctx = this.live.getContext('2d', { desynchronized: true });
     document.body.append(this.live);
     const d = Stage.deck;
-    // pointerrawupdate: 화면 갱신 주기에 맞춰 모아 보내는 pointermove보다 먼저, 입력이 들어오는 즉시 온다
-    if ('onpointerrawupdate' in window) d.addEventListener('pointerrawupdate', (e) => this.raw(e), true);
+    // pointerrawupdate: 화면 갱신 주기에 맞춰 모아 보내는 pointermove보다 먼저, 입력이 들어오는 즉시 온다.
+    // 액자(iframe) 안에서는 쓰지 않는다: 크롬은 이 이벤트 좌표를 액자가 아닌 바깥 창 기준으로 줘서
+    // 점 하나를 찍어도 엉뚱한 곳으로 선이 튄다(사이트 체험 덱, 실시간 수업 체험).
+    if ('onpointerrawupdate' in window && window.self === window.top) d.addEventListener('pointerrawupdate', (e) => this.raw(e), true);
     d.addEventListener('pointerdown', (e) => this.down(e), true);
     d.addEventListener('pointermove', (e) => this.move(e), true);
     // 덱 밖에서 손을 떼도 획이 끝나도록 창에서 듣는다

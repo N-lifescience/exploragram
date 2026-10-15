@@ -380,6 +380,52 @@ test('지우던 중 저장이 끝나도 취소한 획이 다시 저장된다', a
   Exploragram.go(0);
 });
 
+test('맨 위 창에서는 pointerrawupdate로 펜 획을 바로 그린다', async () => {
+  if (!('onpointerrawupdate' in window)) return;
+  const { Session, Tools, Ink } = I();
+  await Session.clearCurrent();
+  Ink.lastUp = -1e9;
+  Tools.set('pen');
+  ptr('pointerdown', null, 200, 300);
+  ptr('pointerrawupdate', null, 260, 300);
+  ptr('pointermove', null, 260, 300);
+  ptr('pointerup', null, 260, 300);
+  eq(page().length, 1);
+  eq(page()[0].p, [200, 300, 260, 300]);
+  Ink.undo();
+  Tools.set('hand');
+});
+
+test('액자(iframe) 안에서는 pointerrawupdate를 쓰지 않는다: 크롬이 바깥 창 기준 좌표를 줘 점에서 선이 튄다', async () => {
+  const f = document.createElement('iframe');
+  f.style.cssText = 'width: 640px; height: 360px; border: 0';
+  f.src = 'live-deck.html';
+  document.body.append(f);
+  await new Promise((resolve) => f.addEventListener('load', resolve, { once: true }));
+  const w = f.contentWindow;
+  await w.Exploragram.ready;
+  const X = w.Exploragram._internal;
+  X.Tools.set('pen');
+  const r = X.Stage.deck.getBoundingClientRect();
+  const s = r.width / 1280;
+  const fire = (type, x, y, dx = 0, dy = 0) => X.Stage.deck.dispatchEvent(new w.PointerEvent(type, {
+    bubbles: true, cancelable: true, composed: true, pointerId: 1, pointerType: 'mouse', isPrimary: true,
+    button: 0, buttons: type === 'pointerup' ? 0 : 1, clientX: r.left + x * s + dx, clientY: r.top + y * s + dy,
+  }));
+  fire('pointerdown', 200, 300);
+  fire('pointerrawupdate', 203, 301, 400, 250);   // 손이 살짝 움직인 점. 좌표는 액자가 놓인 만큼 어긋나 온다
+  fire('pointermove', 203, 301);
+  fire('pointerup', 203, 301);
+  const strokes = X.Ink.page;
+  eq(strokes.length, 1);
+  const p = strokes[0].p;
+  for (let i = 0; i < p.length; i += 2) {
+    assert(p[i] >= 199 && p[i] <= 204 && p[i + 1] >= 299 && p[i + 1] <= 302, `stroke stays at the dot: ${p}`);
+  }
+  X.Ink.undo();
+  f.remove();
+});
+
 test('완성된 획이 없어도 되돌리기·지우기는 미완성 펜 흔적을 지운다', async () => {
   const { Session, Tools, Ink } = I();
   const alpha = () => {                       // 그리는 중인 펜은 맨 위 캔버스에, 끝난 획은 판서층에

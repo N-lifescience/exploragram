@@ -4,7 +4,7 @@
 > **AI에게**: 이 파일 하나가 Exploragram 지침 전체다. 선생님이 수업 PPT를 주면 이 지침대로 수업용 HTML을 만든다.
 > **반드시**: `<head>`에 아래 엔진 css·js 두 줄을 넣는다(지금 환경에서 안 열려도 그대로 둔다). 넘기기·툴바를 직접 짜지 않고, PPT 장을 통째로 그림으로 넣지 않는다(1절 기준 8·9).
 > 본문의 `references/…`는 이 파일의 해당 절을, `scripts/…`는 저장소 https://github.com/N-lifescience/exploragram 의 `skills/exploragram/scripts/`를 가리킨다.
-> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.css`·`.js` (v2.0.2)
+> 엔진: `https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/engine/exploragram.css`·`.js` (v2.0.3)
 > 레퍼런스 완성본(`references/examples/`): https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/elem-shadow.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/eth-exploragram.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/mid-linear.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/sci-diffusion.html · https://cdn.jsdelivr.net/gh/N-lifescience/exploragram@2/skills/exploragram/references/examples/soc-supply-demand.html
 
 ## 차례
