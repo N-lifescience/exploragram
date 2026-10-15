@@ -1,4 +1,6 @@
 /* 재생 단추: data-play 슬라이더 바로 위 */
 :where(.slide) .ch-play { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 8px; }
 :where(.slide) .ch-play-run { min-height: 56px; padding: 0 22px; border-color: var(--accent); background: var(--accent); color: #fff; font-size: 22px; }
+:where(.slide) .ch-play-step { min-height: 56px; padding: 0 18px; border-width: 2px; border-color: var(--accent); color: var(--accent); font-size: 22px; }
+:where(.slide) .ch-play-step:disabled { opacity: .4; cursor: default; }
 @media print { .ch-play { display: none !important; } }

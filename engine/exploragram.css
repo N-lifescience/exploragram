@@ -1,4 +1,4 @@
-/*! exploragram engine v2.0.3 | © N-lifescience | https://github.com/N-lifescience/exploragram */
+/*! exploragram engine v2.1.0 | © N-lifescience | https://github.com/N-lifescience/exploragram */
 /* ---- 00-tokens.css ---- */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
@@ -920,4 +920,6 @@ html.ch-live-student :is(.ch-stops, .ch-yearline) input:disabled, html.ch-live-s
 /* 재생 단추: data-play 슬라이더 바로 위 */
 :where(.slide) .ch-play { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 8px; }
 :where(.slide) .ch-play-run { min-height: 56px; padding: 0 22px; border-color: var(--accent); background: var(--accent); color: #fff; font-size: 22px; }
+:where(.slide) .ch-play-step { min-height: 56px; padding: 0 18px; border-width: 2px; border-color: var(--accent); color: var(--accent); font-size: 22px; }
+:where(.slide) .ch-play-step:disabled { opacity: .4; cursor: default; }
 @media print { .ch-play { display: none !important; } }

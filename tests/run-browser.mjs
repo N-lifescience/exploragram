@@ -1,7 +1,7 @@
 // 페이지 테스트를 헤드리스 크롬(또는 엣지)에서 DevTools 프로토콜로 실행한다. npm 패키지 없음.
 // 사용: node tests/run-browser.mjs tests/browser/a.test.html [b.test.html ...]
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -46,6 +46,12 @@ async function runPage(file) {
       const i = ++id; waiting.set(i, res); ws.send(JSON.stringify({ id: i, method, params }));
     });
     const evaluate = async (expr) => (await send('Runtime.evaluate', { expression: expr, returnByValue: true }))?.result?.value;
+    // <meta name="test-media" content="prefers-reduced-motion: reduce">: 그 미디어 설정을 흉내 낸 뒤 연다
+    const media = /<meta name="test-media" content="([^"]*)"/.exec(readFileSync(file, 'utf8'));
+    if (media) {
+      const features = media[1].split(';').map((pair) => pair.split(':').map((v) => v.trim())).filter(([name, value]) => name && value).map(([name, value]) => ({ name, value }));
+      await send('Emulation.setEmulatedMedia', { features });
+    }
     await send('Page.navigate', { url: pathToFileURL(resolve(file)).href });
     let summary = 'pending';
     for (let t = 0; t < 120 && summary === 'pending'; t++) {

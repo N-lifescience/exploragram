@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko" data-deck="test-motion-reduced">
+<head>
+<meta charset="utf-8">
+<meta name="test-media" content="prefers-reduced-motion: reduce">
+<title>motion reduced</title>
+<link rel="stylesheet" href="../../engine/exploragram.css">
+<script defer src="../../engine/exploragram.js"></script>
+<script src="harness.js"></script>
+</head>
+<body>
+<section class="slide" id="r1">
+  <div class="calc" id="rc"><input type="range" name="n" id="n" min="0" max="10" value="0"><output id="nOut" data-expr="n"></output></div>
+  <figure class="particles" id="rp" data-height="160" style="width:300px"><i data-kind="기체" data-left="20"></i></figure>
+  <div class="calc"><input type="range" name="t" id="t" min="0" max="10" step="1" value="0" data-play="1"><output id="tOut" data-expr="t"></output></div>
+</section>
+<pre id="results" data-summary="pending"></pre>
+<script>
+// tests/run-browser.mjs가 위 meta를 읽고 운영체제의 움직임 줄이기(prefers-reduced-motion: reduce)를 흉내 낸다.
+// 학교 PC는 '최적 성능' 설정 등으로 이 값이 켜져 있을 수 있어 엔진은 따르지 않는다(설계 문서 2026-10-02). ⚙ 「움직임 끄기」만 따른다.
+const I = () => Exploragram._internal;
+const $ = (id) => document.getElementById(id);
+const set = (id, v) => { $(id).value = String(v); $(id).dispatchEvent(new Event('input', { bubbles: true })); };
+const user = () => { I().Calc.userAt = performance.now(); };
+const box = () => I().Particles.list.find((x) => x.fig.id === 'rp');
+
+test('운영체제가 움직임 줄이기여도 엔진의 움직임은 그대로다', async () => {
+  assert(matchMedia('(prefers-reduced-motion: reduce)').matches, '시험 실행기가 움직임 줄이기를 흉내 냈다');
+  eq(I().Settings.values.motionOff, false);
+  assert(!document.documentElement.classList.contains('ch-motion-off'), 'ch-motion-off 없음');
+  assert(box().running, '첫 장의 입자 상자가 저절로 움직인다');
+  user();
+  set('n', 7);
+  eq($('nOut').textContent, '0', '계산 상자는 흘러간다');
+  await wait(700);
+  eq($('nOut').textContent, '7');
+});
+
+test('⚙ 움직임 끄기를 저장해 두었으면 첫 장에서 저절로 움직이던 입자 상자를 멈춘다', async () => {
+  // 부팅 순서: 첫 장이 보여 입자 상자가 움직이기 시작한 뒤에 저장값을 읽는다
+  assert(box().running, '저절로 움직이는 중');
+  await I().Store.set('settings', { motionOff: true, printInk: false, palmErase: true, palmSize: 0 });
+  await I().Settings.init();
+  assert(document.documentElement.classList.contains('ch-motion-off'), '저장값 적용');
+  assert(!box().running, '멈춤');
+});
+
+test('움직임 끄기여도 교사가 누른 재생과 「움직이기」는 된다', async () => {
+  const run = $('t').previousElementSibling.querySelector('.ch-play-run');
+  run.click();
+  await wait(350);
+  assert(Number($('t').value) > 0, `재생: ${$('t').value}`);
+  run.click();
+  box().run.click();
+  assert(box().running, '움직이기');
+  await I().Settings.set('motionOff', true);
+  assert(box().running, '교사가 누른 것은 움직임 끄기 알림에도 그대로');
+  box().run.click();
+  await I().Settings.set('motionOff', false);
+});
+</script>
+</body>
+</html>

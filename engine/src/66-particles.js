@@ -3,6 +3,8 @@
 //   <i data-kind="물" data-left="40" data-right="10" data-pass="1" data-color="#5AA9E6" data-size="4"></i>
 //   <i data-kind="설탕" data-left="20" data-right="0" data-pass="0" data-color="#C04F15" data-size="8"></i></figure>
 // 값은 식이다. .calc 안에 있으면 그 변수를 쓰고, 값이 바뀌면 처음부터 다시 놓는다. 입자는 모두 300개까지.
+// 개수 내보내기: <i data-kind="물" … data-count="wl, wr">이면 셀 때마다(움직이는 동안 0.25초마다) 왼쪽·오른쪽 개수를
+//   계산 상자 변수 wl, wr로 넣고 다시 계산한다. 거시 값(수·막대·그래프)을 입자 상태에서 셈하게 한다.
 const PARTICLE_MAX = 300;
 
 const Particles = {
@@ -20,9 +22,11 @@ const Particles = {
       };
       const kinds = qsa(':scope > i[data-kind]', fig).map((el, k) => {
         el.hidden = true;
+        if (el.dataset.count != null && !calc) errors.push({ el: fig, msg: `입자 상자 ${el.dataset.kind}의 data-count: 계산 상자(.calc) 안의 입자 상자에서만 쓸 수 있어요` });
         return {
           name: el.dataset.kind, color: el.dataset.color || PLOT_COLORS[k % PLOT_COLORS.length], size: clamp(Number(el.dataset.size) || 6, 2, 16),
           left: c(el.dataset.left, 20, 'data-left'), right: c(el.dataset.right, 0, 'data-right'), pass: c(el.dataset.pass, 1, 'data-pass'),
+          counter: calc ? calc.counts.find((x) => x.el === el) || null : null,   // 계산 상자가 이름을 읽어 두었다(58-calc)
         };
       });
       const canvas = h('canvas', { class: 'ch-particles-cv', 'aria-hidden': 'true' });
@@ -38,7 +42,7 @@ const Particles = {
         parts: [], running: false, raf: 0, last: 0, rnd: seededRandom(`${fig.closest('section.slide')?.dataset.key}#particles${n}`), sig: '',
       };
       fig.append(canvas, h('div', { class: 'ch-row' }, run, reset), counts);
-      run.addEventListener('click', (e) => { this.toggle(item); e.currentTarget.blur(); });
+      run.addEventListener('click', (e) => { item.auto = false; this.toggle(item); e.currentTarget.blur(); });
       reset.addEventListener('click', (e) => { this.place(item); this.draw(item); e.currentTarget.blur(); });
       if (calc) calc.listeners.push(() => this.changed(item));
       this.list.push(item);
@@ -51,10 +55,12 @@ const Particles = {
         if (!slide.contains(item.fig)) { this.stop(item); continue; }
         this.layout(item);
         this.draw(item);
-        if (!document.documentElement.classList.contains('ch-motion-off')) this.start(item);   // 움직임 끄기면 「움직이기」를 눌러야 움직인다
+        if (!document.documentElement.classList.contains('ch-motion-off')) { this.start(item); item.auto = true; }   // 움직임 끄기면 「움직이기」를 눌러야 움직인다
       }
     });
     on('hide', (slide) => { for (const item of this.list) if (slide.contains(item.fig)) this.stop(item); });
+    // 움직임 끄기가 켜지면(저장값을 늦게 읽었거나 운영체제 설정이 바뀜) 저절로 움직이던 상자를 멈춘다. 선생님이 누른 것은 그대로.
+    on('motion', (off) => { if (off) for (const item of this.list) if (item.running && item.auto) this.stop(item); });
   },
 
   scope(item) { return item.calc ? item.calc.scope : {}; },
@@ -113,7 +119,9 @@ const Particles = {
   signature(item) { return item.kinds.map((k) => [k.left, k.right].map((f) => this.val(f, item)).join(',')).join(';'); },
 
   // 계산 상자 값이 바뀌면 개수가 달라졌을 때만 다시 놓는다(통과 확률·속도는 움직이는 중에 바로 반영).
+  // 이 상자가 개수를 알려 다시 계산한 것이면 건너뛴다(처음 개수에 개수 변수를 쓰면 끝없이 다시 놓게 된다).
   changed(item) {
+    if (item.telling) return;
     if (this.signature(item) !== item.sig) { this.place(item); this.draw(item); }
   },
 
@@ -167,6 +175,22 @@ const Particles = {
     });
     item.counts.replaceChildren(...item.kinds.map((k, i) => h('span', { class: 'ch-particles-kind', style: `--c:${k.color}` },
       h('b', { text: k.name }), mx == null ? ` ${item.tally[i].left}개` : ` ${item.labels[0]} ${item.tally[i].left} · ${item.labels[1] || ''} ${item.tally[i].right}`)));
+    this.tell(item);
+  },
+
+  // data-count가 있는 입자의 개수가 바뀌었으면 계산 상자 변수에 넣고 다시 계산한다.
+  tell(item) {
+    let changed = false;
+    item.kinds.forEach((k, i) => {
+      const c = k.counter;
+      if (!c || (c.left === item.tally[i].left && c.right === item.tally[i].right)) return;
+      c.left = item.tally[i].left;
+      c.right = item.tally[i].right;
+      changed = true;
+    });
+    if (!changed) return;
+    item.telling = true;
+    try { Calc.update(item.calc); } finally { item.telling = false; }
   },
 
   draw(item) {

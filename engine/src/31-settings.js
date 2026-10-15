@@ -44,6 +44,7 @@ const Settings = {
 
   apply() {
     document.documentElement.classList.toggle('ch-motion-off', this.values.motionOff);
+    emit('motion', this.values.motionOff);   // 저장값은 첫 장이 보인 뒤에 읽으므로, 그 사이 저절로 움직인 부품이 멈추게 알린다
     Ink.palmErase = this.values.palmErase;
     Ink.palmSize = this.values.palmSize;
     for (const input of qsa('.ch-pop-settings input[data-key]')) input.checked = this.values[input.dataset.key];

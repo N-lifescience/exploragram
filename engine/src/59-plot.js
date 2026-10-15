@@ -4,6 +4,9 @@
 // 눈금: data-xstep·data-ystep(간격), data-comma(천 단위 쉼표). 선: data-x="10, 60"(그릴 범위), data-show="식"(참일 때만).
 // 측정값: <i data-points="10, 360; 20, 260" data-label="측정값"></i>  선분·다각형: <i data-path="ax, ay; bx, by; cx, cy" data-close></i>
 // 끌 수 있는 점: <i data-drag="ax, ay" data-value="1, 4" data-label="A" data-snap="1"></i> (계산 상자 안에서만. 점 자리가 변수 ax, ay가 된다)
+// 움직임: 사람이 손잡이를 움직이면 곡선·선분·표시선·점이 계산 상자의 수와 같은 시간(0.6초) 동안 새 자리로 흘러간다.
+//   재생은 다음 칸까지 걸리는 시간 안에, 점검·끌 수 있는 점·⚙ 움직임 끄기는 바로 끝값. 곡선의 마디 수가 달라지면 바로 바꾼다.
+const PLOT_MOVE = new Set(['d', 'x1', 'x2', 'y1', 'y2', 'cx', 'cy', 'x', 'y']);
 const PLOT_COLORS = ['var(--accent)', '#2563EB', '#2E9E6A', '#7A4FBF', '#C8352B', '#B8860B'];
 const PLOT_PAD = { l: 76, r: 18, t: 18, b: 64 };
 const PLOT_GRIP = 56;   // 끌 수 있는 점의 누르는 자리(무대 px). 그래프 위·오른쪽 여백을 그 반 넘게 둔다
@@ -40,7 +43,7 @@ const Plot = {
   init() {
     this.list = [];
     qsa('figure.plot', Stage.deck).forEach((fig, n) => {
-      const item = { fig, n, errors: [], lines: [], vlines: [], points: [], sets: [], paths: [], drags: [], svg: null, area: null, legend: null, w: 0, h: 0, pad: PLOT_PAD, calc: Calc.of(fig) };
+      const item = { fig, n, errors: [], lines: [], vlines: [], points: [], sets: [], paths: [], drags: [], svg: null, area: null, legend: null, w: 0, h: 0, pad: PLOT_PAD, calc: Calc.of(fig), jobs: [], raf: 0 };
       const fail = (msg) => item.errors.push({ el: fig, msg });
       const range = (src, name) => {
         const parts = String(src || '').trim() ? this.split(src).map((s) => Expr.compile(s.trim())) : [];
@@ -120,7 +123,7 @@ const Plot = {
       // 점 손잡이는 그림과 같은 좌표(무대 px)로 겹쳐 놓는다
       if (item.drags.length) item.area = h('div', { class: 'ch-plot-area' }, item.svg, ...item.drags.map((g) => g.el));
       fig.append(item.area || item.svg);
-      if (item.calc) item.calc.listeners.push(() => this.draw(item));
+      if (item.calc) item.calc.listeners.push((scope, how) => this.draw(item, how && how.base ? Calc.dur(fig, how.base, how.opt) : 0));
       this.list.push(item);
       if (item.drags.length) Calc.update(item.calc);   // 범위에 맞춘 처음 자리로 다시 계산한다
       this.layout(item);
@@ -230,7 +233,8 @@ const Plot = {
     return pts;
   },
 
-  draw(item) {
+  // ms > 0이면 곡선·점이 지금 자리에서 새 자리로 ms 동안 흘러간다(계산 상자가 정한 시간). 0이면 바로 끝값.
+  draw(item, ms = 0) {
     if (!item.layer) return;
     const scope = item.calc ? item.calc.scope : {};
     const r = (v) => Math.round(v * 10) / 10;
@@ -240,46 +244,110 @@ const Plot = {
       l.on = shown(l);
       if (l.key) l.key.hidden = !l.on;
     }
-    item.layer.replaceChildren(...item.lines.filter((l) => l.on).map((l) => {
+    // 그림 조각마다 이름(key)을 붙여 두고, 다시 그릴 때 같은 이름끼리 이어서 움직인다
+    const layer = [];
+    item.lines.forEach((l, i) => {
+      if (!l.on) return;
       const dom = l.dom ? [val(l.dom[0]), val(l.dom[1])] : null;
-      if (dom && !dom.every(Number.isFinite)) return svgEl('path', { class: 'ch-plot-line', d: '' });
+      if (dom && !dom.every(Number.isFinite)) { layer.push({ key: `line${i}`, tag: 'path', attrs: { class: 'ch-plot-line', d: '' } }); return; }
       const d = this.sample(item, l.fn, scope, dom).map((seg) => `M${seg.map(([x, y]) => `${r(x)} ${r(y)}`).join('L')}`).join('');
-      return svgEl('path', { class: `ch-plot-line${l.dash ? ' is-dash' : ''}`, d, style: `stroke:${l.color}` });
-    }), ...item.paths.filter((l) => l.on).map((l) => {
+      layer.push({ key: `line${i}`, tag: 'path', attrs: { class: `ch-plot-line${l.dash ? ' is-dash' : ''}`, d, style: `stroke:${l.color}` } });
+    });
+    item.paths.forEach((l, i) => {
+      if (!l.on) return;
       const xy = l.pts.map(([fx, fy]) => [val(fx), val(fy)]);
       // 값이 없는 점이 하나라도 있으면 긋지 않는다(어긋난 도형을 보이지 않게). 범위 밖은 그림 테두리에서 잘린다
       const d = xy.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y))
         ? `M${xy.map(([x, y]) => `${r(this.sx(item, x))} ${r(clamp(this.sy(item, y), -10 * item.h, 11 * item.h))}`).join('L')}${l.close ? 'Z' : ''}` : '';
-      return svgEl('path', { class: `ch-plot-line${l.dash ? ' is-dash' : ''}${l.fill ? ' is-fill' : ''}`, d, style: `stroke:${l.color}${l.fill ? `;fill:${l.color}` : ''}` });
-    }));
+      layer.push({ key: `path${i}`, tag: 'path', attrs: { class: `ch-plot-line${l.dash ? ' is-dash' : ''}${l.fill ? ' is-fill' : ''}`, d, style: `stroke:${l.color}${l.fill ? `;fill:${l.color}` : ''}` } });
+    });
     const marks = [];
-    for (const v of item.vlines) {
-      if (!shown(v)) continue;
+    item.vlines.forEach((v, i) => {
+      if (!shown(v)) return;
       const x = val(v.fn);
-      if (!Number.isFinite(x) || x < item.x[0] || x > item.x[1]) continue;
+      if (!Number.isFinite(x) || x < item.x[0] || x > item.x[1]) return;
       const px = r(this.sx(item, x));
-      marks.push(svgEl('line', { class: 'ch-plot-vline', x1: px, x2: px, y1: item.pad.t, y2: item.h - item.pad.b }));
-    }
-    for (const set of item.sets.filter((l) => l.on)) {
-      for (const [fx, fy] of set.pts) {
+      marks.push({ key: `vline${i}`, tag: 'line', attrs: { class: 'ch-plot-vline', x1: px, x2: px, y1: item.pad.t, y2: item.h - item.pad.b } });
+    });
+    item.sets.forEach((set, i) => {
+      if (!set.on) return;
+      set.pts.forEach(([fx, fy], j) => {
         const x = val(fx);
         const y = val(fy);
-        if (![x, y].every(Number.isFinite) || x < item.x[0] || x > item.x[1] || y < item.y[0] || y > item.y[1]) continue;
-        marks.push(svgEl('circle', { class: 'ch-plot-point', cx: r(this.sx(item, x)), cy: r(this.sy(item, y)), r: 7, style: `fill:${set.color}` }));
-      }
-    }
-    for (const p of item.points) {
-      if (!shown(p)) continue;
+        if (![x, y].every(Number.isFinite) || x < item.x[0] || x > item.x[1] || y < item.y[0] || y > item.y[1]) return;
+        marks.push({ key: `set${i}.${j}`, tag: 'circle', attrs: { class: 'ch-plot-point', cx: r(this.sx(item, x)), cy: r(this.sy(item, y)), r: 7, style: `fill:${set.color}` } });
+      });
+    });
+    item.points.forEach((p, i) => {
+      if (!shown(p)) return;
       const x = val(p.fx);
       const y = val(p.fy);
-      if (![x, y].every(Number.isFinite) || x < item.x[0] || x > item.x[1] || y < item.y[0] || y > item.y[1]) continue;
+      if (![x, y].every(Number.isFinite) || x < item.x[0] || x > item.x[1] || y < item.y[0] || y > item.y[1]) return;
       const px = r(this.sx(item, x));
       const py = r(this.sy(item, y));
-      marks.push(svgEl('circle', { class: 'ch-plot-point', cx: px, cy: py, r: 7, style: `fill:${p.color}` }));
-      if (p.label) marks.push(svgEl('text', { class: 'ch-plot-plabel', x: px + 12, y: py - 12 }, p.label));
-    }
-    item.marks.replaceChildren(...marks);
+      marks.push({ key: `point${i}`, tag: 'circle', attrs: { class: 'ch-plot-point', cx: px, cy: py, r: 7, style: `fill:${p.color}` } });
+      if (p.label) marks.push({ key: `plabel${i}`, tag: 'text', attrs: { class: 'ch-plot-plabel', x: px + 12, y: py - 12 }, text: p.label });
+    });
+    const now = performance.now();
+    this.sync(item, item.layer, layer, ms, now);
+    this.sync(item, item.marks, marks, ms, now);
+    item.jobs = item.jobs.filter((j) => j.el.isConnected);
+    cancelAnimationFrame(item.raf);
+    if (item.jobs.length) this.play(item);
     for (const g of item.drags) this.place(item, g);
+  },
+
+  // parent의 자식을 specs대로 맞춘다. 같은 key·같은 태그의 요소는 그대로 두고 속성만 바꾼다.
+  // 자리 속성(PLOT_MOVE)은 ms > 0이면 지금 값에서 끝값으로 흘려 보낸다(수만 다른 글자끼리일 때, Calc.lerp).
+  sync(item, parent, specs, ms, now) {
+    const old = new Map();
+    for (const el of parent.children) if (el.chKey) old.set(el.chKey, el);
+    const drop = (el, name) => { item.jobs = item.jobs.filter((j) => !(j.el === el && (name == null || j.name === name))); };
+    const kids = specs.map((sp) => {
+      let el = old.get(sp.key);
+      if (!el || el.tagName !== sp.tag) {
+        if (el) drop(el);
+        el = svgEl(sp.tag, sp.attrs, sp.text);
+        el.chKey = sp.key;
+        return el;
+      }
+      for (const [name, v] of Object.entries(sp.attrs)) {
+        const to = String(v);
+        if (PLOT_MOVE.has(name)) {
+          const job = item.jobs.find((j) => j.el === el && j.name === name);
+          if (job && job.to === to) continue;   // 같은 끝값으로 가는 중이면 그대로
+          drop(el, name);
+          const from = el.getAttribute(name);
+          const lerp = ms && from != null && from !== to ? Calc.lerp(from, to) : null;
+          if (lerp) { item.jobs.push({ el, name, to, lerp, t0: now, ms }); continue; }
+        }
+        if (el.getAttribute(name) !== to) el.setAttribute(name, to);
+      }
+      if (sp.text != null && el.textContent !== sp.text) el.textContent = sp.text;
+      return el;
+    });
+    parent.replaceChildren(...kids);
+  },
+
+  play(item) {
+    const tick = (t) => {
+      item.jobs = item.jobs.filter((j) => {
+        const u = clamp((t - j.t0) / j.ms, 0, 1);
+        j.el.setAttribute(j.name, u >= 1 ? j.to : j.lerp(1 - (1 - u) ** 3));   // ease-out(계산 상자와 같다)
+        return u < 1;
+      });
+      if (item.jobs.length) item.raf = requestAnimationFrame(tick);
+    };
+    item.raf = requestAnimationFrame(tick);
+  },
+
+  // 흘러가는 중인 곡선·점을 끝값으로(점검 전, 시험)
+  settle() {
+    for (const item of this.list) {
+      cancelAnimationFrame(item.raf);
+      for (const j of item.jobs) j.el.setAttribute(j.name, j.to);
+      item.jobs = [];
+    }
   },
 
   // ---- 끌 수 있는 점 ----

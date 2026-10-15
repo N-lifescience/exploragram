@@ -4,9 +4,10 @@
 //   <p data-show="v < 1">…</p> <p data-class="is-ok: s > 0"> <div class="bar" data-value="s" data-max="10"></div>
 //   <button data-set="sex" data-value="여">여</button> <rect data-attr="width: 200 * v"/> </div>
 // 식은 50-expr.js(eval 없음). 식 오류는 그 자리에 '?'를 쓰고 자동 점검에 알린다.
-// 움직임: 사람이 손잡이를 움직이면 수·막대·SVG 속성·스타일 값이 0.6초 동안 끝값으로 흘러간다.
+// 움직임: 사람이 손잡이를 움직이면 수·막대·SVG 속성·스타일 값이 0.6초 동안 끝값으로 흘러간다(그래프는 59-plot이 같은 기준으로).
 //   점검·도구·수업 스크립트가 값을 바꿀 때, ⚙ 움직임 끄기, 보고 있지 않은 장에서는 바로 끝값을 쓴다.
 //   data-tween="off"(그 요소나 상자에서 끄기), data-tween="1.5"(초), <html data-tween="off">(파일 전체).
+// 입자 상자의 개수: <i data-kind="물" data-count="wl, wr">이면 그 입자의 왼쪽·오른쪽 개수가 변수 wl, wr이 된다(66-particles가 센다).
 const CALC_BIND = '[data-expr], [data-show], [data-class], [data-style], [data-attr], .bar[data-value]';
 const CALC_UNITLESS = /^(opacity|z-index|flex|flex-grow|flex-shrink|order|font-weight|line-height|scale)$/;
 const CALC_TWEEN_MS = 600;
@@ -67,6 +68,7 @@ const Calc = {
       for (const b of sets) taken.set(b.dataset.set, '단추');
       for (const el of item.steppers) taken.set(el.dataset.name, '단계 막대');
       item.drags = qsa('figure.plot > [data-drag]', box).filter(own).map((el) => this.drag(item, el, fail, taken)).filter(Boolean);
+      item.counts = qsa('figure.particles > i[data-kind][data-count]', box).filter(own).map((el) => this.counter(el, fail, taken)).filter(Boolean);
       box.addEventListener('ch-stepper', (e) => {
         if (!item.steppers.includes(e.target)) return;
         const src = e.detail && e.detail.src;
@@ -117,6 +119,25 @@ const Calc = {
       else bad(`data-snap="${snap}": 0보다 큰 수로 써 주세요(가로와 세로가 다르면 '1, 0.5')`);
     }
     return d;
+  },
+
+  // 입자 상자 개수 변수: data-count="wl, wr"(왼쪽, 오른쪽). 개수는 입자 상자가 셀 때마다 채운다. 잘못 쓰면 null.
+  counter(el, fail, taken) {
+    const kind = el.dataset.kind || '';
+    const bad = (msg) => fail(el.parentElement, `입자 상자 ${kind}의 data-count: ${msg}`);
+    const names = String(el.dataset.count).split(',').map((v) => v.trim());
+    if (names.length !== 2 || !names.every((n) => /^[\p{L}_][\p{L}\p{N}_]*$/u.test(n))) {
+      bad(`"${el.dataset.count}" — 왼쪽과 오른쪽 개수를 담을 변수 이름 두 개를 'wl, wr' 꼴로 써 주세요`);
+      return null;
+    }
+    if (names[0] === names[1]) { bad(`왼쪽과 오른쪽 변수 이름이 같아요(${names[0]})`); return null; }
+    for (const n of names) {
+      if (n === 'x') { bad('x는 그래프 곡선의 가로 변수라 쓸 수 없어요. wl처럼 다른 이름을 쓰세요'); return null; }
+      if (EXPR_BAD.has(n) || n in EXPR_CONSTS || EXPR_FUNCS[n]) { bad(`${n}은(는) 이름으로 쓸 수 없어요`); return null; }
+      if (taken.has(n)) { bad(`${n}은(는) ${taken.get(n)}에서도 쓰는 이름이에요`); return null; }
+    }
+    for (const n of names) taken.set(n, '입자 상자 개수');
+    return { el, names, left: 0, right: 0 };
   },
 
   // 'a: 식; b: 식' → [[a, 식]]. 따옴표 안의 ;는 나누지 않고, 이름 뒤 첫 :에서 자른다(식 안의 ? :는 그대로).
@@ -186,6 +207,7 @@ const Calc = {
     for (const b of item.sets) if (b.getAttribute('aria-pressed') === 'true') scope[b.dataset.set] = num(b.dataset.value);
     for (const el of item.steppers) scope[el.dataset.name] = Number(el.dataset.pos || 0);
     for (const d of item.drags) { scope[d.names[0]] = d.x; scope[d.names[1]] = d.y; }
+    for (const c of item.counts) { scope[c.names[0]] = c.left; scope[c.names[1]] = c.right; }
     return scope;
   },
 
@@ -203,15 +225,14 @@ const Calc = {
     const now = performance.now();
     const next = [];
     // 값 하나(글자·스타일·속성·막대)를 끝값 to로 보낸다. 흘려 보낼 수 있으면 일감으로 남기고, 아니면 바로 쓴다.
+    // 같은 끝값으로 가는 중이면 그대로 둔다(손을 뗄 때의 change, 입자 상자가 개수를 알려 다시 계산할 때).
     const put = (b, key, to, write, dec) => {
+      const old = item.jobs.find((j) => j.b === b && j.key === key);
+      if (old && old.to === to) { next.push(old); return; }
       const ms = base && this.dur(b.el, base, opt);
       const from = b.now[key];
       const lerp = ms && from !== undefined && from !== to ? this.lerp(from, to) : null;
-      if (lerp) {
-        const old = item.jobs.find((j) => j.b === b && j.key === key);
-        next.push(old && old.to === to ? old : { b, key, to, write, lerp, dec, t0: now, ms });   // 같은 끝값으로 가는 중이면 그대로
-        return;
-      }
+      if (lerp) { next.push({ b, key, to, write, lerp, dec, t0: now, ms }); return; }
       write(to, false, dec);
       b.now[key] = to;
     };
@@ -259,8 +280,9 @@ const Calc = {
     item.jobs = next;
     cancelAnimationFrame(item.raf);
     if (next.length) this.play(item);
+    // 그래프 등은 같은 기준(base, opt)으로 흘려 보낼지 정한다(Calc.dur)
     for (const fn of item.listeners) {
-      try { fn(scope); } catch (err) { console.error('[exploragram] calc', err); }
+      try { fn(scope, { base, opt }); } catch (err) { console.error('[exploragram] calc', err); }
     }
   },
 
@@ -313,13 +335,14 @@ const Calc = {
     item.raf = requestAnimationFrame(tick);
   },
 
-  // 흘러가는 중인 값을 모두 끝값으로(점검 전, 시험)
+  // 흘러가는 중인 값을 모두 끝값으로(점검 전, 시험). 그래프 곡선과 점도 함께.
   settle() {
     for (const item of this.list) {
       cancelAnimationFrame(item.raf);
       for (const j of item.jobs) { j.write(j.to, false, j.dec); j.b.now[j.key] = j.to; }
       item.jobs = [];
     }
+    Plot.settle();
   },
 
   // 실행 중 오류(모르는 이름 등)는 처음 한 번만 적는다.

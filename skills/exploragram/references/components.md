@@ -205,7 +205,7 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 </div>
 ```
 
-- 입력(변수 이름은 `name`): `input[type=range|number|checkbox|radio|text]`, `textarea`, `select`, 단추 고르기 `<button data-set="sex" data-value="여">`(처음엔 `aria-pressed="true"`인 것, 없으면 첫 단추).
+- 입력(변수 이름은 `name`): `input[type=range|number|checkbox|radio|text]`, `textarea`, `select`, 단추 고르기 `<button data-set="sex" data-value="여">`(처음엔 `aria-pressed="true"`인 것, 없으면 첫 단추). 그래프의 끌 수 있는 점(9-1절)과 입자 상자의 개수(`data-count`, 13절)도 변수가 된다.
 - 단계 막대를 변수로: `.calc` 안의 `<div class="reveal" data-name="v" data-stops="…">` → 지금 칸 번호가 `v`. 0단계 시작이 필요한 활동은 이것을 쓴다.
 - 계산: `data-const`(한 번), `data-let`(바뀔 때마다 앞에서부터).
 - 단추 값(`data-value`)은 수처럼 생기면 수(`year == 1918`), 아니면 글자(`sex == '여'`)다.
@@ -215,7 +215,7 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 - 식이 틀리면 그 자리에 '?'가 나오고 점검(D)에 오류로 뜬다. 근거 없는 수치를 지어내지 않는다. 단위를 쓴다.
 - 계산 상자의 슬라이더는 중간값에서 시작해도 된다(단계를 여는 막대가 아니다). 엔진이 손을 뗄 때 초점을 풀어 주므로 → 키가 그대로 장을 넘긴다. 0단계 가림이 필요하면 위의 `.reveal data-name`을 쓴다.
 - 입자·점이 많은 모식도는 `data-attr`로 점마다 식을 쓰지 말고 입자 상자 `figure.particles`(13절)를 쓰거나, 그림 몇 장을 단계 막대로 바꾼다.
-- **움직임**: 사람이 손잡이를 움직이면 수(`data-expr`), 막대(`.bar`), `data-attr`, `data-style` 값이 0.6초 동안 끝값으로 흘러간다. 끝값이 정수면 정수로 세어 간다. 수만 다른 글자 값(`'rotate(' + a + ' 100 100)'`, 꺾은선 `points`)도 흐르고 `#` 색과 글자 결과는 바로 바뀐다. 그래프 곡선과 입자 상자는 흐르지 않고 다시 그린다.
+- **움직임**: 사람이 손잡이를 움직이면 수(`data-expr`), 막대(`.bar`), `data-attr`, `data-style` 값이 0.6초 동안 끝값으로 흘러간다. 끝값이 정수면 정수로 세어 간다. 수만 다른 글자 값(`'rotate(' + a + ' 100 100)'`, 꺾은선 `points`)도 흐르고 `#` 색과 글자 결과는 바로 바뀐다. 그래프의 곡선과 점도 같은 시간 동안 새 자리로 간다(9절).
 - 바로 바뀌게 하려면 그 요소나 상자에 `data-tween="off"`를, 더 천천히 움직이려면 `data-tween="1.5"`(초)를 붙인다. 파일 전체는 `<html data-tween="off">`로 끈다. 자동 점검, `states.mjs`, 수업 스크립트가 값을 바꾸면 바로 끝값이 되고 ⚙ 「움직임 끄기」도 따른다.
 - 시간을 엔진이 흘리게 하려면 슬라이더에 `data-play`를 붙인다(16절).
 
@@ -241,6 +241,10 @@ PPT로 할 수 없는 '하나씩 열기'. 0단계(전부 가림)에서 시작한
 | 범례 | `data-label`이 있는 선·측정값이 그래프 위에 범례로 나온다. 움직이는 점의 이름은 점 옆에 |
 
 예: 가격 슬라이더 `p`에 따라 초과량 구간만 굵게 보이기 `<i data-line="p" data-x="min(qd, qs), max(qd, qs)" data-show="qd != qs" data-label="초과량"></i>`.
+
+- 사람이 손잡이를 움직이면 곡선, 선분, 세로 표시선, 점이 계산 상자의 수와 함께 0.6초 동안 새 자리로 간다. 단추로 값을 바꿔도 곡선이 건너뛰지 않는다. 흐르는 시간은 계산 상자처럼 `data-tween`으로 바꾼다(8절).
+- 재생 중에는 다음 칸까지 걸리는 시간 동안 옮긴다. 끌 수 있는 점과 그 점으로 그린 선은 손을 그대로 따라간다. 점검(D)과 ⚙ 「움직임 끄기」에서는 바로 끝값을 그린다.
+- 점근선을 건너는 곳처럼 곡선이 끊기는 자리가 달라지면 흘리지 않고 바로 바꾼다.
 
 ### 9-1. 끌 수 있는 점 `data-drag`
 
@@ -340,12 +344,14 @@ document.addEventListener('DOMContentLoaded', () => {
 ```html
 <div class="calc" style="display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start">
   <figure class="particles" data-membrane="0.5" data-labels="세포 밖|세포 안" data-height="300">
-    <i data-kind="물" data-left="30" data-right="30" data-pass="1" data-color="#5AA9E6" data-size="4"></i>
+    <i data-kind="물" data-left="30" data-right="30" data-pass="1" data-color="#5AA9E6" data-size="4" data-count="wl, wr"></i>
     <i data-kind="설탕" data-left="sugar" data-right="5" data-pass="0" data-color="#C04F15" data-size="8"></i>
   </figure>
   <div>
     <p>세포 밖 설탕 <output data-expr="sugar" data-unit="개"></output></p>
     <input type="range" name="sugar" min="0" max="40" value="20" aria-label="세포 밖 설탕 수">
+    <p>세포 안 물 <output data-expr="wr" data-unit="개"></output></p>
+    <div class="bar" data-value="wr" data-max="60" style="--bar-c:#5AA9E6"></div>
     <p data-show="sugar > 5">설탕은 막을 못 지난다. 물이 세포 밖으로 더 많이 나간다.</p>
   </div>
 </div>
@@ -354,6 +360,8 @@ document.addEventListener('DOMContentLoaded', () => {
 - `data-membrane`: 막의 가로 위치(0~1). 빼면 막이 없는 한 칸(기체 운동, 확산). 막이 없어도 `data-right`를 주면 처음에 가운데를 기준으로 나눠 놓고 양쪽 개수를 센다(잉크가 퍼지는 확산).
 - `data-labels="세포 밖|세포 안"`은 상자 안 양쪽 위와 개수 줄에 나온다.
 - 입자 종류마다 `data-left`·`data-right`(처음 개수), `data-pass`(막을 지날 확률 0~1: 반투과성막이면 물 1, 용질 0), `data-color`, `data-size`(반지름 px). 값은 식이라 계산 상자 변수를 쓸 수 있다. `data-speed`(상자 전체 속도, 기본 1)도 식.
+- `data-count="wl, wr"`: 그 입자의 왼쪽 개수와 오른쪽 개수가 계산 상자 변수 `wl`, `wr`이 된다. 입자가 움직이는 동안 0.25초마다 바뀐다. 개수로 나타낼 거시 값(수, 막대, 그래프)은 따로 짓지 말고 이 변수로 계산한다. 위 예에서는 세포 안 물 개수와 막대가 입자를 센 값을 따라간다.
+- 개수 변수는 계산 상자 안의 입자 상자에서만 쓴다. 처음 개수(`data-left`, `data-right`)에는 쓰지 않는다. 막이 없고 `data-right`도 없으면 모두 왼쪽으로 센다.
 - 장이 보이면 움직이고 넘기면 멈춘다. 「멈추기」·「다시」 단추, 아래에 양쪽 개수. 입자는 모두 300개까지.
 - 삼투: 막을 못 지나는 입자(`data-pass="0"`, 용질)는 자기 쪽 막 구멍을 가려, 그쪽 물이 막을 지날 확률이 용질 비율만큼 줄어든다. 그래서 물은 용질이 많은 쪽으로 더 많이 모인다(교과서의 설명 모형).
 - 움직임은 모형이다. 개수의 비율이 개념과 맞는지만 지키고, '실제 분자 수'처럼 말하지 않는다.
@@ -413,11 +421,12 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 ```
 
-- 시간 축(`exploragram.md`의 '축')의 기본 조작이다. 슬라이더에 `data-play="8"`을 붙이면 엔진이 슬라이더 바로 위에 「▶ 재생」과 「처음으로」 단추를 단다. 재생하는 동안 「▶ 재생」은 「❚❚ 멈춤」이 된다. 숫자는 최솟값에서 최댓값까지 가는 초이고 비우면 6초다. 끝에 닿으면 멈춘다. `data-loop`를 붙이면 처음부터 되풀이한다.
+- 시간 축(`exploragram.md`의 '축')의 기본 조작이다. 슬라이더에 `data-play="8"`을 붙이면 엔진이 슬라이더 바로 위에 「▶ 재생」, 「한 칸」, 「처음으로」 단추를 단다. 재생하는 동안 「▶ 재생」은 「❚❚ 멈춤」이 된다. 숫자는 최솟값에서 최댓값까지 가는 초이고 비우면 6초다. 끝에 닿으면 멈춘다. `data-loop`를 붙이면 처음부터 되풀이한다.
 - 계산 상자 안이면 값이 바뀔 때마다 다시 계산한다. 칸이 성기면 다음 칸까지 걸리는 시간 동안 그림을 흘려 보낸다. 그래프 선에 `data-x="0, max(t, 0.01)"`을 주면 곡선이 시간을 따라 그려진다.
 - 직접 짠 그림의 슬라이더에도 붙인다. 엔진이 값을 바꿀 때마다 `input` 이벤트를 보내므로 직접 짠 처리기가 그대로 그린다.
+- 「한 칸」은 슬라이더의 `step`만큼 나아간다. 사람이 슬라이더를 민 것처럼 그림이 0.6초 동안 움직인다. 재생 중에 누르면 멈추고 한 칸 나아간다. 끝에 닿으면 눌리지 않는다. `data-loop`면 처음으로 돌아간다.
 - 끝에 있을 때 「▶ 재생」을 누르면 처음부터 다시 간다. 슬라이더를 손으로 잡거나 장을 넘기면 멈춘다. ⚙ 「움직임 끄기」를 켜도 재생은 된다.
-- 재생할 슬라이더는 최솟값('시작'이나 0)에서 시작한다. 「재생」 줄만큼(약 64px) 높이가 늘어나니 점검(D)으로 넘침을 확인한다.
+- 재생할 슬라이더는 최솟값('시작'이나 0)에서 시작한다. 단추 줄만큼(약 64px) 높이가 늘어난다. 단추 셋은 폭 340px 이상인 칸에 한 줄로 들어간다. 더 좁으면 두 줄(약 130px)이 되니 점검(D)으로 넘침을 확인한다.
 - 단계 막대(`.reveal`)가 만드는 막대에는 붙이지 않는다. 단계를 차례로 보여 주려면 `→` 키로 넘긴다.
 
 ## 점검 코드(D 키, `?audit`, ⚙ 설정의 「자동 점검」)

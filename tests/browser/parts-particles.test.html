@@ -22,6 +22,19 @@
   <figure class="particles" id="mix" data-height="200" style="width:400px"><i data-kind="잉크" data-left="0" data-right="20" data-color="#7A4FBF"></i><i data-kind="물" data-left="20" data-right="0"></i></figure>
   <figure class="particles" id="bad"><i data-kind="x" data-left="1 +"></i></figure>
 </section>
+<section class="slide" id="p2">
+  <div class="calc" id="cc" data-let="gap = wr - wl">
+    <figure class="particles" id="cnt" data-membrane="0.5" data-height="200" style="width:400px">
+      <i data-kind="물" data-left="30" data-right="10" data-pass="1" data-count="wl, wr"></i>
+      <i data-kind="설탕" data-left="0" data-right="10" data-pass="0" data-size="8"></i>
+    </figure>
+    <output id="gapOut" data-expr="gap"></output>
+    <div class="bar" id="wbar" data-value="wr" data-max="40"></div>
+    <figure class="plot" id="cplot" data-x="0, 2" data-y="0, 40" data-height="200" style="width:300px"><i data-point="1, wr"></i></figure>
+  </div>
+  <div class="calc"><figure class="particles" id="badc"><i data-kind="가" data-count="x, y"></i><i data-kind="나" data-count="p"></i><i data-kind="다" data-count="q, q"></i></figure></div>
+  <figure class="particles" id="nocalc"><i data-kind="라" data-count="m, n"></i></figure>
+</section>
 <pre id="results" data-summary="pending"></pre>
 <script>
 const I = () => Exploragram._internal;
@@ -88,6 +101,55 @@ test('움직임 끄기면 저절로 움직이지 않는다', async () => {
   Exploragram.go(1);
   assert(!it('box').running, 'no autoplay');
   await I().Settings.set('motionOff', false);
+});
+test('움직임 끄기를 켜면 저절로 움직이던 상자는 멈추고, 선생님이 누른 상자는 계속 움직인다', async () => {
+  Exploragram.go(0);
+  Exploragram.go(1);
+  const b = it('box');
+  const g = it('gas');
+  assert(b.running && g.running, '장이 보이면 저절로 움직인다');
+  g.run.click();
+  g.run.click();
+  assert(g.running, '선생님이 다시 누름');
+  await I().Settings.set('motionOff', true);
+  assert(!b.running, '저절로 움직이던 상자는 멈춤');
+  assert(g.running, '선생님이 누른 상자는 그대로');
+  await I().Settings.set('motionOff', false);
+  Exploragram.go(0);
+});
+test('data-count: 입자 개수가 계산 상자 변수가 되어 수·막대·그래프를 입자 상태에서 계산한다', async () => {
+  const c = it('cnt');
+  const calc = I().Calc.list.find((x) => x.box.id === 'cc');
+  eq([calc.scope.wl, calc.scope.wr], [30, 10]);
+  eq(document.getElementById('gapOut').textContent, '-20');
+  eq(document.getElementById('wbar').style.getPropertyValue('--f'), '0.25');
+  for (let i = 0; i < 1500; i++) I().Particles.step(c, 0.03);
+  I().Particles.count(c);
+  eq([calc.scope.wl, calc.scope.wr], [c.tally[0].left, c.tally[0].right]);
+  assert(calc.scope.wr > 10, `물이 설탕 쪽으로 옮겨 갔다: ${calc.scope.wr}`);
+  eq(document.getElementById('gapOut').textContent, String(c.tally[0].right - c.tally[0].left));
+  const p = I().Plot.list.find((x) => x.fig.id === 'cplot');
+  eq(Number(p.marks.querySelector('circle').getAttribute('cy')), Math.round(I().Plot.sy(p, calc.scope.wr) * 10) / 10);
+  c.reset.click();
+  eq([calc.scope.wl, calc.scope.wr], [30, 10], '「다시」를 누르면 처음 개수');
+});
+test('data-count: 움직이는 동안 0.25초마다 개수를 알린다', async () => {
+  const c = it('cnt');
+  const calc = I().Calc.list.find((x) => x.box.id === 'cc');
+  Exploragram.go(2);
+  assert(c.running, '움직인다');
+  const seen = new Set();
+  for (let i = 0; i < 12; i++) { await wait(100); seen.add(calc.scope.wr); }
+  Exploragram.go(0);
+  assert(seen.size > 1, `개수가 바뀌어 간다: ${[...seen].join(',')}`);
+  eq([calc.scope.wl, calc.scope.wr], [c.tally[0].left, c.tally[0].right]);
+});
+test('data-count를 잘못 쓰면 점검 오류', () => {
+  const msgs = Exploragram.audit().errors.map((e) => e.msg).join('\n');
+  assert(/가의 data-count: x는/.test(msgs), msgs);
+  assert(/나의 data-count: "p"/.test(msgs), msgs);
+  assert(/다의 data-count: 왼쪽과 오른쪽 변수 이름이 같아요/.test(msgs), msgs);
+  assert(/라의 data-count: 계산 상자\(\.calc\) 안/.test(msgs), msgs);
 });
 test('잘못 쓴 식은 점검 오류', () => {
   assert(Exploragram.audit().errors.some((e) => e.code === 'part' && e.msg.includes('data-left')), 'part error');
