@@ -1,7 +1,7 @@
-/*! class-html engine v1.6.0 | MIT | https://github.com/N-lifescience/exploragram */
+/*! class-html engine v1.6.1 | MIT | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '1.6.0';
+const VERSION = '1.6.1';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
 // 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 ClassHTML.
