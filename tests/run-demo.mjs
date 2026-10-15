@@ -150,6 +150,15 @@ async function runViewport(width, height) {
       check(index >= 0, `Missing menu: ${text}`);
       await click(`.ch-menu-item:nth-of-type(${index + 1})`);
     };
+    // 화면 안 확인창(Ask, 13-panels.js)에 답한다. 글자 칸이 있으면 실제 키 입력으로 채운다.
+    const answer = async (text) => {
+      await until("!!document.querySelector('.ch-ask-ok')");
+      if (text != null) {
+        await evaluate("document.querySelector('.ch-ask-input').select()");
+        await send('Input.insertText', { text });
+      }
+      await click('.ch-ask-ok');
+    };
     const screenshot = async (label) => {
       await sleep(350);
       const image = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
@@ -201,6 +210,8 @@ async function runViewport(width, height) {
     check(await evaluate("document.querySelector('#counter').textContent==='1' && Exploragram._internal.Ink.page.length===1"), 'Button drag must create ink without incrementing counter');
     pass('실제 펜 포인터: 톡 버튼 실행 · 드래그는 판서');
 
+    // 획을 뗀 뒤 0.7초(엔진 WRITING_MS) 안에 닿으면 쓰는 중이라 판서가 된다. 슬라이더 조작은 그 뒤에 본다.
+    await sleep(800);
     const slider = await center('#demo-range');
     await drag({ x: slider.x - slider.width * .1, y: slider.y }, { x: slider.x + slider.width * .35, y: slider.y }, 'mouse');
     const range = await evaluate("({value:document.querySelector('#demo-range').value,out:document.querySelector('#demo-out').textContent,ink:Exploragram._internal.Ink.page.length,tool:Exploragram._internal.Tools.current})");
@@ -238,9 +249,8 @@ async function runViewport(width, height) {
     check(await evaluate('!Exploragram._internal.Board.active && Exploragram._internal.Nav.state.slide===2'), 'C did not restore slide');
     pass('실제 C 토글 · 칠판 추가 · 초록 바탕 흰 펜 · 원래 장 복원');
 
-    // 실제 네이티브 prompt/confirm은 CDP dialog handler가 이 독립 프로필 안에서만 수락한다.
-    dialogReply = { accept: true, promptText: '2반' };
     await menu('반 추가');
+    await answer('2반');
     await until("Exploragram._internal.Session.current==='2반'");
     check(await evaluate('Exploragram._internal.Ink.page.length===0 && Exploragram._internal.Session.doc.boards.length===1'), 'New class must have separate ink and board');
     await click(toolbar('class'));
@@ -270,6 +280,7 @@ async function runViewport(width, height) {
     check(JSON.parse(readFileSync(backup, 'utf8')).kind === 'ink-backup', 'Downloaded file is not an ink backup');
     run.backup = backup;
     await menu('판서 모두 지우기');
+    await answer();
     await until('Object.values(Exploragram._internal.Session.doc.slides).every(p=>!p.length) && Exploragram._internal.Session.doc.boards.length===1');
     await click(toolbar('class'));
     const root = await send('DOM.getDocument');

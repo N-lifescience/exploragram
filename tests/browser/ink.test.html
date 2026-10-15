@@ -151,6 +151,21 @@ test('쓰는 중(획을 뗀 직후)에 버튼에 닿으면 누름이 아니라 �
   btn.click();
   eq(taps, t0 + 1);                                       // 멈췄다 누르면 다시 버튼
 });
+test('장을 옮기면 쓰는 중이 끊겨 새 장의 첫 톡은 누름', async () => {
+  const { Nav } = I();
+  const btn = document.getElementById('tap');
+  const t0 = taps;
+  drag(null, [100, 640], [160, 650]);
+  await wait(450);                                        // 늦은 클릭 막기(0.4초)는 지났고 쓰는 중(0.7초) 안
+  Nav.go(1);
+  Nav.go(0);
+  const before = page().length;
+  ptr('pointerdown', btn, 200, 200, { pointerType: 'touch' });
+  ptr('pointerup', btn, 200, 200, { pointerType: 'touch' });
+  btn.click();
+  eq(taps, t0 + 1);
+  eq(page().length, before);
+});
 test('판서 입력은 아래 요소의 포인터 처리기로 내려가지 않는다', () => {
   I().Ink.lastUp = -1e9;
   const h2 = document.querySelector('#i1 h2');

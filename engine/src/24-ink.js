@@ -101,6 +101,9 @@ const Ink = {
 
   setPage(ref) {
     this.cancelGesture();
+    // 다른 장·칠판 쪽으로 옮겼다면 앞 쪽 글씨를 이어 쓰는 중이 아니다: 새 쪽의 첫 톡은 누름으로 받는다
+    const r = this.ref;
+    if (!r || r.kind !== ref.kind || r.key !== ref.key || r.index !== ref.index) this.lastUp = -1e9;
     this.ref = ref;
     this.redraw();
   },

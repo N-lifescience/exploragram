@@ -3,7 +3,7 @@ import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const VERSION = '2.0.1';
+const VERSION = '2.0.2';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 function concat(dir, ext) {

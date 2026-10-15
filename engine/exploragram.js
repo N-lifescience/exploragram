@@ -1,7 +1,7 @@
-/*! exploragram engine v2.0.1 | © N-lifescience | https://github.com/N-lifescience/exploragram */
+/*! exploragram engine v2.0.2 | © N-lifescience | https://github.com/N-lifescience/exploragram */
 (function () {
 'use strict';
-const VERSION = '2.0.1';
+const VERSION = '2.0.2';
 const LIVE_CONFIG = {"url":"https://qtwigpxinccudhprrdnb.supabase.co","key":"sb_publishable_-3KCWch7Q7sBQbcdVzxR4g_imovkZv5","site":"https://n-lifescience.github.io/exploragram/"};
 /* ---- 00-core.js ---- */
 // 공통 상수, 작은 DOM 도우미, 이벤트 훅, 공개 객체 Exploragram.
@@ -984,6 +984,9 @@ const Ink = {
 
   setPage(ref) {
     this.cancelGesture();
+    // 다른 장·칠판 쪽으로 옮겼다면 앞 쪽 글씨를 이어 쓰는 중이 아니다: 새 쪽의 첫 톡은 누름으로 받는다
+    const r = this.ref;
+    if (!r || r.kind !== ref.kind || r.key !== ref.key || r.index !== ref.index) this.lastUp = -1e9;
     this.ref = ref;
     this.redraw();
   },
