@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
 - `</body>` 바로 앞에 둔다. `Exploragram.onShow/onHide/go/next/prev/audit`를 쓴다. `Exploragram.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
 - 설계 방법과 뼈대 코드는 `exploragram.md`. 조작한 상태를 찍어 확인할 때는 `scripts/states.mjs`.
 - 펜을 든 채로 쓰는 규칙: 누르는 요소는 `button`·`a`·`label` 또는 `data-tap`, 끄는 요소(슬라이더가 아닌 것)는 `data-no-ink`.
-- 값이 바뀌면 그림이 건너뛰지 않게 바뀌는 SVG 요소에 CSS `transition`을 준다(`exploragram.md`의 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).
+- 값이 바뀌면 그림이 건너뛰지 않게 0.6~0.8초 동안 이어서 움직인다. 바뀌는 SVG 요소에 CSS `transition`을 주거나 `requestAnimationFrame`으로 보간한다. 움직임 줄이기(`prefers-reduced-motion`)와 ⚙ 「움직임 끄기」에서는 바로 끝값을 그린다(`exploragram.md`의 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).
 
 ## 13. 입자 상자 `figure.particles`
 
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 ```
 
-- 슬라이더에 `data-play="8"`을 붙이면 엔진이 슬라이더 바로 위에 「▶ 재생」과 「처음으로」 단추를 단다. 숫자는 최솟값에서 최댓값까지 가는 초이고 비우면 6초다. 끝에 닿으면 멈춘다. `data-loop`를 붙이면 처음부터 되풀이한다.
+- 시간 축(`exploragram.md`의 '축')의 기본 조작이다. 슬라이더에 `data-play="8"`을 붙이면 엔진이 슬라이더 바로 위에 「▶ 재생」과 「처음으로」 단추를 단다. 재생하는 동안 「▶ 재생」은 「❚❚ 멈춤」이 된다. 숫자는 최솟값에서 최댓값까지 가는 초이고 비우면 6초다. 끝에 닿으면 멈춘다. `data-loop`를 붙이면 처음부터 되풀이한다.
 - 계산 상자 안이면 값이 바뀔 때마다 다시 계산한다. 칸이 성기면 다음 칸까지 걸리는 시간 동안 그림을 흘려 보낸다. 그래프 선에 `data-x="0, max(t, 0.01)"`을 주면 곡선이 시간을 따라 그려진다.
 - 직접 짠 그림의 슬라이더에도 붙인다. 엔진이 값을 바꿀 때마다 `input` 이벤트를 보내므로 직접 짠 처리기가 그대로 그린다.
 - 끝에 있을 때 「▶ 재생」을 누르면 처음부터 다시 간다. 슬라이더를 손으로 잡거나 장을 넘기면 멈춘다. ⚙ 「움직임 끄기」를 켜도 재생은 된다.
