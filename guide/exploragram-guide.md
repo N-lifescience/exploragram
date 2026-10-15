@@ -82,7 +82,7 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
    - 글만 바뀌는 장에는 `data-activity`를 붙이지 않는다. 붙이면 점검이 `text-only`로 알리고 활동 장으로 세지 않는다.
    - **움직임은 필수다.** 입력이 바뀔 때 그림을 끝값으로 다시 그리기만 하는 장(static re-render)은 기준 미달이다.
    - 장면마다 축을 하나 고른다. 개념이 '어떻게 변해 가나, 얼마나 걸리나'를 물으면 시간 축이다. '어디서 무엇이 다른가, 어느 수준에서 보나'를 물으면 공간 축, '무엇이 어디로 퍼지거나 전달되나'를 물으면 시공간 축이다. 같은 개념도 수업의 질문에 따라 축이 달라진다(`references/exploragram.md`의 '축').
-   - 어느 축이든 값이 바뀌면 0.6~0.8초 동안 이어서 움직이고 끝값으로 순간 이동하지 않는다. 계산 상자, 입자 상자, 재생(`data-play`)은 엔진이 움직인다. 직접 짠 그림은 `requestAnimationFrame`이나 CSS `transition`으로 0.6~0.8초 동안 보간한다. 움직임 줄이기(`prefers-reduced-motion`)나 ⚙ 「움직임 끄기」가 켜져 있으면 움직임을 줄인다.
+   - 어느 축이든 값이 바뀌면 0.6~0.8초 동안 이어서 움직이고 끝값으로 순간 이동하지 않는다. 계산 상자, 입자 상자, 재생(`data-play`)은 엔진이 움직인다. 직접 짠 그림은 `requestAnimationFrame`이나 CSS `transition`으로 0.6~0.8초 동안 보간한다. ⚙ 「움직임 끄기」가 켜져 있으면 바로 끝값을 그린다. 학교 PC에서 움직임이 통째로 사라지지 않게 운영체제의 움직임 줄이기(`prefers-reduced-motion`)는 따르지 않는다.
 2. **0단계에서 시작.** 직접 짠 익스플로라그램은 첫 조작 전까지 결과를 가림막으로 가린다. 단계·시간·연도를 여는 슬라이더는 첫 칸이 '시작'이다. 연표·지도·비교 전환도 아무것도 공개되지 않은 상태에서 시작하고, 첫 조작이 1단계를 연다.
    - 조건을 비교하는 슬라이더(사람 수, 정서 세기처럼 기준값이 있어야 비교되는 것)는 기준값에서 시작해도 된다. 그때도 결과는 다른 첫 조작(상황 고르기 등) 전까지 가린다. 점검의 `not-veiled` 경고는 남아도 된다.
    - 엔진 계산 상자(`.calc`)는 기준값을 보여 주며 시작해도 된다. 엔진이 첫 상태를 점검하고 초점도 풀어 주기 때문이다. 계산 상자로도 0단계 가림이 필요하면 단계 막대를 변수로 쓴다(`exploragram.md`의 '엔진에 붙이는 뼈대').
@@ -163,7 +163,8 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 - 계산 상자는 엔진이 움직인다. 수(`data-expr`), 막대(`.bar`), `data-attr`, `data-style`이 0.6초 동안 끝값으로 간다. 그래프의 곡선과 점도 같은 시간 동안 새 자리로 간다. 더 길게 하려면 `data-tween="0.8"`을 붙인다.
 - 재생 중에는 엔진이 다음 칸까지 걸리는 시간 동안 그림을 옮긴다. 「한 칸」과 「처음으로」는 사람이 슬라이더를 민 것처럼 0.6초 동안 옮긴다. 그래프에서 학생이 끄는 점(`data-drag`)은 손을 그대로 따라간다.
 - 직접 짠 그림은 `requestAnimationFrame`으로 앞 값에서 새 값까지 0.6~0.8초 동안 보간(tween)하거나 바뀌는 SVG 요소에 CSS `transition`을 0.6~0.8초로 준다. 끝값만 넣고 끝내지 않는다(아래 '직접 짜야 할 때').
-- 운영체제의 움직임 줄이기(`prefers-reduced-motion: reduce`)나 ⚙ 「움직임 끄기」(`<html>`의 `ch-motion-off` 클래스)가 켜져 있으면 움직임을 줄인다. 엔진 부품은 「움직임 끄기」를 따른다. 직접 짠 움직임은 두 설정을 모두 확인해 바로 끝값을 그린다. 교사가 누른 재생은 그대로 둔다.
+- ⚙ 「움직임 끄기」(`<html>`의 `ch-motion-off` 클래스)가 켜져 있으면 바로 끝값을 그린다. 엔진 부품도 직접 짠 움직임도 이 설정 하나만 확인한다. 교사가 누른 재생은 그대로 둔다.
+- 운영체제의 움직임 줄이기(`prefers-reduced-motion`)는 따르지 않는다. 학교 PC는 '최적 성능' 같은 설정으로 이 값이 켜져 있기도 하다. 그대로 따르면 움직임이 통째로 사라진다. 움직임을 꺼야 하는 PC에서는 ⚙로 끈다. 그 PC가 설정을 기억한다.
 
 ### 설계 순서
 
@@ -462,7 +463,6 @@ PPT를 HTML로 옮기는 일이 아니다. PPT로는 못 하는 수업을 만든
 .dh-lab, .dh-out { font-size: 26px; }
 .dh-calc { font-size: 22px; }
 #ab-cell, #ab-bar { transition: rx .7s, ry .7s, y .7s, height .7s; }   /* 값이 바뀌면 0.7초 동안 이어서 움직인다 */
-@media (prefers-reduced-motion: reduce) { #ab-cell, #ab-bar { transition: none; } }
 ```
 
 ```html
@@ -493,11 +493,11 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 ```
 
-- **직접 짠 그림도 0.6~0.8초 동안 이어서 움직인다.** 바뀌는 SVG 요소에 CSS `transition`을 준다(위 `#ab-cell`, `#ab-bar`). 크롬, 엣지, 웨일에서는 `rx`, `cx`, `height`, `y` 같은 SVG 속성도 흘러간다. ⚙ 「움직임 끄기」를 누르면 엔진이 transition을 끈다. 운영체제의 움직임 줄이기는 위 `@media (prefers-reduced-motion: reduce)`가 끈다.
-- CSS로 흘릴 수 없는 것(캔버스, 글자로 쓴 수, 경로 `d`)은 `requestAnimationFrame`으로 보간한다. 아래 `tween`은 앞 값에서 새 값까지 0.7초 동안 그린다. 움직임을 줄이는 설정이면 바로 끝값을 그린다. 재생이 보낸 `input`에는 한 칸 시간(`e.chPlay`)이 실려 오므로 그 시간 안에 닿게 한다.
+- **직접 짠 그림도 0.6~0.8초 동안 이어서 움직인다.** 바뀌는 SVG 요소에 CSS `transition`을 준다(위 `#ab-cell`, `#ab-bar`). 크롬, 엣지, 웨일에서는 `rx`, `cx`, `height`, `y` 같은 SVG 속성도 흘러간다. ⚙ 「움직임 끄기」를 켜면 엔진이 transition을 끈다. 운영체제 설정을 보는 `@media (prefers-reduced-motion)`은 쓰지 않는다(위 '움직임 공통 규칙').
+- CSS로 흘릴 수 없는 것(캔버스, 글자로 쓴 수, 경로 `d`)은 `requestAnimationFrame`으로 보간한다. 아래 `tween`은 앞 값에서 새 값까지 0.7초 동안 그린다. ⚙ 「움직임 끄기」가 켜져 있으면 바로 끝값을 그린다. 재생이 보낸 `input`에는 한 칸 시간(`e.chPlay`)이 실려 오므로 그 시간 안에 닿게 한다.
 
 ```js
-const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('ch-motion-off');
+const still = () => document.documentElement.classList.contains('ch-motion-off');   // ⚙ 「움직임 끄기」만 본다
 function tween(job, to, draw, ms = 700) {   // job = { v: 지금 값, raf: 0 }을 그림마다 하나씩 둔다
   cancelAnimationFrame(job.raf);
   const from = job.v, t0 = performance.now();
@@ -550,7 +550,7 @@ function tween(job, to, draw, ms = 700) {   // job = { v: 지금 값, raf: 0 }�
 - [ ] 모형 수치에 `data-ai="모형 수치"`를 붙이고 화면에 '모형'이라고 적었는가.
 - [ ] 장면마다 축(시간, 공간, 시공간)을 하나 골랐는가. 고른 이유가 그 개념이 던지는 질문과 맞는가.
 - [ ] 값이 바뀌면 그림이 0.6~0.8초 동안 이어서 움직이는가(계산 상자, 입자 상자, `data-play`, 직접 짠 그림의 `transition`이나 `requestAnimationFrame`). 끝값으로 다시 그리기만 하는 장은 없는가.
-- [ ] 움직임 줄이기(`prefers-reduced-motion`)와 ⚙ 「움직임 끄기」에서 직접 짠 움직임이 멈추는가.
+- [ ] ⚙ 「움직임 끄기」를 켜면 직접 짠 움직임이 멈추는가. 운영체제 설정(`prefers-reduced-motion`)을 보는 코드는 없는가.
 - [ ] 설계표에 적은 손잡이, 축, 부품, 움직임을 모두 만들었는가.
 - [ ] 단추를 눌렀을 때 글만 바뀌는 장에 `data-activity`를 붙이지 않았는가.
 - [ ] 장에 '원본 PPT', '익스플로라그램 ①' 같은 만드는 쪽 말이 없는가.
@@ -994,7 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
 - `</body>` 바로 앞에 둔다. `Exploragram.onShow/onHide/go/next/prev/audit`를 쓴다. `Exploragram.go(i)`의 `i`는 0부터 센다(1쪽 = 0). `innerHTML`로 학생 입력을 넣지 않는다.
 - 설계 방법과 뼈대 코드는 `exploragram.md`. 조작한 상태를 찍어 확인할 때는 `scripts/states.mjs`.
 - 펜을 든 채로 쓰는 규칙: 누르는 요소는 `button`·`a`·`label` 또는 `data-tap`, 끄는 요소(슬라이더가 아닌 것)는 `data-no-ink`.
-- 값이 바뀌면 그림이 건너뛰지 않게 0.6~0.8초 동안 이어서 움직인다. 바뀌는 SVG 요소에 CSS `transition`을 주거나 `requestAnimationFrame`으로 보간한다. 움직임 줄이기(`prefers-reduced-motion`)와 ⚙ 「움직임 끄기」에서는 바로 끝값을 그린다(`exploragram.md`의 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).
+- 값이 바뀌면 그림이 건너뛰지 않게 0.6~0.8초 동안 이어서 움직인다. 바뀌는 SVG 요소에 CSS `transition`을 주거나 `requestAnimationFrame`으로 보간한다. ⚙ 「움직임 끄기」(`ch-motion-off`)가 켜져 있으면 바로 끝값을 그린다. 운영체제의 움직임 줄이기(`prefers-reduced-motion`)는 엔진과 마찬가지로 따르지 않는다(`exploragram.md`의 '움직임 공통 규칙'과 '직접 짜야 할 때'). 직접 짠 슬라이더에도 `data-play`를 붙일 수 있다(16절).
 
 ### 13. 입자 상자 `figure.particles`
 

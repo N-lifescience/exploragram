@@ -49,7 +49,8 @@
 - 계산 상자는 엔진이 움직인다. 수(`data-expr`), 막대(`.bar`), `data-attr`, `data-style`이 0.6초 동안 끝값으로 간다. 그래프의 곡선과 점도 같은 시간 동안 새 자리로 간다. 더 길게 하려면 `data-tween="0.8"`을 붙인다.
 - 재생 중에는 엔진이 다음 칸까지 걸리는 시간 동안 그림을 옮긴다. 「한 칸」과 「처음으로」는 사람이 슬라이더를 민 것처럼 0.6초 동안 옮긴다. 그래프에서 학생이 끄는 점(`data-drag`)은 손을 그대로 따라간다.
 - 직접 짠 그림은 `requestAnimationFrame`으로 앞 값에서 새 값까지 0.6~0.8초 동안 보간(tween)하거나 바뀌는 SVG 요소에 CSS `transition`을 0.6~0.8초로 준다. 끝값만 넣고 끝내지 않는다(아래 '직접 짜야 할 때').
-- 운영체제의 움직임 줄이기(`prefers-reduced-motion: reduce`)나 ⚙ 「움직임 끄기」(`<html>`의 `ch-motion-off` 클래스)가 켜져 있으면 움직임을 줄인다. 엔진 부품은 「움직임 끄기」를 따른다. 직접 짠 움직임은 두 설정을 모두 확인해 바로 끝값을 그린다. 교사가 누른 재생은 그대로 둔다.
+- ⚙ 「움직임 끄기」(`<html>`의 `ch-motion-off` 클래스)가 켜져 있으면 바로 끝값을 그린다. 엔진 부품도 직접 짠 움직임도 이 설정 하나만 확인한다. 교사가 누른 재생은 그대로 둔다.
+- 운영체제의 움직임 줄이기(`prefers-reduced-motion`)는 따르지 않는다. 학교 PC는 '최적 성능' 같은 설정으로 이 값이 켜져 있기도 하다. 그대로 따르면 움직임이 통째로 사라진다. 움직임을 꺼야 하는 PC에서는 ⚙로 끈다. 그 PC가 설정을 기억한다.
 
 ## 설계 순서
 
@@ -348,7 +349,6 @@
 .dh-lab, .dh-out { font-size: 26px; }
 .dh-calc { font-size: 22px; }
 #ab-cell, #ab-bar { transition: rx .7s, ry .7s, y .7s, height .7s; }   /* 값이 바뀌면 0.7초 동안 이어서 움직인다 */
-@media (prefers-reduced-motion: reduce) { #ab-cell, #ab-bar { transition: none; } }
 ```
 
 ```html
@@ -379,11 +379,11 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 ```
 
-- **직접 짠 그림도 0.6~0.8초 동안 이어서 움직인다.** 바뀌는 SVG 요소에 CSS `transition`을 준다(위 `#ab-cell`, `#ab-bar`). 크롬, 엣지, 웨일에서는 `rx`, `cx`, `height`, `y` 같은 SVG 속성도 흘러간다. ⚙ 「움직임 끄기」를 누르면 엔진이 transition을 끈다. 운영체제의 움직임 줄이기는 위 `@media (prefers-reduced-motion: reduce)`가 끈다.
-- CSS로 흘릴 수 없는 것(캔버스, 글자로 쓴 수, 경로 `d`)은 `requestAnimationFrame`으로 보간한다. 아래 `tween`은 앞 값에서 새 값까지 0.7초 동안 그린다. 움직임을 줄이는 설정이면 바로 끝값을 그린다. 재생이 보낸 `input`에는 한 칸 시간(`e.chPlay`)이 실려 오므로 그 시간 안에 닿게 한다.
+- **직접 짠 그림도 0.6~0.8초 동안 이어서 움직인다.** 바뀌는 SVG 요소에 CSS `transition`을 준다(위 `#ab-cell`, `#ab-bar`). 크롬, 엣지, 웨일에서는 `rx`, `cx`, `height`, `y` 같은 SVG 속성도 흘러간다. ⚙ 「움직임 끄기」를 켜면 엔진이 transition을 끈다. 운영체제 설정을 보는 `@media (prefers-reduced-motion)`은 쓰지 않는다(위 '움직임 공통 규칙').
+- CSS로 흘릴 수 없는 것(캔버스, 글자로 쓴 수, 경로 `d`)은 `requestAnimationFrame`으로 보간한다. 아래 `tween`은 앞 값에서 새 값까지 0.7초 동안 그린다. ⚙ 「움직임 끄기」가 켜져 있으면 바로 끝값을 그린다. 재생이 보낸 `input`에는 한 칸 시간(`e.chPlay`)이 실려 오므로 그 시간 안에 닿게 한다.
 
 ```js
-const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('ch-motion-off');
+const still = () => document.documentElement.classList.contains('ch-motion-off');   // ⚙ 「움직임 끄기」만 본다
 function tween(job, to, draw, ms = 700) {   // job = { v: 지금 값, raf: 0 }을 그림마다 하나씩 둔다
   cancelAnimationFrame(job.raf);
   const from = job.v, t0 = performance.now();
@@ -436,7 +436,7 @@ function tween(job, to, draw, ms = 700) {   // job = { v: 지금 값, raf: 0 }�
 - [ ] 모형 수치에 `data-ai="모형 수치"`를 붙이고 화면에 '모형'이라고 적었는가.
 - [ ] 장면마다 축(시간, 공간, 시공간)을 하나 골랐는가. 고른 이유가 그 개념이 던지는 질문과 맞는가.
 - [ ] 값이 바뀌면 그림이 0.6~0.8초 동안 이어서 움직이는가(계산 상자, 입자 상자, `data-play`, 직접 짠 그림의 `transition`이나 `requestAnimationFrame`). 끝값으로 다시 그리기만 하는 장은 없는가.
-- [ ] 움직임 줄이기(`prefers-reduced-motion`)와 ⚙ 「움직임 끄기」에서 직접 짠 움직임이 멈추는가.
+- [ ] ⚙ 「움직임 끄기」를 켜면 직접 짠 움직임이 멈추는가. 운영체제 설정(`prefers-reduced-motion`)을 보는 코드는 없는가.
 - [ ] 설계표에 적은 손잡이, 축, 부품, 움직임을 모두 만들었는가.
 - [ ] 단추를 눌렀을 때 글만 바뀌는 장에 `data-activity`를 붙이지 않았는가.
 - [ ] 장에 '원본 PPT', '익스플로라그램 ①' 같은 만드는 쪽 말이 없는가.
